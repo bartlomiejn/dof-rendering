@@ -6,8 +6,9 @@
 //  Copyright © 2017 Bartłomiej Nowak. All rights reserved.
 //
 
-#import <UIKit/UIKit.h>
+@import UIKit;
+@import Metal;
+@import MetalKit;
 
 @interface MetalView : UIView
-@property (readonly) CAMetalLayer *metalLayer;
 @end
