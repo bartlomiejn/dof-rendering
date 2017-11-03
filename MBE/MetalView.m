@@ -16,10 +16,20 @@ typedef struct
 
 @interface MetalView ()
 @property (readonly) CAMetalLayer *metalLayer;
-@property (readwrite) id<MTLDevice> device;
+@property (strong) id<MTLDevice> device;
+@property (strong) id<MTLBuffer> vertexBuffer;
+@property (strong) id<MTLRenderPipelineState> pipelineState;
+@property (strong) CADisplayLink *displayLink;
 @end
 
 @implementation MetalView
+
+static const MetalVertex vertices[] =
+{
+    { .position = { 0.0, 0.5, 0, 1 },   .color = { 1, 0, 0, 1 } },
+    { .position = { -0.5, -0.5, 0, 1 }, .color = { 0, 1, 0, 1 } },
+    { .position = { 0.5, -0.5, 0, 1 },  .color = { 0, 0, 1, 1 } }
+};
 
 + (id)layerClass
 {
@@ -49,50 +59,81 @@ typedef struct
 - (void)setup
 {
     _metalLayer = (CAMetalLayer *)self.layer;
-    [self makeDevice];
-    [self makeBuffers];
+    [self setupDevice];
+    [self setupBuffers];
+    [self setupPipeline];
 }
 
-- (void)makeDevice
+- (void)setupDevice
 {
     _device = MTLCreateSystemDefaultDevice();
     _metalLayer.device = _device;
     _metalLayer.pixelFormat = MTLPixelFormatBGRA8Unorm;
 }
 
-- (void)makeBuffers
+- (void)setupBuffers
 {
-    static const MetalVertex vertices[] =
-    {
-        { .position = { 0.0, 0.5, 0, 1 }, .color = { 1, 0, 0, 1 } },
-        { .position = { -0.5, -0.5, 0, 1 }, .color = { 0, 1, 0, 1 } },
-        { .position = { 0.5, -0.5, 0, 1 }, .color = { 0, 0, 1, 1 } }
-    };
+    _vertexBuffer = [_device newBufferWithBytes:vertices
+                                         length:sizeof(vertices)
+                                        options:MTLResourceOptionCPUCacheModeDefault];
 }
 
-- (void)didMoveToWindow
+- (void)setupPipeline
 {
-    [self redraw];
+    id<MTLLibrary> library = [_device newDefaultLibrary];
+    
+    id<MTLFunction> vertexFunc = [library newFunctionWithName:@"vert_passthrough"];
+    id<MTLFunction> fragFunc = [library newFunctionWithName:@"frag_passthrough"];
+    
+    MTLRenderPipelineDescriptor *pipelineDescriptor = [MTLRenderPipelineDescriptor new];
+    pipelineDescriptor.vertexFunction = vertexFunc;
+    pipelineDescriptor.fragmentFunction = fragFunc;
+    pipelineDescriptor.colorAttachments[0].pixelFormat = _metalLayer.pixelFormat;
+    
+    _pipelineState = [_device newRenderPipelineStateWithDescriptor:pipelineDescriptor error:nil];
+}
+
+- (void)didMoveToSuperview
+{
+    [super didMoveToSuperview];
+    if (self.superview)
+    {
+        _displayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(displayLinkDidFire:)];
+        [_displayLink addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSRunLoopCommonModes];
+    }
+    else
+    {
+        [_displayLink invalidate];
+        _displayLink = nil;
+    }
 }
 
 - (void)redraw
 {
     id<CAMetalDrawable> drawable = [_metalLayer nextDrawable];
-    id<MTLTexture> texture = drawable.texture;
+    id<MTLTexture> frameBufferTexture = drawable.texture;
     
     MTLRenderPassDescriptor *passDescriptor = [MTLRenderPassDescriptor renderPassDescriptor];
-    passDescriptor.colorAttachments[0].texture = texture;
+    passDescriptor.colorAttachments[0].texture = frameBufferTexture;
+    passDescriptor.colorAttachments[0].clearColor = MTLClearColorMake(0.85, 0.85, 0.85, 1.0);
     passDescriptor.colorAttachments[0].loadAction = MTLLoadActionClear;
     passDescriptor.colorAttachments[0].storeAction = MTLStoreActionStore;
-    passDescriptor.colorAttachments[0].clearColor = MTLClearColorMake(1.0, 0.0, 0.0, 1.0);
     
     id<MTLCommandQueue> queue = [_device newCommandQueue];
     id<MTLCommandBuffer> buffer = [queue commandBuffer];
-    id<MTLRenderCommandEncoder> encoder = [buffer renderCommandEncoderWithDescriptor:passDescriptor];
-    [encoder endEncoding];
+    id<MTLRenderCommandEncoder> commandEncoder = [buffer renderCommandEncoderWithDescriptor:passDescriptor];
+    [commandEncoder setRenderPipelineState:_pipelineState];
+    [commandEncoder setVertexBuffer:_vertexBuffer offset:0 atIndex:0];
+    [commandEncoder drawPrimitives:MTLPrimitiveTypeTriangle vertexStart:0 vertexCount:3];
+    [commandEncoder endEncoding];
     
     [buffer presentDrawable:drawable];
     [buffer commit];
+}
+
+- (void)displayLinkDidFire:(CADisplayLink *)link
+{
+    [self redraw];
 }
 
 @end

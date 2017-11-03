@@ -16,6 +16,7 @@
 		9F066B821FACE19700AF820A /* MetalView.m in Sources */ = {isa = PBXBuildFile; fileRef = 9F066B811FACE19700AF820A /* MetalView.m */; };
 		9F066B851FACF38500AF820A /* Metal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9F066B841FACF38500AF820A /* Metal.framework */; };
 		9F066B871FACF38900AF820A /* MetalKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9F066B861FACF38900AF820A /* MetalKit.framework */; };
+		9F066B891FACF56800AF820A /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 9F066B881FACF56800AF820A /* Shaders.metal */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -33,6 +34,7 @@
 		9F066B811FACE19700AF820A /* MetalView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MetalView.m; sourceTree = "<group>"; };
 		9F066B841FACF38500AF820A /* Metal.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Metal.framework; path = System/Library/Frameworks/Metal.framework; sourceTree = SDKROOT; };
 		9F066B861FACF38900AF820A /* MetalKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MetalKit.framework; path = System/Library/Frameworks/MetalKit.framework; sourceTree = SDKROOT; };
+		9F066B881FACF56800AF820A /* Shaders.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Shaders.metal; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -79,6 +81,7 @@
 				9F066B751FACE10C00AF820A /* LaunchScreen.storyboard */,
 				9F066B781FACE10C00AF820A /* Info.plist */,
 				9F066B791FACE10C00AF820A /* main.m */,
+				9F066B881FACF56800AF820A /* Shaders.metal */,
 			);
 			path = MBE;
 			sourceTree = "<group>";
@@ -167,6 +170,7 @@
 				9F066B6F1FACE10C00AF820A /* ViewController.m in Sources */,
 				9F066B7A1FACE10C00AF820A /* main.m in Sources */,
 				9F066B6C1FACE10C00AF820A /* AppDelegate.m in Sources */,
+				9F066B891FACF56800AF820A /* Shaders.metal in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
