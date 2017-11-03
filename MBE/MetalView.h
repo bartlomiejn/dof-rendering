@@ -1,5 +1,5 @@
 //
-//  AppDelegate.h
+//  MetalView.h
 //  MBE
 //
 //  Created by Bartłomiej Nowak on 03/11/2017.
@@ -8,7 +8,6 @@
 
 #import <UIKit/UIKit.h>
 
-@interface AppDelegate : UIResponder <UIApplicationDelegate>
-@property (strong, nonatomic) UIWindow *window;
+@interface MetalView : UIView
+@property (readonly) CAMetalLayer *metalLayer;
 @end
-
