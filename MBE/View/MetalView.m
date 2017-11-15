@@ -162,11 +162,11 @@ const MTLIndexType MetalIndexType = MTLIndexTypeUInt16;
                                                      fragmentFunction:(id<MTLFunction>)fragmentFunction
                                                           pixelFormat:(MTLPixelFormat)format {
     
-    MTLRenderPipelineDescriptor *pipelineDescriptor = [MTLRenderPipelineDescriptor new];
-    pipelineDescriptor.vertexFunction = vertexFunction;
-    pipelineDescriptor.fragmentFunction = fragmentFunction;
-    pipelineDescriptor.colorAttachments[0].pixelFormat = format;
-    return pipelineDescriptor;
+    MTLRenderPipelineDescriptor *descriptor = [MTLRenderPipelineDescriptor new];
+    descriptor.vertexFunction = vertexFunction;
+    descriptor.fragmentFunction = fragmentFunction;
+    descriptor.colorAttachments[0].pixelFormat = format;
+    return descriptor;
 }
 
 /**
@@ -187,14 +187,28 @@ const MTLIndexType MetalIndexType = MTLIndexTypeUInt16;
     vector_float3 xAxis = { 1, 0, 0 };
     vector_float3 yAxis = { 0, 1, 0 };
     
-    matrix_float4x4 xRot = matrix_float4x4_rotation(xAxis, _rotationX);
-    matrix_float4x4 yRot = matrix_float4x4_rotation(yAxis, _rotationY);
+    matrix_float4x4 xRotation = matrix_float4x4_rotation(xAxis, _rotationX);
+    matrix_float4x4 yRotation = matrix_float4x4_rotation(yAxis, _rotationY);
     
     matrix_float4x4 scale = matrix_float4x4_uniform_scale(scaleFactor);
     
-    matrix_float4x4 modelMatrix = matrix_multiply(matrix_multiply(xRot, yRot), scale);
+    matrix_float4x4 modelMatrix = matrix_multiply(matrix_multiply(xRotation, yRotation), scale);
     
     return modelMatrix;
+}
+
+- (matrix_float4x4)viewTransformation {
+    vector_float3 cameraTranslation = { 0, 0, -5 };
+    return matrix_float4x4_translation(cameraTranslation);
+}
+
+- (matrix_float4x4)perspectiveTransformation {
+    float aspect = drawableSize.width / drawableSize.height;
+    float fov = (2 * M_PI) / 5;
+    float near = 1;
+    float far = 100;
+    
+    return matrix_float4x4_perspective(aspect, fov, near, far);
 }
 
 @end
