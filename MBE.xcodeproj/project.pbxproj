@@ -13,10 +13,12 @@
 		9F066B741FACE10C00AF820A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9F066B731FACE10C00AF820A /* Assets.xcassets */; };
 		9F066B771FACE10C00AF820A /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9F066B751FACE10C00AF820A /* LaunchScreen.storyboard */; };
 		9F066B7A1FACE10C00AF820A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 9F066B791FACE10C00AF820A /* main.m */; };
-		9F066B821FACE19700AF820A /* MetalView.m in Sources */ = {isa = PBXBuildFile; fileRef = 9F066B811FACE19700AF820A /* MetalView.m */; };
 		9F066B851FACF38500AF820A /* Metal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9F066B841FACF38500AF820A /* Metal.framework */; };
 		9F066B871FACF38900AF820A /* MetalKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9F066B861FACF38900AF820A /* MetalKit.framework */; };
 		9F066B891FACF56800AF820A /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 9F066B881FACF56800AF820A /* Shaders.metal */; };
+		9F066B8A1FB39F2F00AF820A /* MetalView.m in Sources */ = {isa = PBXBuildFile; fileRef = 9F066B811FACE19700AF820A /* MetalView.m */; };
+		9F2D391C1FBC8C2400F7578F /* MathFunctions.m in Sources */ = {isa = PBXBuildFile; fileRef = 9F2D391B1FBC8C2400F7578F /* MathFunctions.m */; };
+		9F2D39201FBC8E9D00F7578F /* MetalRenderer.m in Sources */ = {isa = PBXBuildFile; fileRef = 9F2D391F1FBC8E9D00F7578F /* MetalRenderer.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -35,6 +37,10 @@
 		9F066B841FACF38500AF820A /* Metal.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Metal.framework; path = System/Library/Frameworks/Metal.framework; sourceTree = SDKROOT; };
 		9F066B861FACF38900AF820A /* MetalKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MetalKit.framework; path = System/Library/Frameworks/MetalKit.framework; sourceTree = SDKROOT; };
 		9F066B881FACF56800AF820A /* Shaders.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Shaders.metal; sourceTree = "<group>"; };
+		9F2D391A1FBC8BF400F7578F /* MathFunctions.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MathFunctions.h; sourceTree = "<group>"; };
+		9F2D391B1FBC8C2400F7578F /* MathFunctions.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MathFunctions.m; sourceTree = "<group>"; };
+		9F2D391E1FBC8E9D00F7578F /* MetalRenderer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MetalRenderer.h; sourceTree = "<group>"; };
+		9F2D391F1FBC8E9D00F7578F /* MetalRenderer.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MetalRenderer.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -70,8 +76,9 @@
 		9F066B691FACE10C00AF820A /* MBE */ = {
 			isa = PBXGroup;
 			children = (
-				9F066B801FACE19700AF820A /* MetalView.h */,
-				9F066B811FACE19700AF820A /* MetalView.m */,
+				9F2D39191FBC8BD400F7578F /* Auxiliary */,
+				9F2D391D1FBC8E7F00F7578F /* Renderer */,
+				9F2D39181FBC8BD000F7578F /* View */,
 				9F066B6A1FACE10C00AF820A /* AppDelegate.h */,
 				9F066B6B1FACE10C00AF820A /* AppDelegate.m */,
 				9F066B6D1FACE10C00AF820A /* ViewController.h */,
@@ -93,6 +100,33 @@
 				9F066B841FACF38500AF820A /* Metal.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		9F2D39181FBC8BD000F7578F /* View */ = {
+			isa = PBXGroup;
+			children = (
+				9F066B801FACE19700AF820A /* MetalView.h */,
+				9F066B811FACE19700AF820A /* MetalView.m */,
+			);
+			path = View;
+			sourceTree = "<group>";
+		};
+		9F2D39191FBC8BD400F7578F /* Auxiliary */ = {
+			isa = PBXGroup;
+			children = (
+				9F2D391A1FBC8BF400F7578F /* MathFunctions.h */,
+				9F2D391B1FBC8C2400F7578F /* MathFunctions.m */,
+			);
+			path = Auxiliary;
+			sourceTree = "<group>";
+		};
+		9F2D391D1FBC8E7F00F7578F /* Renderer */ = {
+			isa = PBXGroup;
+			children = (
+				9F2D391E1FBC8E9D00F7578F /* MetalRenderer.h */,
+				9F2D391F1FBC8E9D00F7578F /* MetalRenderer.m */,
+			);
+			path = Renderer;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -166,11 +200,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				9F066B821FACE19700AF820A /* MetalView.m in Sources */,
 				9F066B6F1FACE10C00AF820A /* ViewController.m in Sources */,
 				9F066B7A1FACE10C00AF820A /* main.m in Sources */,
 				9F066B6C1FACE10C00AF820A /* AppDelegate.m in Sources */,
+				9F2D391C1FBC8C2400F7578F /* MathFunctions.m in Sources */,
 				9F066B891FACF56800AF820A /* Shaders.metal in Sources */,
+				9F066B8A1FB39F2F00AF820A /* MetalView.m in Sources */,
+				9F2D39201FBC8E9D00F7578F /* MetalRenderer.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

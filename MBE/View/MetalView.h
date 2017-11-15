@@ -9,6 +9,7 @@
 @import UIKit;
 @import Metal;
 @import MetalKit;
+@import CoreGraphics;
 
 @interface MetalView : UIView
 @end
