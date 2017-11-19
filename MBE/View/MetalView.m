@@ -69,6 +69,7 @@
 - (instancetype)initWithDevice:(id<MTLDevice>)device {
     self = [super init];
     if (self) {
+        _metalLayer = (CAMetalLayer *)self.layer;
         _metalLayer.device = device;
         _clearColor = MTLClearColorMake(1.0, 1.0, 1.0, 1.0);
         self.preferredFramesPerSecond = 60;

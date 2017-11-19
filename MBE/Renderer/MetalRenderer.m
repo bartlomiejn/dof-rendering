@@ -67,6 +67,14 @@ static const NSInteger inFlightBufferCount = 3;
                                                                                    pixelFormat:MTLPixelFormatBGRA8Unorm];
     
     _renderPipelineState = [self createRenderPipelineStateWith:descriptor];
+    _depthStencilState = [self createDepthStencilState];
+}
+
+- (id<MTLDepthStencilState>)createDepthStencilState {
+    MTLDepthStencilDescriptor *depthStencilDescriptor = [MTLDepthStencilDescriptor new];
+    depthStencilDescriptor.depthCompareFunction = MTLCompareFunctionLess;
+    depthStencilDescriptor.depthWriteEnabled = YES;
+    return [_device newDepthStencilStateWithDescriptor:depthStencilDescriptor];
 }
 
 - (void)setupBuffers {
@@ -117,6 +125,7 @@ static const NSInteger inFlightBufferCount = 3;
     descriptor.vertexFunction = vertexFunction;
     descriptor.fragmentFunction = fragmentFunction;
     descriptor.colorAttachments[0].pixelFormat = format;
+    descriptor.depthAttachmentPixelFormat = MTLPixelFormatDepth32Float;
     return descriptor;
 }
 
