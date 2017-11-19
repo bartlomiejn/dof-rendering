@@ -5,7 +5,8 @@
 //  Created by Bartłomiej Nowak on 15/11/2017.
 //  Copyright © 2017 Bartłomiej Nowak. All rights reserved.
 //
-//  Code taken from Metal By Example book repository at: https://github.com/metal-by-example/sample-code
+//  Includes code taken from Metal By Example book repository at: https://github.com/metal-by-example/sample-code
+//
 
 #ifndef MathFunctions_h
 #define MathFunctions_h
