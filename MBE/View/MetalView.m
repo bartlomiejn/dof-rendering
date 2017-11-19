@@ -9,27 +9,18 @@
 #import "MetalView.h"
 #import "MathFunctions.h"
 
-typedef struct
-{
-    vector_float4 position;
-    vector_float4 color;
-} MetalVertex;
-
-typedef uint16_t MetalIndex;
-const MTLIndexType MetalIndexType = MTLIndexTypeUInt16;
-
 @interface MetalView ()
-@property (strong) id<MTLDevice> device;
-@property (strong) id<MTLCommandQueue> commandQueue;
-@property (strong) id<MTLRenderPipelineState> pipelineState;
-@property (strong) id<CAMetalDrawable> currentDrawable;
-@property (strong) id<MTLBuffer> cubeVertexBuffer;
-@property (strong) id<MTLBuffer> cubeIndexBuffer;
+@property (nonatomic, strong) id<MTLDevice> device;
+@property (nonatomic, strong) id<MTLCommandQueue> commandQueue;
+@property (nonatomic, strong) id<MTLRenderPipelineState> pipelineState;
+@property (nonatomic, readwrite, strong) id<CAMetalDrawable> currentDrawable;
+@property (nonatomic, strong) id<MTLBuffer> cubeVertexBuffer;
+@property (nonatomic, strong) id<MTLBuffer> cubeIndexBuffer;
 
-@property (assign) float time, rotationX, rotationY;
+@property (nonatomic, assign) float time, rotationX, rotationY;
 
-@property (readonly) CAMetalLayer* metalLayer;
-@property (strong) CADisplayLink* displayLink;
+@property (nonatomic, readwrite) CAMetalLayer* metalLayer;
+@property (nonatomic, strong) CADisplayLink* displayLink;
 @end
 
 @implementation MetalView

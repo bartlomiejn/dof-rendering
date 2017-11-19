@@ -7,7 +7,8 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "MetalView.h"
 
-@interface MetalRenderer : NSObject
+@interface MetalRenderer : NSObject <MetalViewDelegate>
 
 @end
