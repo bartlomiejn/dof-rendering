@@ -10,5 +10,6 @@
 #import "MetalView.h"
 
 @interface MetalRenderer : NSObject <MetalViewDelegate>
-
+@property (nonatomic) MTLPixelFormat colorPixelFormat;
+- (instancetype)initWithDevice:(id<MTLDevice>)device;
 @end

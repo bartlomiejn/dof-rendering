@@ -5,201 +5,145 @@
 //  Created by Bartłomiej Nowak on 03/11/2017.
 //  Copyright © 2017 Bartłomiej Nowak. All rights reserved.
 //
+//  Includes code taken from Metal By Example book repository at: https://github.com/metal-by-example/sample-code
+//
 
 #import "MetalView.h"
 #import "MathFunctions.h"
 
 @interface MetalView ()
-@property (nonatomic, strong) id<MTLDevice> device;
-@property (nonatomic, strong) id<MTLCommandQueue> commandQueue;
-@property (nonatomic, strong) id<MTLRenderPipelineState> pipelineState;
-@property (nonatomic, readwrite, strong) id<CAMetalDrawable> currentDrawable;
-@property (nonatomic, strong) id<MTLBuffer> cubeVertexBuffer;
-@property (nonatomic, strong) id<MTLBuffer> cubeIndexBuffer;
-
-@property (nonatomic, assign) float time, rotationX, rotationY;
-
-@property (nonatomic, readwrite) CAMetalLayer* metalLayer;
+@property (assign) NSTimeInterval frameDuration;
+@property (strong) id<CAMetalDrawable> currentDrawable;
+@property (strong) id<MTLTexture> depthTexture;
 @property (nonatomic, strong) CADisplayLink* displayLink;
 @end
 
 @implementation MetalView
 
-#pragma mark - UIView
+#pragma mark - Layer
 
 + (id)layerClass {
     return [CAMetalLayer class];
 }
 
-- (instancetype)init {
+#pragma mark - Getter/Setter
+
+- (MTLPixelFormat)colorPixelFormat {
+    return _metalLayer.pixelFormat;
+}
+
+- (void)setColorPixelFormat:(MTLPixelFormat)colorPixelFormat {
+    _metalLayer.pixelFormat = colorPixelFormat;
+}
+
+- (NSInteger)preferredFramesPerSecond {
+    return _displayLink.preferredFramesPerSecond;
+}
+
+- (void)setPreferredFramesPerSecond:(NSInteger)preferredFramesPerSecond {
+    _displayLink.preferredFramesPerSecond = preferredFramesPerSecond;
+}
+
+- (MTLRenderPassDescriptor *)currentRenderPassDescriptor
+{
+    MTLRenderPassDescriptor *passDescriptor = [MTLRenderPassDescriptor renderPassDescriptor];
+    
+    passDescriptor.colorAttachments[0].texture = [self.currentDrawable texture];
+    passDescriptor.colorAttachments[0].clearColor = self.clearColor;
+    passDescriptor.colorAttachments[0].storeAction = MTLStoreActionStore;
+    passDescriptor.colorAttachments[0].loadAction = MTLLoadActionClear;
+    
+    passDescriptor.depthAttachment.texture = self.depthTexture;
+    passDescriptor.depthAttachment.clearDepth = 1.0;
+    passDescriptor.depthAttachment.loadAction = MTLLoadActionClear;
+    passDescriptor.depthAttachment.storeAction = MTLStoreActionDontCare;
+    
+    passDescriptor.renderTargetWidth = self.metalLayer.drawableSize.width;
+    passDescriptor.renderTargetHeight = self.metalLayer.drawableSize.height;
+    
+    return passDescriptor;
+}
+
+#pragma mark - Initialization
+
+- (instancetype)initWithDevice:(id<MTLDevice>)device {
     self = [super init];
     if (self) {
-        [self setup];
+        _metalLayer.device = device;
+        _clearColor = MTLClearColorMake(1.0, 1.0, 1.0, 1.0);
+        self.preferredFramesPerSecond = 60;
     }
     return self;
 }
 
-- (instancetype)initWithCoder:(NSCoder *)coder {
-    self = [super initWithCoder:coder];
-    if (self) {
-        [self setup];
-    }
-    return self;
-}
+#pragma mark - UIView
 
 - (void)didMoveToSuperview {
     [super didMoveToSuperview];
     
-    if (self.superview)
-    {
-        _displayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(displayLinkDidFire:)];
-        [_displayLink addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSRunLoopCommonModes];
+    if (self.superview) {
+        [self setupDisplayLink];
+    } else {
+        [self removeDisplayLink];
     }
-    else
-    {
-        [_displayLink invalidate];
-        _displayLink = nil;
+}
+
+- (void)setFrame:(CGRect)frame
+{
+    [super setFrame:frame];
+    
+    // During the first layout pass, we will not be in a view hierarchy, so we guess our scale
+    CGFloat scale = [UIScreen mainScreen].scale;
+    
+    // If we've moved to a window by the time our frame is being set, we can take its scale as our own
+    if (self.window) {
+        scale = self.window.screen.scale;
     }
     
+    CGSize drawableSize = self.bounds.size;
+    
+    // Since drawable size is in pixels, we need to multiply by the scale to move from points to pixels
+    drawableSize.width *= scale;
+    drawableSize.height *= scale;
+    
+    self.metalLayer.drawableSize = drawableSize;
+    
+    [self makeDepthTexture];
+}
+
+- (void)setupDisplayLink {
+    _displayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(displayLinkDidFire:)];
+    [_displayLink addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSRunLoopCommonModes];
+}
+
+- (void)removeDisplayLink {
+    [_displayLink invalidate];
+    _displayLink = nil;
+}
+
+- (void)makeDepthTexture {
+    CGSize drawableSize = self.metalLayer.drawableSize;
+    
+    if ([self.depthTexture width] != drawableSize.width || [self.depthTexture height] != drawableSize.height) {
+        MTLTextureDescriptor *desc = [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:MTLPixelFormatDepth32Float
+                                                                                        width:drawableSize.width
+                                                                                       height:drawableSize.height
+                                                                                    mipmapped:NO];
+        desc.usage = MTLTextureUsageRenderTarget;
+        
+        self.depthTexture = [self.metalLayer.device newTextureWithDescriptor:desc];
+    }
 }
 
 #pragma mark - CADisplayLink Action
 
-- (void)displayLinkDidFire:(CADisplayLink *)link {
-    [self redraw];
-}
-
-- (void)redraw {
+- (void)displayLinkDidFire:(CADisplayLink *)displayLink {
     _currentDrawable = [_metalLayer nextDrawable];
+    _frameDuration = displayLink.duration;
     
-    MTLRenderPassDescriptor *passDescriptor = [self passDescriptorWithOutputTexture:_currentDrawable.texture];
-    
-    id<MTLCommandBuffer> buffer = [_commandQueue commandBuffer];
-    id<MTLRenderCommandEncoder> commandEncoder = [buffer renderCommandEncoderWithDescriptor:passDescriptor];
-    
-    [commandEncoder setRenderPipelineState:_pipelineState];
-    [commandEncoder setVertexBuffer:_cubeVertexBuffer offset:0 atIndex:0];
-    [commandEncoder drawPrimitives:MTLPrimitiveTypeTriangle vertexStart:0 vertexCount:3];
-    [commandEncoder endEncoding];
-    
-    [buffer presentDrawable:_currentDrawable];
-    [buffer commit];
-}
-
-#pragma mark - Auxiliary
-
-- (void)setup {
-    _metalLayer = (CAMetalLayer *)self.layer;
-    
-    [self setupDevice];
-    [self setupBuffers];
-    [self setupPipeline];
-}
-
-- (void)setupDevice {
-    _device = MTLCreateSystemDefaultDevice();
-    _commandQueue = [_device newCommandQueue];
-    
-    _metalLayer.device = _device;
-    _metalLayer.pixelFormat = MTLPixelFormatBGRA8Unorm;
-}
-
-- (void)setupBuffers {
-    static const MetalVertex vertices[] = {
-        { .position = { -1, 1, 1, 1 }, .color = { 0, 1, 1, 1 } },
-        { .position = { -1, -1, 1, 1 }, .color = { 0, 0, 1, 1 } },
-        { .position = { 1, -1, 1, 1 }, .color = { 1, 0, 1, 1 } },
-        { .position = { 1, 1, 1, 1 }, .color = { 1, 1, 1, 1 } },
-        { .position = { -1, 1, -1, 1 }, .color = { 0, 1, 0, 1 } },
-        { .position = { -1, -1, -1, 1 }, .color = { 0, 0, 0, 1 } },
-        { .position = { 1, -1, -1, 1 }, .color = { 1, 0, 0, 1 } },
-        { .position = { 1, 1, -1, 1 }, .color = { 1, 1, 0, 1 } }
-    };
-    
-    static const MetalIndex indices[] = {
-        3, 2, 6, 6, 7, 3,
-        4, 5, 1, 1, 0, 4,
-        4, 0, 3, 3, 7, 4,
-        1, 5, 6, 6, 2, 1,
-        0, 1, 2, 2, 3, 0,
-        7, 6, 5, 5, 4, 7
-    };
-    
-    _cubeVertexBuffer = [_device newBufferWithBytes:vertices
-                                         length:sizeof(vertices)
-                                        options:MTLResourceOptionCPUCacheModeDefault];
-    _cubeIndexBuffer = [_device newBufferWithBytes:indices
-                                         length:sizeof(indices)
-                                        options:MTLResourceOptionCPUCacheModeDefault];
-}
-
-- (void)setupPipeline {
-    id<MTLLibrary> library = [_device newDefaultLibrary];
-    id<MTLFunction> vertexFunction = [library newFunctionWithName:@"vert_passthrough"];
-    id<MTLFunction> fragFunction = [library newFunctionWithName:@"frag_passthrough"];
-    
-    MTLRenderPipelineDescriptor *descriptor = [self pipelineDescriptorWithVertexFunction:vertexFunction
-                                                                        fragmentFunction:fragFunction
-                                                                             pixelFormat:_metalLayer.pixelFormat];
-    
-    _pipelineState = [_device newRenderPipelineStateWithDescriptor:descriptor error:nil];
-}
-
-/**
- * Encodes graphics state for a configured graphics rendering pipeline, to use with MTLRenderCommandEncoder to encode
- * commands for a rendering pass. Should be set before any draw calls.
- */
-- (MTLRenderPipelineDescriptor *)pipelineDescriptorWithVertexFunction:(id<MTLFunction>)vertexFunction
-                                                     fragmentFunction:(id<MTLFunction>)fragmentFunction
-                                                          pixelFormat:(MTLPixelFormat)format {
-    
-    MTLRenderPipelineDescriptor *descriptor = [MTLRenderPipelineDescriptor new];
-    descriptor.vertexFunction = vertexFunction;
-    descriptor.fragmentFunction = fragmentFunction;
-    descriptor.colorAttachments[0].pixelFormat = format;
-    return descriptor;
-}
-
-/**
- * Group of render targets that serve as the output destination for pixels generated by a render pass.
- */
-- (MTLRenderPassDescriptor *)passDescriptorWithOutputTexture:(id<MTLTexture>)texture {
-    MTLRenderPassDescriptor *descriptor = [MTLRenderPassDescriptor renderPassDescriptor];
-    descriptor.colorAttachments[0].texture = texture;
-    descriptor.colorAttachments[0].clearColor = MTLClearColorMake(0.85, 0.85, 0.85, 1.0);
-    descriptor.colorAttachments[0].loadAction = MTLLoadActionClear;
-    descriptor.colorAttachments[0].storeAction = MTLStoreActionStore;
-    return descriptor;
-}
-
-- (matrix_float4x4)worldTransformation {
-    float scaleFactor = sinf(5 * _time) * 0.25 + 1;
-    
-    vector_float3 xAxis = { 1, 0, 0 };
-    vector_float3 yAxis = { 0, 1, 0 };
-    
-    matrix_float4x4 xRotation = matrix_float4x4_rotation(xAxis, _rotationX);
-    matrix_float4x4 yRotation = matrix_float4x4_rotation(yAxis, _rotationY);
-    
-    matrix_float4x4 scale = matrix_float4x4_uniform_scale(scaleFactor);
-    
-    matrix_float4x4 modelMatrix = matrix_multiply(matrix_multiply(xRotation, yRotation), scale);
-    
-    return modelMatrix;
-}
-
-- (matrix_float4x4)viewTransformation {
-    vector_float3 cameraTranslation = { 0, 0, -5 };
-    return matrix_float4x4_translation(cameraTranslation);
-}
-
-- (matrix_float4x4)perspectiveTransformation {
-    float aspect = drawableSize.width / drawableSize.height;
-    float fov = (2 * M_PI) / 5;
-    float near = 1;
-    float far = 100;
-    
-    return matrix_float4x4_perspective(aspect, fov, near, far);
+    if ([self.delegate respondsToSelector:@selector(drawInView:)]) {
+        [self.delegate drawInView:self];
+    }
 }
 
 @end
