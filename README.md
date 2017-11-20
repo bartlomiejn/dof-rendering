@@ -1,2 +1,4 @@
 # MBE
-Learning repository for Metal By Example book
+
+Repository for learning Metal following Metal By Example (http://metalbyexample.com) book by Warren Moore.
+
