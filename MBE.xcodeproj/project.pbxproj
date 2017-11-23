@@ -21,6 +21,7 @@
 		9F843C071FC7212200A15944 /* Mesh.m in Sources */ = {isa = PBXBuildFile; fileRef = 9F843C061FC7212200A15944 /* Mesh.m */; };
 		9F843C0A1FC723DF00A15944 /* OBJModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 9F843C091FC723DF00A15944 /* OBJModel.m */; };
 		9F843C0D1FC73DA900A15944 /* OBJGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = 9F843C0C1FC73DA900A15944 /* OBJGroup.m */; };
+		9F843C101FC74D9E00A15944 /* OBJMesh.m in Sources */ = {isa = PBXBuildFile; fileRef = 9F843C0F1FC74D9E00A15944 /* OBJMesh.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -48,6 +49,8 @@
 		9F843C091FC723DF00A15944 /* OBJModel.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = OBJModel.m; sourceTree = "<group>"; };
 		9F843C0B1FC73DA900A15944 /* OBJGroup.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OBJGroup.h; sourceTree = "<group>"; };
 		9F843C0C1FC73DA900A15944 /* OBJGroup.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = OBJGroup.m; sourceTree = "<group>"; };
+		9F843C0E1FC74D9E00A15944 /* OBJMesh.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OBJMesh.h; sourceTree = "<group>"; };
+		9F843C0F1FC74D9E00A15944 /* OBJMesh.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = OBJMesh.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -139,14 +142,24 @@
 		9F843C041FC7210A00A15944 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				9F843C111FC74DBF00A15944 /* OBJ */,
 				9F843C051FC7212200A15944 /* Mesh.h */,
 				9F843C061FC7212200A15944 /* Mesh.m */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		9F843C111FC74DBF00A15944 /* OBJ */ = {
+			isa = PBXGroup;
+			children = (
 				9F843C081FC723DF00A15944 /* OBJModel.h */,
 				9F843C091FC723DF00A15944 /* OBJModel.m */,
 				9F843C0B1FC73DA900A15944 /* OBJGroup.h */,
 				9F843C0C1FC73DA900A15944 /* OBJGroup.m */,
+				9F843C0E1FC74D9E00A15944 /* OBJMesh.h */,
+				9F843C0F1FC74D9E00A15944 /* OBJMesh.m */,
 			);
-			path = Models;
+			path = OBJ;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -222,6 +235,7 @@
 				9F066B6F1FACE10C00AF820A /* ViewController.m in Sources */,
 				9F066B7A1FACE10C00AF820A /* main.m in Sources */,
 				9F066B6C1FACE10C00AF820A /* AppDelegate.m in Sources */,
+				9F843C101FC74D9E00A15944 /* OBJMesh.m in Sources */,
 				9F2D391C1FBC8C2400F7578F /* MathFunctions.m in Sources */,
 				9F066B891FACF56800AF820A /* Shaders.metal in Sources */,
 				9F066B8A1FB39F2F00AF820A /* MetalView.m in Sources */,

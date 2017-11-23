@@ -6,10 +6,11 @@
 //  Copyright © 2017 Bartłomiej Nowak. All rights reserved.
 //
 
-#import "OBJIndex.h"
+#import "OBJGroup.h"
 @import Foundation;
 
 @interface OBJModel : NSObject
-- (instancetype)initWithContentsOfURL:(NSURL*)url;
-- (OBJGroup)groupAtIndex:(int)index;
+@property (nonatomic, readonly) NSArray *groups;
+- (instancetype)initWithContentsOfURL:(NSURL *)url;
+- (OBJGroup *)groupAtIndex:(int)index;
 @end
