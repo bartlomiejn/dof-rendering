@@ -72,11 +72,30 @@ static const NSInteger inFlightBufferCount = 3;
     _depthStencilState = [self createDepthStencilState];
 }
 
+/**
+ * Encodes information about depth and stencil buffer operations.
+ */
 - (id<MTLDepthStencilState>)createDepthStencilState {
     MTLDepthStencilDescriptor *depthStencilDescriptor = [MTLDepthStencilDescriptor new];
     depthStencilDescriptor.depthCompareFunction = MTLCompareFunctionLess;
     depthStencilDescriptor.depthWriteEnabled = YES;
     return [_device newDepthStencilStateWithDescriptor:depthStencilDescriptor];
+}
+
+/**
+ * Encodes graphics state for a configured graphics rendering pipeline, to use with MTLRenderCommandEncoder to encode
+ * commands for a rendering pass. Set it before any draw calls.
+ */
+- (MTLRenderPipelineDescriptor *)createPipelineDescriptorWithVertexFunction:(id<MTLFunction>)vertexFunction
+                                                           fragmentFunction:(id<MTLFunction>)fragmentFunction
+                                                                pixelFormat:(MTLPixelFormat)format {
+    
+    MTLRenderPipelineDescriptor *descriptor = [MTLRenderPipelineDescriptor new];
+    descriptor.vertexFunction = vertexFunction;
+    descriptor.fragmentFunction = fragmentFunction;
+    descriptor.colorAttachments[0].pixelFormat = format;
+    descriptor.depthAttachmentPixelFormat = MTLPixelFormatDepth32Float;
+    return descriptor;
 }
 
 - (void)setupBuffers {
@@ -113,22 +132,6 @@ static const NSInteger inFlightBufferCount = 3;
     _uniformBuffer = [_device newBufferWithLength:sizeof(MetalUniforms) * inFlightBufferCount
                                           options:MTLResourceOptionCPUCacheModeDefault];
     _uniformBuffer.label = @"Uniforms";
-}
-
-/**
- * Encodes graphics state for a configured graphics rendering pipeline, to use with MTLRenderCommandEncoder to encode
- * commands for a rendering pass. Set it before any draw calls.
- */
-- (MTLRenderPipelineDescriptor *)createPipelineDescriptorWithVertexFunction:(id<MTLFunction>)vertexFunction
-                                                           fragmentFunction:(id<MTLFunction>)fragmentFunction
-                                                                pixelFormat:(MTLPixelFormat)format {
-    
-    MTLRenderPipelineDescriptor *descriptor = [MTLRenderPipelineDescriptor new];
-    descriptor.vertexFunction = vertexFunction;
-    descriptor.fragmentFunction = fragmentFunction;
-    descriptor.colorAttachments[0].pixelFormat = format;
-    descriptor.depthAttachmentPixelFormat = MTLPixelFormatDepth32Float;
-    return descriptor;
 }
 
 - (id<MTLRenderPipelineState>)createRenderPipelineStateWith:(MTLRenderPipelineDescriptor *)descriptor {

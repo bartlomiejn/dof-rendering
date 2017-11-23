@@ -26,7 +26,7 @@
     return [CAMetalLayer class];
 }
 
-#pragma mark - Getter/Setter
+#pragma mark - Get / Set
 
 - (MTLPixelFormat)colorPixelFormat {
     return _metalLayer.pixelFormat;
