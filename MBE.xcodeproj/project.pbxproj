@@ -18,6 +18,9 @@
 		9F066B8A1FB39F2F00AF820A /* MetalView.m in Sources */ = {isa = PBXBuildFile; fileRef = 9F066B811FACE19700AF820A /* MetalView.m */; };
 		9F2D391C1FBC8C2400F7578F /* MathFunctions.m in Sources */ = {isa = PBXBuildFile; fileRef = 9F2D391B1FBC8C2400F7578F /* MathFunctions.m */; };
 		9F2D39201FBC8E9D00F7578F /* MetalRenderer.m in Sources */ = {isa = PBXBuildFile; fileRef = 9F2D391F1FBC8E9D00F7578F /* MetalRenderer.m */; };
+		9F843C071FC7212200A15944 /* Mesh.m in Sources */ = {isa = PBXBuildFile; fileRef = 9F843C061FC7212200A15944 /* Mesh.m */; };
+		9F843C0A1FC723DF00A15944 /* OBJModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 9F843C091FC723DF00A15944 /* OBJModel.m */; };
+		9F843C0D1FC73DA900A15944 /* OBJGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = 9F843C0C1FC73DA900A15944 /* OBJGroup.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -39,6 +42,12 @@
 		9F2D391B1FBC8C2400F7578F /* MathFunctions.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MathFunctions.m; sourceTree = "<group>"; };
 		9F2D391E1FBC8E9D00F7578F /* MetalRenderer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MetalRenderer.h; sourceTree = "<group>"; };
 		9F2D391F1FBC8E9D00F7578F /* MetalRenderer.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MetalRenderer.m; sourceTree = "<group>"; };
+		9F843C051FC7212200A15944 /* Mesh.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Mesh.h; sourceTree = "<group>"; };
+		9F843C061FC7212200A15944 /* Mesh.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Mesh.m; sourceTree = "<group>"; };
+		9F843C081FC723DF00A15944 /* OBJModel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OBJModel.h; sourceTree = "<group>"; };
+		9F843C091FC723DF00A15944 /* OBJModel.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = OBJModel.m; sourceTree = "<group>"; };
+		9F843C0B1FC73DA900A15944 /* OBJGroup.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OBJGroup.h; sourceTree = "<group>"; };
+		9F843C0C1FC73DA900A15944 /* OBJGroup.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = OBJGroup.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -74,6 +83,7 @@
 		9F066B691FACE10C00AF820A /* MBE */ = {
 			isa = PBXGroup;
 			children = (
+				9F843C041FC7210A00A15944 /* Models */,
 				9F2D39191FBC8BD400F7578F /* Auxiliary */,
 				9F2D391D1FBC8E7F00F7578F /* Renderer */,
 				9F2D39181FBC8BD000F7578F /* View */,
@@ -124,6 +134,19 @@
 				9F2D391F1FBC8E9D00F7578F /* MetalRenderer.m */,
 			);
 			path = Renderer;
+			sourceTree = "<group>";
+		};
+		9F843C041FC7210A00A15944 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				9F843C051FC7212200A15944 /* Mesh.h */,
+				9F843C061FC7212200A15944 /* Mesh.m */,
+				9F843C081FC723DF00A15944 /* OBJModel.h */,
+				9F843C091FC723DF00A15944 /* OBJModel.m */,
+				9F843C0B1FC73DA900A15944 /* OBJGroup.h */,
+				9F843C0C1FC73DA900A15944 /* OBJGroup.m */,
+			);
+			path = Models;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -202,6 +225,9 @@
 				9F2D391C1FBC8C2400F7578F /* MathFunctions.m in Sources */,
 				9F066B891FACF56800AF820A /* Shaders.metal in Sources */,
 				9F066B8A1FB39F2F00AF820A /* MetalView.m in Sources */,
+				9F843C071FC7212200A15944 /* Mesh.m in Sources */,
+				9F843C0A1FC723DF00A15944 /* OBJModel.m in Sources */,
+				9F843C0D1FC73DA900A15944 /* OBJGroup.m in Sources */,
 				9F2D39201FBC8E9D00F7578F /* MetalRenderer.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
