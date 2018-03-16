@@ -89,7 +89,6 @@ static const NSInteger inFlightBufferCount = 3;
 - (MTLRenderPipelineDescriptor *)createPipelineDescriptorWithVertexFunction:(id<MTLFunction>)vertexFunction
                                                            fragmentFunction:(id<MTLFunction>)fragmentFunction
                                                                 pixelFormat:(MTLPixelFormat)format {
-    
     MTLRenderPipelineDescriptor *descriptor = [MTLRenderPipelineDescriptor new];
     descriptor.vertexFunction = vertexFunction;
     descriptor.fragmentFunction = fragmentFunction;

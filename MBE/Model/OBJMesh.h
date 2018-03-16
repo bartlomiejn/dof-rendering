@@ -8,8 +8,8 @@
 
 #import "Mesh.h"
 #import "OBJGroup.h"
-@import Foundation;
-@import Metal;
+#import <Foundation/Foundation.h>
+#import <Metal/Metal.h>
 
 @interface OBJMesh : Mesh
 - (instancetype)initWithGroup:(OBJGroup *)group device:(id<MTLDevice>)device;

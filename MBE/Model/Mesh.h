@@ -6,8 +6,8 @@
 //  Copyright © 2017 Bartłomiej Nowak. All rights reserved.
 //
 
-@import UIKit;
-@import Metal;
+#import <UIKit/UIKit.h>
+#import <Metal/Metal.h>
 
 @interface Mesh : NSObject
 @property (nonatomic, readonly) id<MTLBuffer> vertexBuffer;
