@@ -10,7 +10,7 @@
 
 #import "MetalRenderer.h"
 #import "MathFunctions.h"
-
+#import "OBJMesh.h"
 @import simd;
 @import Metal;
 @import QuartzCore.CAMetalLayer;
@@ -31,8 +31,7 @@ static const NSInteger inFlightBufferCount = 3;
 
 @interface MetalRenderer ()
 @property (strong) id<MTLDevice> device;
-@property (strong) id<MTLBuffer> vertexBuffer;
-@property (strong) id<MTLBuffer> indexBuffer;
+@property (strong) OBJMesh *mesh;
 @property (strong) id<MTLBuffer> uniformBuffer;
 @property (strong) id<MTLCommandQueue> commandQueue;
 @property (strong) id<MTLRenderPipelineState> renderPipelineState;
@@ -52,9 +51,13 @@ static const NSInteger inFlightBufferCount = 3;
         _displaySemaphore = dispatch_semaphore_create(inFlightBufferCount);
         
         [self setupPipeline];
-        [self setupBuffers];
+        [self setupUniformBuffer];
     }
     return self;
+}
+
+- (void)setupMeshFromOBJGroup:(OBJGroup*)group {
+    _mesh = [[OBJMesh alloc] initWithGroup:group device:_device];
 }
 
 - (void)setupPipeline {
@@ -64,22 +67,17 @@ static const NSInteger inFlightBufferCount = 3;
     id<MTLFunction> vertexFunction = [library newFunctionWithName:@"vert_passthrough"];
     id<MTLFunction> fragFunction = [library newFunctionWithName:@"frag_passthrough"];
     
-    MTLRenderPipelineDescriptor *descriptor = [self createPipelineDescriptorWithVertexFunction:vertexFunction
-                                                                              fragmentFunction:fragFunction
-                                                                                   pixelFormat:MTLPixelFormatBGRA8Unorm];
-    
+    MTLRenderPipelineDescriptor *descriptor = [MTLRenderPipelineDescriptor new];
+    descriptor.vertexFunction = vertexFunction;
+    descriptor.fragmentFunction = fragFunction;
+    descriptor.colorAttachments[0].pixelFormat = MTLPixelFormatBGRA8Unorm;
+    descriptor.depthAttachmentPixelFormat = MTLPixelFormatDepth32Float;
     _renderPipelineState = [self createRenderPipelineStateWith:descriptor];
-    _depthStencilState = [self createDepthStencilState];
-}
-
-/**
- * Encodes information about depth and stencil buffer operations.
- */
-- (id<MTLDepthStencilState>)createDepthStencilState {
+    
     MTLDepthStencilDescriptor *depthStencilDescriptor = [MTLDepthStencilDescriptor new];
     depthStencilDescriptor.depthCompareFunction = MTLCompareFunctionLess;
     depthStencilDescriptor.depthWriteEnabled = YES;
-    return [_device newDepthStencilStateWithDescriptor:depthStencilDescriptor];
+    _depthStencilState = [_device newDepthStencilStateWithDescriptor:depthStencilDescriptor];
 }
 
 /**
@@ -97,37 +95,7 @@ static const NSInteger inFlightBufferCount = 3;
     return descriptor;
 }
 
-- (void)setupBuffers {
-    static const MetalVertex vertices[] = {
-        { .position = { -1, 1, 1, 1 }, .color = { 0, 1, 1, 1 } },
-        { .position = { -1, -1, 1, 1 }, .color = { 0, 0, 1, 1 } },
-        { .position = { 1, -1, 1, 1 }, .color = { 1, 0, 1, 1 } },
-        { .position = { 1, 1, 1, 1 }, .color = { 1, 1, 1, 1 } },
-        { .position = { -1, 1, -1, 1 }, .color = { 0, 1, 0, 1 } },
-        { .position = { -1, -1, -1, 1 }, .color = { 0, 0, 0, 1 } },
-        { .position = { 1, -1, -1, 1 }, .color = { 1, 0, 0, 1 } },
-        { .position = { 1, 1, -1, 1 }, .color = { 1, 1, 0, 1 } }
-    };
-    
-    static const MetalIndex indices[] = {
-        3, 2, 6, 6, 7, 3,
-        4, 5, 1, 1, 0, 4,
-        4, 0, 3, 3, 7, 4,
-        1, 5, 6, 6, 2, 1,
-        0, 1, 2, 2, 3, 0,
-        7, 6, 5, 5, 4, 7
-    };
-    
-    _vertexBuffer = [_device newBufferWithBytes:vertices
-                                         length:sizeof(vertices)
-                                        options:MTLResourceOptionCPUCacheModeDefault];
-    _vertexBuffer.label = @"Vertices";
-    
-    _indexBuffer = [_device newBufferWithBytes:indices
-                                        length:sizeof(indices)
-                                       options:MTLResourceOptionCPUCacheModeDefault];
-    _indexBuffer.label = @"Indices";
-    
+- (void)setupUniformBuffer {
     _uniformBuffer = [_device newBufferWithLength:sizeof(MetalUniforms) * inFlightBufferCount
                                           options:MTLResourceOptionCPUCacheModeDefault];
     _uniformBuffer.label = @"Uniforms";
@@ -152,44 +120,30 @@ static const NSInteger inFlightBufferCount = 3;
     [self updateUniformsForView:view duration:view.frameDuration];
     
     id<MTLCommandBuffer> commandBuffer = [self.commandQueue commandBuffer];
-    
     MTLRenderPassDescriptor *passDescriptor = [view currentRenderPassDescriptor];
-    
-    id<MTLRenderCommandEncoder> renderPass = [self createRenderCommandEncoderWithCommandBuffer:commandBuffer
-                                                                                 andDescriptor:passDescriptor];
-    
-    const NSUInteger uniformBufferOffset = sizeof(MetalUniforms) * self.bufferIndex;
-    
-    [renderPass setVertexBuffer:self.vertexBuffer offset:0 atIndex:0];
-    [renderPass setVertexBuffer:self.uniformBuffer offset:uniformBufferOffset atIndex:1];
-    
-    [renderPass drawIndexedPrimitives:MTLPrimitiveTypeTriangle
-                           indexCount:[self.indexBuffer length] / sizeof(MetalIndex)
-                            indexType:MetalIndexType
-                          indexBuffer:self.indexBuffer
-                    indexBufferOffset:0];
-    
-    [renderPass endEncoding];
-    
-    [commandBuffer presentDrawable:view.currentDrawable];
-    
-    [commandBuffer addCompletedHandler:^(id<MTLCommandBuffer> commandBuffer) {
-        self.bufferIndex = (self.bufferIndex + 1) % inFlightBufferCount;
-        dispatch_semaphore_signal(self.displaySemaphore);
-    }];
-    
-    [commandBuffer commit];
-}
-
-- (id<MTLRenderCommandEncoder>)createRenderCommandEncoderWithCommandBuffer:(id<MTLCommandBuffer>)buffer
-                                                             andDescriptor:(MTLRenderPassDescriptor *)descriptor {
-    
-    id<MTLRenderCommandEncoder> renderCommandEncoder = [buffer renderCommandEncoderWithDescriptor:descriptor];
+    id<MTLRenderCommandEncoder> renderCommandEncoder = [commandBuffer renderCommandEncoderWithDescriptor:passDescriptor];
     [renderCommandEncoder setRenderPipelineState:_renderPipelineState];
     [renderCommandEncoder setDepthStencilState:_depthStencilState];
     [renderCommandEncoder setFrontFacingWinding:MTLWindingCounterClockwise];
     [renderCommandEncoder setCullMode:MTLCullModeBack];
-    return renderCommandEncoder;
+    
+    const NSUInteger uniformBufferOffset = sizeof(MetalUniforms) * self.bufferIndex;
+    
+    [renderCommandEncoder setVertexBuffer:self.mesh.vertexBuffer offset:0 atIndex:0];
+    [renderCommandEncoder setVertexBuffer:self.uniformBuffer offset:uniformBufferOffset atIndex:1];
+    [renderCommandEncoder drawIndexedPrimitives:MTLPrimitiveTypeTriangle
+                                     indexCount:[self.mesh.indexBuffer length] / sizeof(MetalIndex)
+                                      indexType:MetalIndexType
+                                    indexBuffer:self.mesh.indexBuffer
+                              indexBufferOffset:0];
+    [renderCommandEncoder endEncoding];
+    
+    [commandBuffer presentDrawable:view.currentDrawable];
+    [commandBuffer addCompletedHandler:^(id<MTLCommandBuffer> commandBuffer) {
+        self.bufferIndex = (self.bufferIndex + 1) % inFlightBufferCount;
+        dispatch_semaphore_signal(self.displaySemaphore);
+    }];
+    [commandBuffer commit];
 }
 
 - (void)updateUniformsForView:(MetalView *)view duration:(NSTimeInterval)duration {
@@ -197,7 +151,7 @@ static const NSInteger inFlightBufferCount = 3;
     self.rotationX += duration * (M_PI / 2);
     self.rotationY += duration * (M_PI / 3);
     
-    float scaleFactor = sinf(5 * self.time) * 0.25 + 1;
+    float scaleFactor = sinf(5 * self.time) * 0.5 + 1;
     
     const vector_float3 translation = { 0, 0, 0 };
     const vector_float3 xAxis = { 1, 0, 0 };
