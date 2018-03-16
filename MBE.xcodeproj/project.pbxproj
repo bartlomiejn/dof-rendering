@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		60EEBCD5205C1D2D00D2EEDA /* teapot.obj in Resources */ = {isa = PBXBuildFile; fileRef = 60EEBCD4205C1D2D00D2EEDA /* teapot.obj */; };
 		9F066B6C1FACE10C00AF820A /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 9F066B6B1FACE10C00AF820A /* AppDelegate.m */; };
 		9F066B6F1FACE10C00AF820A /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9F066B6E1FACE10C00AF820A /* ViewController.m */; };
 		9F066B741FACE10C00AF820A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9F066B731FACE10C00AF820A /* Assets.xcassets */; };
@@ -26,6 +27,7 @@
 
 /* Begin PBXFileReference section */
 		60EEBCCF205C114900D2EEDA /* MBETypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MBETypes.h; sourceTree = "<group>"; };
+		60EEBCD4205C1D2D00D2EEDA /* teapot.obj */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = teapot.obj; sourceTree = "<group>"; };
 		9F066B671FACE10C00AF820A /* MBE.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MBE.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9F066B6A1FACE10C00AF820A /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		9F066B6B1FACE10C00AF820A /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -95,6 +97,7 @@
 				9F066B6B1FACE10C00AF820A /* AppDelegate.m */,
 				9F066B6D1FACE10C00AF820A /* ViewController.h */,
 				9F066B6E1FACE10C00AF820A /* ViewController.m */,
+				60EEBCD4205C1D2D00D2EEDA /* teapot.obj */,
 				9F066B731FACE10C00AF820A /* Assets.xcassets */,
 				9F066B751FACE10C00AF820A /* LaunchScreen.storyboard */,
 				9F066B781FACE10C00AF820A /* Info.plist */,
@@ -224,6 +227,7 @@
 			files = (
 				9F066B771FACE10C00AF820A /* LaunchScreen.storyboard in Resources */,
 				9F066B741FACE10C00AF820A /* Assets.xcassets in Resources */,
+				60EEBCD5205C1D2D00D2EEDA /* teapot.obj in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

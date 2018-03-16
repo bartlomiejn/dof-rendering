@@ -55,8 +55,8 @@
     
     passDescriptor.depthAttachment.texture = self.depthTexture;
     passDescriptor.depthAttachment.clearDepth = 1.0;
-    passDescriptor.depthAttachment.loadAction = MTLLoadActionClear;
     passDescriptor.depthAttachment.storeAction = MTLStoreActionDontCare;
+    passDescriptor.depthAttachment.loadAction = MTLLoadActionClear;
     
     passDescriptor.renderTargetWidth = self.metalLayer.drawableSize.width;
     passDescriptor.renderTargetHeight = self.metalLayer.drawableSize.height;
@@ -131,7 +131,6 @@
                                                                                        height:drawableSize.height
                                                                                     mipmapped:NO];
         desc.usage = MTLTextureUsageRenderTarget;
-        
         self.depthTexture = [self.metalLayer.device newTextureWithDescriptor:desc];
     }
 }

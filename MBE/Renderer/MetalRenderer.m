@@ -184,12 +184,12 @@ static const NSInteger inFlightBufferCount = 3;
 - (id<MTLRenderCommandEncoder>)createRenderCommandEncoderWithCommandBuffer:(id<MTLCommandBuffer>)buffer
                                                              andDescriptor:(MTLRenderPassDescriptor *)descriptor {
     
-    id<MTLRenderCommandEncoder> renderPass = [buffer renderCommandEncoderWithDescriptor:descriptor];
-    [renderPass setRenderPipelineState:_renderPipelineState];
-    [renderPass setDepthStencilState:_depthStencilState];
-    [renderPass setFrontFacingWinding:MTLWindingCounterClockwise];
-    [renderPass setCullMode:MTLCullModeBack];
-    return renderPass;
+    id<MTLRenderCommandEncoder> renderCommandEncoder = [buffer renderCommandEncoderWithDescriptor:descriptor];
+    [renderCommandEncoder setRenderPipelineState:_renderPipelineState];
+    [renderCommandEncoder setDepthStencilState:_depthStencilState];
+    [renderCommandEncoder setFrontFacingWinding:MTLWindingCounterClockwise];
+    [renderCommandEncoder setCullMode:MTLCullModeBack];
+    return renderCommandEncoder;
 }
 
 - (void)updateUniformsForView:(MetalView *)view duration:(NSTimeInterval)duration {
@@ -199,12 +199,18 @@ static const NSInteger inFlightBufferCount = 3;
     
     float scaleFactor = sinf(5 * self.time) * 0.25 + 1;
     
+    const vector_float3 translation = { 0, 0, 0 };
     const vector_float3 xAxis = { 1, 0, 0 };
     const vector_float3 yAxis = { 0, 1, 0 };
     const matrix_float4x4 xRot = matrix_float4x4_rotation(xAxis, self.rotationX);
     const matrix_float4x4 yRot = matrix_float4x4_rotation(yAxis, self.rotationY);
     const matrix_float4x4 scale = matrix_float4x4_uniform_scale(scaleFactor);
-    const matrix_float4x4 modelMatrix = matrix_multiply(matrix_multiply(xRot, yRot), scale);
+
+    const matrix_float4x4 transMatrix = matrix_float4x4_translation(translation);
+    const matrix_float4x4 rotMatrix = matrix_multiply(xRot, yRot);
+    const matrix_float4x4 transRotMatrix = matrix_multiply(transMatrix, rotMatrix);
+    
+    const matrix_float4x4 modelMatrix = matrix_multiply(transRotMatrix, scale);
     
     const vector_float3 cameraTranslation = { 0, 0, -5 };
     const matrix_float4x4 viewMatrix = matrix_float4x4_translation(cameraTranslation);
