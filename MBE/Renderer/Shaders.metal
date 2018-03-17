@@ -17,11 +17,11 @@ typedef struct {
 } MetalVertex;
 typedef struct {
     float4x4 modelViewProjectionMatrix;
-} MetalUniforms;
+} RenderObjectUniforms;
 
 vertex MetalVertex
 map_vertices(device MetalVertex *inputVerts [[buffer(0)]],
-             constant MetalUniforms *uniforms [[buffer(1)]],
+             constant RenderObjectUniforms *uniforms [[buffer(1)]],
              uint vid [[vertex_id]]) {
     MetalVertex outputVert;
     outputVert.position = uniforms->modelViewProjectionMatrix * inputVerts[vid].position;
@@ -41,8 +41,12 @@ typedef struct {
     float2 textureCoordinate;
 } TextureMappingVertex;
 
+/**
+ Maps provided vertices to corners of drawable texture.
+ */
 vertex TextureMappingVertex
 map_texture(unsigned int vertex_id [[ vertex_id ]]) {
+    
     float4x4 renderedCoordinates = float4x4(float4(-1.0, -1.0, 0.0, 1.0),
                                             float4( 1.0, -1.0, 0.0, 1.0),
                                             float4(-1.0,  1.0, 0.0, 1.0),
@@ -60,9 +64,19 @@ map_texture(unsigned int vertex_id [[ vertex_id ]]) {
 
 constexpr sampler sampl(address::clamp_to_zero, filter::linear, coord::normalized);
 
+/**
+ Adds bloom effect to provided texture.
+ */
 fragment half4
 bloom_texture(TextureMappingVertex mappingVertex [[stage_in]],
                texture2d<float, access::sample> texture [[texture(0)]]) {
-    return half4(texture.sample(sampl, mappingVertex.textureCoordinate));
+    half4 bloomSum(0.0, 0.0, 0.0, 0.0);
+    for (int i = -2; i <= 2; i++) {
+        for (int j = -2; i <= 2; i++) {
+            float2 offset = float2(i, j) * float2(0.005, 0.005);
+            bloomSum += half4(texture.sample(sampl, mappingVertex.textureCoordinate + offset));
+        }
+    }
+    return (bloomSum / 25.0) + half4(texture.sample(sampl, mappingVertex.textureCoordinate));
 }
 

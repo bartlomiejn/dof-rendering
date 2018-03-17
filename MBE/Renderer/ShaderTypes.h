@@ -18,6 +18,6 @@ typedef struct __attribute((packed)) {
 
 typedef struct __attribute((packed)) {
     matrix_float4x4 modelViewProjectionMatrix;
-} MetalUniforms;
+} RenderObjectUniforms;
 
 #endif /* ShaderTypes_h */

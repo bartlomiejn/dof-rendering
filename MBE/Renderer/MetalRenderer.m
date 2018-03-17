@@ -21,15 +21,19 @@ const MTLIndexType MetalIndexType = MTLIndexTypeUInt16;
 static const NSInteger inFlightBufferCount = 3;
 
 @interface MetalRenderer ()
+
 @property (strong) id<MTLDevice> device;
 @property (strong) OBJMesh *mesh;
 @property (strong) id<MTLBuffer> uniformBuffer;
 @property (strong) id<MTLCommandQueue> commandQueue;
+// MARK: - Render Objects
 @property (strong) id<MTLRenderPipelineState> renderObjectsPipelineState;
 @property (strong) id<MTLTexture> renderObjectsTexture;
 @property (strong) id<MTLTexture> depthTexture;
 @property (strong) id<MTLDepthStencilState> depthStencilState;
+// MARK: - Bloom
 @property (strong) id<MTLRenderPipelineState> applyBloomPipelineState;
+// MARK: - Auxiliary
 @property (strong) dispatch_semaphore_t displaySemaphore;
 @property (assign) NSInteger bufferIndex;
 @property (assign) float rotationX, rotationY, time;
@@ -80,7 +84,7 @@ static const NSInteger inFlightBufferCount = 3;
 }
 
 - (void)setupUniformBuffer {
-    _uniformBuffer = [_device newBufferWithLength:sizeof(MetalUniforms) * inFlightBufferCount
+    _uniformBuffer = [_device newBufferWithLength:sizeof(RenderObjectUniforms) * inFlightBufferCount
                                           options:MTLResourceOptionCPUCacheModeDefault];
     _uniformBuffer.label = @"Uniforms";
 }
@@ -127,7 +131,7 @@ static const NSInteger inFlightBufferCount = 3;
     [encoder setFrontFacingWinding:MTLWindingCounterClockwise];
     [encoder setCullMode:MTLCullModeBack];
     [encoder setVertexBuffer:self.mesh.vertexBuffer offset:0 atIndex:0];
-    const NSUInteger uniformBufferOffset = sizeof(MetalUniforms) * self.bufferIndex;
+    const NSUInteger uniformBufferOffset = sizeof(RenderObjectUniforms) * self.bufferIndex;
     [encoder setVertexBuffer:self.uniformBuffer offset:uniformBufferOffset atIndex:1];
     [encoder drawIndexedPrimitives:MTLPrimitiveTypeTriangle
                                             indexCount:[self.mesh.indexBuffer length] / sizeof(MetalIndex)
@@ -180,10 +184,10 @@ static const NSInteger inFlightBufferCount = 3;
     const float far = 100;
     const matrix_float4x4 projectionMatrix = matrix_float4x4_perspective(aspect, fov, near, far);
     
-    MetalUniforms uniforms;
+    RenderObjectUniforms uniforms;
     uniforms.modelViewProjectionMatrix = matrix_multiply(projectionMatrix, matrix_multiply(viewMatrix, modelMatrix));
     
-    const NSUInteger uniformBufferOffset = sizeof(MetalUniforms) * self.bufferIndex;
+    const NSUInteger uniformBufferOffset = sizeof(RenderObjectUniforms) * self.bufferIndex;
     memcpy([self.uniformBuffer contents] + uniformBufferOffset, &uniforms, sizeof(uniforms));
 }
 
