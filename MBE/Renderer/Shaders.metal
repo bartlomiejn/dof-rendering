@@ -19,21 +19,50 @@ typedef struct {
     float4x4 modelViewProjectionMatrix;
 } MetalUniforms;
 
-vertex MetalVertex vert_passthrough(device MetalVertex *inputVerts [[buffer(0)]],
-                               constant MetalUniforms *uniforms [[buffer(1)]],
-                               uint vid [[vertex_id]]) {
+vertex MetalVertex
+map_vertices(device MetalVertex *inputVerts [[buffer(0)]],
+             constant MetalUniforms *uniforms [[buffer(1)]],
+             uint vid [[vertex_id]]) {
     MetalVertex outputVert;
     outputVert.position = uniforms->modelViewProjectionMatrix * inputVerts[vid].position;
     outputVert.color = inputVerts[vid].color;
     return outputVert;
 }
 
-fragment half4 frag_passthrough(MetalVertex inputVert [[stage_in]]) {
+fragment half4
+color_passthrough(MetalVertex inputVert [[stage_in]]) {
     return half4(inputVert.color);
 }
 
 #pragma mark - Bloom
 
-fragment half4 frag_bloom(MetalVertex inputVert [[stage_in]]) {
-    return half4(inputVert.color);
+typedef struct {
+    float4 renderedCoordinate [[position]];
+    float2 textureCoordinate;
+} TextureMappingVertex;
+
+vertex TextureMappingVertex
+map_texture(unsigned int vertex_id [[ vertex_id ]]) {
+    float4x4 renderedCoordinates = float4x4(float4(-1.0, -1.0, 0.0, 1.0),
+                                            float4( 1.0, -1.0, 0.0, 1.0),
+                                            float4(-1.0,  1.0, 0.0, 1.0),
+                                            float4( 1.0,  1.0, 0.0, 1.0));
+    float4x2 textureCoordinates = float4x2(float2(0.0, 1.0),
+                                           float2(1.0, 1.0),
+                                           float2(0.0, 0.0),
+                                           float2(1.0, 0.0));
+    
+    TextureMappingVertex outVertex;
+    outVertex.renderedCoordinate = renderedCoordinates[vertex_id];
+    outVertex.textureCoordinate = textureCoordinates[vertex_id];
+    return outVertex;
 }
+
+constexpr sampler sampl(address::clamp_to_zero, filter::linear, coord::normalized);
+
+fragment half4
+bloom_texture(TextureMappingVertex mappingVertex [[stage_in]],
+               texture2d<float, access::sample> texture [[texture(0)]]) {
+    return half4(texture.sample(sampl, mappingVertex.textureCoordinate));
+}
+

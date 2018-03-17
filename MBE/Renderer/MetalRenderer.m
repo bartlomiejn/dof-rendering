@@ -58,22 +58,19 @@ static const NSInteger inFlightBufferCount = 3;
     _commandQueue = [_device newCommandQueue];
     
     id<MTLLibrary> library = [_device newDefaultLibrary];
-    id<MTLFunction> vertexPassthroughFunction = [library newFunctionWithName:@"vert_passthrough"];
-    id<MTLFunction> fragPassthroughFunction = [library newFunctionWithName:@"frag_passthrough"];
-    id<MTLFunction> fragBloomFunction = [library newFunctionWithName:@"frag_blur"];
     
     MTLRenderPipelineDescriptor *renderObjectsDescriptor = [MTLRenderPipelineDescriptor new];
-    renderObjectsDescriptor.vertexFunction = vertexPassthroughFunction;
-    renderObjectsDescriptor.fragmentFunction = fragPassthroughFunction;
+    renderObjectsDescriptor.vertexFunction = [library newFunctionWithName:@"map_vertices"];
+    renderObjectsDescriptor.fragmentFunction = [library newFunctionWithName:@"color_passthrough"];
     renderObjectsDescriptor.colorAttachments[0].pixelFormat = MTLPixelFormatBGRA8Unorm;
     renderObjectsDescriptor.depthAttachmentPixelFormat = MTLPixelFormatDepth32Float;
     _renderObjectsPipelineState = [self createRenderPipelineStateWith:renderObjectsDescriptor];
     
     MTLRenderPipelineDescriptor *bloomDescriptor = [MTLRenderPipelineDescriptor new];
-    bloomDescriptor.vertexFunction = vertexPassthroughFunction; // Change to map vertex function
-    bloomDescriptor.fragmentFunction = fragBloomFunction;
+    bloomDescriptor.vertexFunction = [library newFunctionWithName:@"map_texture"];
+    bloomDescriptor.fragmentFunction = [library newFunctionWithName:@"bloom_texture"];
     bloomDescriptor.colorAttachments[0].pixelFormat = MTLPixelFormatBGRA8Unorm;
-    bloomDescriptor.depthAttachmentPixelFormat = MTLPixelFormatDepth32Float;
+    bloomDescriptor.depthAttachmentPixelFormat = MTLPixelFormatInvalid;
     _applyBloomPipelineState = [self createRenderPipelineStateWith:bloomDescriptor];
     
     MTLDepthStencilDescriptor *depthStencilDescriptor = [MTLDepthStencilDescriptor new];
@@ -105,35 +102,52 @@ static const NSInteger inFlightBufferCount = 3;
     dispatch_semaphore_wait(self.displaySemaphore, DISPATCH_TIME_FOREVER);
     
     [self updateUniformsForView:view duration:view.frameDuration];
+    id<MTLCaptureScope> scope = [[MTLCaptureManager sharedCaptureManager] newCaptureScopeWithDevice:self.device];
+    scope.label = @"Capture Scope";
+    [scope beginScope];
     
     id<MTLCommandBuffer> commandBuffer = [self.commandQueue commandBuffer];
-    MTLRenderPassDescriptor *passDescriptor = [self renderPassDescriptorForView:view];
-    id<MTLRenderCommandEncoder> renderCommandEncoder = [commandBuffer renderCommandEncoderWithDescriptor:passDescriptor];
-    [renderCommandEncoder setRenderPipelineState:_renderObjectsPipelineState];
-    [renderCommandEncoder setDepthStencilState:_depthStencilState];
-    [renderCommandEncoder setFrontFacingWinding:MTLWindingCounterClockwise];
-    [renderCommandEncoder setCullMode:MTLCullModeBack];
-
-    const NSUInteger uniformBufferOffset = sizeof(MetalUniforms) * self.bufferIndex;
-
-    [renderCommandEncoder setVertexBuffer:self.mesh.vertexBuffer offset:0 atIndex:0];
-    [renderCommandEncoder setVertexBuffer:self.uniformBuffer offset:uniformBufferOffset atIndex:1];
-    [renderCommandEncoder drawIndexedPrimitives:MTLPrimitiveTypeTriangle
-                                     indexCount:[self.mesh.indexBuffer length] / sizeof(MetalIndex)
-                                      indexType:MetalIndexType
-                                    indexBuffer:self.mesh.indexBuffer
-                              indexBufferOffset:0];
-    [renderCommandEncoder endEncoding];
+    [self renderObjectsInView:view withCommandBuffer:commandBuffer];
+    [self applyBloomInView:view withCommandBuffer:commandBuffer];
     
     [commandBuffer presentDrawable:view.currentDrawable];
     [commandBuffer addCompletedHandler:^(id<MTLCommandBuffer> commandBuffer) {
         self.bufferIndex = (self.bufferIndex + 1) % inFlightBufferCount;
         dispatch_semaphore_signal(self.displaySemaphore);
     }];
+    [scope endScope];
     [commandBuffer commit];
 }
 
--(void)frameAdjustedForView:(MetalView *)view {
+- (void)renderObjectsInView:(MetalView *)view withCommandBuffer:(id<MTLCommandBuffer>)commandBuffer {
+    MTLRenderPassDescriptor *descriptor = [self renderObjectsPassDescriptorForView:view];
+    id<MTLRenderCommandEncoder> encoder = [commandBuffer renderCommandEncoderWithDescriptor:descriptor];
+    [encoder setRenderPipelineState:_renderObjectsPipelineState];
+    [encoder setDepthStencilState:_depthStencilState];
+    [encoder setFrontFacingWinding:MTLWindingCounterClockwise];
+    [encoder setCullMode:MTLCullModeBack];
+    [encoder setVertexBuffer:self.mesh.vertexBuffer offset:0 atIndex:0];
+    const NSUInteger uniformBufferOffset = sizeof(MetalUniforms) * self.bufferIndex;
+    [encoder setVertexBuffer:self.uniformBuffer offset:uniformBufferOffset atIndex:1];
+    [encoder drawIndexedPrimitives:MTLPrimitiveTypeTriangle
+                                            indexCount:[self.mesh.indexBuffer length] / sizeof(MetalIndex)
+                                             indexType:MetalIndexType
+                                           indexBuffer:self.mesh.indexBuffer
+                                     indexBufferOffset:0];
+    [encoder endEncoding];
+}
+
+- (void)applyBloomInView:(MetalView *)view withCommandBuffer:(id<MTLCommandBuffer>)commandBuffer {
+    MTLRenderPassDescriptor *descriptor = [self applyBloomPassDescriptorForView:view];
+    id<MTLRenderCommandEncoder> encoder = [commandBuffer renderCommandEncoderWithDescriptor:descriptor];
+    [encoder setRenderPipelineState:_applyBloomPipelineState];
+    [encoder setFragmentTexture:self.renderObjectsTexture atIndex:0];
+    [encoder drawPrimitives:MTLPrimitiveTypeTriangleStrip vertexStart:0 vertexCount:4];
+    [encoder endEncoding];
+}
+
+- (void)frameAdjustedForView:(MetalView *)view {
+    [self setupRenderObjectsTextureForView:view];
     [self setupDepthTextureForView:view];
 }
 
@@ -154,7 +168,6 @@ static const NSInteger inFlightBufferCount = 3;
     const matrix_float4x4 transMatrix = matrix_float4x4_translation(translation);
     const matrix_float4x4 rotMatrix = matrix_multiply(xRot, yRot);
     const matrix_float4x4 transRotMatrix = matrix_multiply(transMatrix, rotMatrix);
-    
     const matrix_float4x4 modelMatrix = matrix_multiply(transRotMatrix, scale);
     
     const vector_float3 cameraTranslation = { 0, 0, -5 };
@@ -174,24 +187,43 @@ static const NSInteger inFlightBufferCount = 3;
     memcpy([self.uniformBuffer contents] + uniformBufferOffset, &uniforms, sizeof(uniforms));
 }
 
-- (MTLRenderPassDescriptor *)renderPassDescriptorForView:(MetalView*)view
-{
+- (MTLRenderPassDescriptor *)renderObjectsPassDescriptorForView:(MetalView*)view {
     MTLRenderPassDescriptor *passDescriptor = [MTLRenderPassDescriptor renderPassDescriptor];
-    
-    passDescriptor.colorAttachments[0].texture = [view.currentDrawable texture];
+    passDescriptor.colorAttachments[0].texture = self.renderObjectsTexture;
     passDescriptor.colorAttachments[0].clearColor = view.clearColor;
     passDescriptor.colorAttachments[0].storeAction = MTLStoreActionStore;
     passDescriptor.colorAttachments[0].loadAction = MTLLoadActionClear;
-    
     passDescriptor.depthAttachment.texture = self.depthTexture;
     passDescriptor.depthAttachment.clearDepth = 1.0;
     passDescriptor.depthAttachment.storeAction = MTLStoreActionDontCare;
     passDescriptor.depthAttachment.loadAction = MTLLoadActionClear;
-    
     passDescriptor.renderTargetWidth = view.metalLayer.drawableSize.width;
     passDescriptor.renderTargetHeight = view.metalLayer.drawableSize.height;
-    
     return passDescriptor;
+}
+
+- (MTLRenderPassDescriptor *)applyBloomPassDescriptorForView:(MetalView*)view {
+    MTLRenderPassDescriptor *passDescriptor = [MTLRenderPassDescriptor renderPassDescriptor];
+    passDescriptor.colorAttachments[0].texture = [view.currentDrawable texture];
+    passDescriptor.colorAttachments[0].clearColor = view.clearColor;
+    passDescriptor.colorAttachments[0].storeAction = MTLStoreActionStore;
+    passDescriptor.colorAttachments[0].loadAction = MTLLoadActionClear;
+    passDescriptor.renderTargetWidth = view.metalLayer.drawableSize.width;
+    passDescriptor.renderTargetHeight = view.metalLayer.drawableSize.height;
+    return passDescriptor;
+}
+
+- (void)setupRenderObjectsTextureForView:(MetalView *)view {
+    CGSize drawableSize = view.metalLayer.drawableSize;
+    
+    if (self.renderObjectsTexture.width != drawableSize.width || self.renderObjectsTexture.height != drawableSize.height) {
+        MTLTextureDescriptor *desc = [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:MTLPixelFormatBGRA8Unorm
+                                                                                        width:drawableSize.width
+                                                                                       height:drawableSize.height
+                                                                                    mipmapped:NO];
+        desc.usage = MTLTextureUsageRenderTarget & MTLTextureUsageShaderRead;
+        self.renderObjectsTexture = [self.device newTextureWithDescriptor:desc];
+    }
 }
 
 - (void)setupDepthTextureForView:(MetalView *)view {
