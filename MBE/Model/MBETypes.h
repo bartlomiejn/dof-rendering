@@ -28,5 +28,4 @@ typedef struct __attribute((packed))
     matrix_float3x3 normalMatrix;
 } MBEUniforms;
 
-
 #endif /* MBETypes_h */

@@ -7,28 +7,33 @@
 //
 
 #include <metal_stdlib>
-#include "ShaderTypes.h"
 using namespace metal;
 
-struct Vertex {
+#pragma mark - Draw Objects
+
+typedef struct {
     float4 position [[position]];
     float4 color;
-};
-
-struct Uniforms {
+} MetalVertex;
+typedef struct {
     float4x4 modelViewProjectionMatrix;
-};
+} MetalUniforms;
 
-vertex Vertex vert_passthrough(device Vertex *inputVerts [[buffer(0)]],
-                               constant Uniforms *uniforms [[buffer(1)]],
+vertex MetalVertex vert_passthrough(device MetalVertex *inputVerts [[buffer(0)]],
+                               constant MetalUniforms *uniforms [[buffer(1)]],
                                uint vid [[vertex_id]]) {
-    
-    Vertex outputVert;
+    MetalVertex outputVert;
     outputVert.position = uniforms->modelViewProjectionMatrix * inputVerts[vid].position;
     outputVert.color = inputVerts[vid].color;
     return outputVert;
 }
 
-fragment half4 frag_passthrough(Vertex inputVert [[stage_in]]) {
+fragment half4 frag_passthrough(MetalVertex inputVert [[stage_in]]) {
+    return half4(inputVert.color);
+}
+
+#pragma mark - Bloom
+
+fragment half4 frag_bloom(MetalVertex inputVert [[stage_in]]) {
     return half4(inputVert.color);
 }

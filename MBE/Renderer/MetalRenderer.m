@@ -25,8 +25,11 @@ static const NSInteger inFlightBufferCount = 3;
 @property (strong) OBJMesh *mesh;
 @property (strong) id<MTLBuffer> uniformBuffer;
 @property (strong) id<MTLCommandQueue> commandQueue;
-@property (strong) id<MTLRenderPipelineState> renderPipelineState;
+@property (strong) id<MTLRenderPipelineState> renderObjectsPipelineState;
+@property (strong) id<MTLTexture> renderObjectsTexture;
+@property (strong) id<MTLTexture> depthTexture;
 @property (strong) id<MTLDepthStencilState> depthStencilState;
+@property (strong) id<MTLRenderPipelineState> applyBloomPipelineState;
 @property (strong) dispatch_semaphore_t displaySemaphore;
 @property (assign) NSInteger bufferIndex;
 @property (assign) float rotationX, rotationY, time;
@@ -55,15 +58,23 @@ static const NSInteger inFlightBufferCount = 3;
     _commandQueue = [_device newCommandQueue];
     
     id<MTLLibrary> library = [_device newDefaultLibrary];
-    id<MTLFunction> vertexFunction = [library newFunctionWithName:@"vert_passthrough"];
-    id<MTLFunction> fragFunction = [library newFunctionWithName:@"frag_passthrough"];
+    id<MTLFunction> vertexPassthroughFunction = [library newFunctionWithName:@"vert_passthrough"];
+    id<MTLFunction> fragPassthroughFunction = [library newFunctionWithName:@"frag_passthrough"];
+    id<MTLFunction> fragBloomFunction = [library newFunctionWithName:@"frag_blur"];
     
-    MTLRenderPipelineDescriptor *descriptor = [MTLRenderPipelineDescriptor new];
-    descriptor.vertexFunction = vertexFunction;
-    descriptor.fragmentFunction = fragFunction;
-    descriptor.colorAttachments[0].pixelFormat = MTLPixelFormatBGRA8Unorm;
-    descriptor.depthAttachmentPixelFormat = MTLPixelFormatDepth32Float;
-    _renderPipelineState = [self createRenderPipelineStateWith:descriptor];
+    MTLRenderPipelineDescriptor *renderObjectsDescriptor = [MTLRenderPipelineDescriptor new];
+    renderObjectsDescriptor.vertexFunction = vertexPassthroughFunction;
+    renderObjectsDescriptor.fragmentFunction = fragPassthroughFunction;
+    renderObjectsDescriptor.colorAttachments[0].pixelFormat = MTLPixelFormatBGRA8Unorm;
+    renderObjectsDescriptor.depthAttachmentPixelFormat = MTLPixelFormatDepth32Float;
+    _renderObjectsPipelineState = [self createRenderPipelineStateWith:renderObjectsDescriptor];
+    
+    MTLRenderPipelineDescriptor *bloomDescriptor = [MTLRenderPipelineDescriptor new];
+    bloomDescriptor.vertexFunction = vertexPassthroughFunction; // Change to map vertex function
+    bloomDescriptor.fragmentFunction = fragBloomFunction;
+    bloomDescriptor.colorAttachments[0].pixelFormat = MTLPixelFormatBGRA8Unorm;
+    bloomDescriptor.depthAttachmentPixelFormat = MTLPixelFormatDepth32Float;
+    _applyBloomPipelineState = [self createRenderPipelineStateWith:bloomDescriptor];
     
     MTLDepthStencilDescriptor *depthStencilDescriptor = [MTLDepthStencilDescriptor new];
     depthStencilDescriptor.depthCompareFunction = MTLCompareFunctionLess;
@@ -96,15 +107,15 @@ static const NSInteger inFlightBufferCount = 3;
     [self updateUniformsForView:view duration:view.frameDuration];
     
     id<MTLCommandBuffer> commandBuffer = [self.commandQueue commandBuffer];
-    MTLRenderPassDescriptor *passDescriptor = [view currentRenderPassDescriptor];
+    MTLRenderPassDescriptor *passDescriptor = [self renderPassDescriptorForView:view];
     id<MTLRenderCommandEncoder> renderCommandEncoder = [commandBuffer renderCommandEncoderWithDescriptor:passDescriptor];
-    [renderCommandEncoder setRenderPipelineState:_renderPipelineState];
+    [renderCommandEncoder setRenderPipelineState:_renderObjectsPipelineState];
     [renderCommandEncoder setDepthStencilState:_depthStencilState];
     [renderCommandEncoder setFrontFacingWinding:MTLWindingCounterClockwise];
     [renderCommandEncoder setCullMode:MTLCullModeBack];
-    
+
     const NSUInteger uniformBufferOffset = sizeof(MetalUniforms) * self.bufferIndex;
-    
+
     [renderCommandEncoder setVertexBuffer:self.mesh.vertexBuffer offset:0 atIndex:0];
     [renderCommandEncoder setVertexBuffer:self.uniformBuffer offset:uniformBufferOffset atIndex:1];
     [renderCommandEncoder drawIndexedPrimitives:MTLPrimitiveTypeTriangle
@@ -120,6 +131,10 @@ static const NSInteger inFlightBufferCount = 3;
         dispatch_semaphore_signal(self.displaySemaphore);
     }];
     [commandBuffer commit];
+}
+
+-(void)frameAdjustedForView:(MetalView *)view {
+    [self setupDepthTextureForView:view];
 }
 
 - (void)updateUniformsForView:(MetalView *)view duration:(NSTimeInterval)duration {
@@ -157,6 +172,39 @@ static const NSInteger inFlightBufferCount = 3;
     
     const NSUInteger uniformBufferOffset = sizeof(MetalUniforms) * self.bufferIndex;
     memcpy([self.uniformBuffer contents] + uniformBufferOffset, &uniforms, sizeof(uniforms));
+}
+
+- (MTLRenderPassDescriptor *)renderPassDescriptorForView:(MetalView*)view
+{
+    MTLRenderPassDescriptor *passDescriptor = [MTLRenderPassDescriptor renderPassDescriptor];
+    
+    passDescriptor.colorAttachments[0].texture = [view.currentDrawable texture];
+    passDescriptor.colorAttachments[0].clearColor = view.clearColor;
+    passDescriptor.colorAttachments[0].storeAction = MTLStoreActionStore;
+    passDescriptor.colorAttachments[0].loadAction = MTLLoadActionClear;
+    
+    passDescriptor.depthAttachment.texture = self.depthTexture;
+    passDescriptor.depthAttachment.clearDepth = 1.0;
+    passDescriptor.depthAttachment.storeAction = MTLStoreActionDontCare;
+    passDescriptor.depthAttachment.loadAction = MTLLoadActionClear;
+    
+    passDescriptor.renderTargetWidth = view.metalLayer.drawableSize.width;
+    passDescriptor.renderTargetHeight = view.metalLayer.drawableSize.height;
+    
+    return passDescriptor;
+}
+
+- (void)setupDepthTextureForView:(MetalView *)view {
+    CGSize drawableSize = view.metalLayer.drawableSize;
+    
+    if (self.depthTexture.width != drawableSize.width || self.depthTexture.height != drawableSize.height) {
+        MTLTextureDescriptor *desc = [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:MTLPixelFormatDepth32Float
+                                                                                        width:drawableSize.width
+                                                                                       height:drawableSize.height
+                                                                                    mipmapped:NO];
+        desc.usage = MTLTextureUsageRenderTarget;
+        self.depthTexture = [self.device newTextureWithDescriptor:desc];
+    }
 }
 
 @end

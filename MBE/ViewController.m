@@ -38,6 +38,7 @@
     [self setupViewWithDevice:device colorFormat:colorPixelFormat];
     [self setupRendererWithDevice:device colorFormat:colorPixelFormat];
     
+    self.metalView.clearColor = MTLClearColorMake(0.0, 0.0, 0.0, 1.0);
     self.metalView.delegate = _renderer;
 }
 

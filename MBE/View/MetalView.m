@@ -14,7 +14,6 @@
 @interface MetalView ()
 @property (assign) NSTimeInterval frameDuration;
 @property (strong) id<CAMetalDrawable> currentDrawable;
-@property (strong) id<MTLTexture> depthTexture;
 @property (nonatomic, strong) CADisplayLink* displayLink;
 @end
 
@@ -42,26 +41,6 @@
 
 - (void)setPreferredFramesPerSecond:(NSInteger)preferredFramesPerSecond {
     _displayLink.preferredFramesPerSecond = preferredFramesPerSecond;
-}
-
-- (MTLRenderPassDescriptor *)currentRenderPassDescriptor
-{
-    MTLRenderPassDescriptor *passDescriptor = [MTLRenderPassDescriptor renderPassDescriptor];
-    
-    passDescriptor.colorAttachments[0].texture = [self.currentDrawable texture];
-    passDescriptor.colorAttachments[0].clearColor = self.clearColor;
-    passDescriptor.colorAttachments[0].storeAction = MTLStoreActionStore;
-    passDescriptor.colorAttachments[0].loadAction = MTLLoadActionClear;
-    
-    passDescriptor.depthAttachment.texture = self.depthTexture;
-    passDescriptor.depthAttachment.clearDepth = 1.0;
-    passDescriptor.depthAttachment.storeAction = MTLStoreActionDontCare;
-    passDescriptor.depthAttachment.loadAction = MTLLoadActionClear;
-    
-    passDescriptor.renderTargetWidth = self.metalLayer.drawableSize.width;
-    passDescriptor.renderTargetHeight = self.metalLayer.drawableSize.height;
-    
-    return passDescriptor;
 }
 
 #pragma mark - Initialization
@@ -109,7 +88,8 @@
     
     self.metalLayer.drawableSize = drawableSize;
     
-    [self makeDepthTexture];
+    if ([_delegate respondsToSelector:@selector(frameAdjustedForView:)])
+        [self.delegate frameAdjustedForView:self];
 }
 
 - (void)setupDisplayLink {
@@ -122,28 +102,14 @@
     _displayLink = nil;
 }
 
-- (void)makeDepthTexture {
-    CGSize drawableSize = self.metalLayer.drawableSize;
-    
-    if ([self.depthTexture width] != drawableSize.width || [self.depthTexture height] != drawableSize.height) {
-        MTLTextureDescriptor *desc = [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:MTLPixelFormatDepth32Float
-                                                                                        width:drawableSize.width
-                                                                                       height:drawableSize.height
-                                                                                    mipmapped:NO];
-        desc.usage = MTLTextureUsageRenderTarget;
-        self.depthTexture = [self.metalLayer.device newTextureWithDescriptor:desc];
-    }
-}
-
 #pragma mark - CADisplayLink Action
 
 - (void)displayLinkDidFire:(CADisplayLink *)displayLink {
     _currentDrawable = [_metalLayer nextDrawable];
     _frameDuration = displayLink.duration;
     
-    if ([self.delegate respondsToSelector:@selector(drawInView:)]) {
+    if ([self.delegate respondsToSelector:@selector(drawInView:)])
         [self.delegate drawInView:self];
-    }
 }
 
 @end

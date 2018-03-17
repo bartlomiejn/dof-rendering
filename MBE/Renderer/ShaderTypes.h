@@ -11,12 +11,12 @@
 
 #include <simd/simd.h>
 
-typedef struct {
+typedef struct __attribute((packed)) {
     vector_float4 position;
     vector_float4 color;
 } MetalVertex;
 
-typedef struct {
+typedef struct __attribute((packed)) {
     matrix_float4x4 modelViewProjectionMatrix;
 } MetalUniforms;
 
