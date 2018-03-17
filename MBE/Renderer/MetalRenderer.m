@@ -12,28 +12,23 @@
 #import "MathFunctions.h"
 #import "OBJMesh.h"
 #import "ShaderTypes.h"
+#import "RenderStateProvider.h"
 @import Metal;
 @import QuartzCore.CAMetalLayer;
 
 typedef uint16_t MetalIndex;
 const MTLIndexType MetalIndexType = MTLIndexTypeUInt16;
-
 static const NSInteger inFlightBufferCount = 3;
 
 @interface MetalRenderer ()
-
 @property (strong) id<MTLDevice> device;
 @property (strong) OBJMesh *mesh;
 @property (strong) id<MTLBuffer> uniformBuffer;
 @property (strong) id<MTLCommandQueue> commandQueue;
-// MARK: - Render Objects
-@property (strong) id<MTLRenderPipelineState> renderObjectsPipelineState;
+@property (strong, nonatomic) RenderStateProvider *renderStateProvider;
 @property (strong) id<MTLTexture> renderObjectsTexture;
 @property (strong) id<MTLTexture> depthTexture;
 @property (strong) id<MTLDepthStencilState> depthStencilState;
-// MARK: - Bloom
-@property (strong) id<MTLRenderPipelineState> applyBloomPipelineState;
-// MARK: - Auxiliary
 @property (strong) dispatch_semaphore_t displaySemaphore;
 @property (assign) NSInteger bufferIndex;
 @property (assign) float rotationX, rotationY, time;
@@ -41,15 +36,16 @@ static const NSInteger inFlightBufferCount = 3;
 
 @implementation MetalRenderer
 
-- (instancetype)initWithDevice:(id<MTLDevice>)device
-{
+- (instancetype)initWithDevice:(id<MTLDevice>)device {
     self = [super init];
     if (self) {
         _device = device;
         _displaySemaphore = dispatch_semaphore_create(inFlightBufferCount);
-        
-        [self setupPipeline];
-        [self setupUniformBuffer];
+        _commandQueue = [_device newCommandQueue];
+        _renderStateProvider = [[RenderStateProvider alloc] initWithDevice:_device];
+        _uniformBuffer = [_device newBufferWithLength:sizeof(RenderObjectUniforms) * inFlightBufferCount
+                                              options:MTLResourceOptionCPUCacheModeDefault];
+        _uniformBuffer.label = @"Uniforms";
     }
     return self;
 }
@@ -58,56 +54,16 @@ static const NSInteger inFlightBufferCount = 3;
     _mesh = [[OBJMesh alloc] initWithGroup:group device:_device];
 }
 
-- (void)setupPipeline {
-    _commandQueue = [_device newCommandQueue];
-    
-    id<MTLLibrary> library = [_device newDefaultLibrary];
-    
-    MTLRenderPipelineDescriptor *renderObjectsDescriptor = [MTLRenderPipelineDescriptor new];
-    renderObjectsDescriptor.vertexFunction = [library newFunctionWithName:@"map_vertices"];
-    renderObjectsDescriptor.fragmentFunction = [library newFunctionWithName:@"color_passthrough"];
-    renderObjectsDescriptor.colorAttachments[0].pixelFormat = MTLPixelFormatBGRA8Unorm;
-    renderObjectsDescriptor.depthAttachmentPixelFormat = MTLPixelFormatDepth32Float;
-    _renderObjectsPipelineState = [self createRenderPipelineStateWith:renderObjectsDescriptor];
-    
-    MTLRenderPipelineDescriptor *bloomDescriptor = [MTLRenderPipelineDescriptor new];
-    bloomDescriptor.vertexFunction = [library newFunctionWithName:@"map_texture"];
-    bloomDescriptor.fragmentFunction = [library newFunctionWithName:@"bloom_texture"];
-    bloomDescriptor.colorAttachments[0].pixelFormat = MTLPixelFormatBGRA8Unorm;
-    bloomDescriptor.depthAttachmentPixelFormat = MTLPixelFormatInvalid;
-    _applyBloomPipelineState = [self createRenderPipelineStateWith:bloomDescriptor];
-    
-    MTLDepthStencilDescriptor *depthStencilDescriptor = [MTLDepthStencilDescriptor new];
-    depthStencilDescriptor.depthCompareFunction = MTLCompareFunctionLess;
-    depthStencilDescriptor.depthWriteEnabled = YES;
-    _depthStencilState = [_device newDepthStencilStateWithDescriptor:depthStencilDescriptor];
-}
-
-- (void)setupUniformBuffer {
-    _uniformBuffer = [_device newBufferWithLength:sizeof(RenderObjectUniforms) * inFlightBufferCount
-                                          options:MTLResourceOptionCPUCacheModeDefault];
-    _uniformBuffer.label = @"Uniforms";
-}
-
-- (id<MTLRenderPipelineState>)createRenderPipelineStateWith:(MTLRenderPipelineDescriptor *)descriptor {
-    NSError *error = nil;
-    id<MTLRenderPipelineState> pipelineState = [_device newRenderPipelineStateWithDescriptor:descriptor error:&error];
-    
-    if (!pipelineState) {
-        NSLog(@"Error occurred when creating render pipeline state: %@", error);
-    }
-    
-    return pipelineState;
-}
-
 #pragma mark - MetalViewDelegate
 
 - (void)drawInView:(MetalView *)view {
     dispatch_semaphore_wait(self.displaySemaphore, DISPATCH_TIME_FOREVER);
     
-    [self updateUniformsForView:view duration:view.frameDuration];
     id<MTLCaptureScope> scope = [[MTLCaptureManager sharedCaptureManager] newCaptureScopeWithDevice:self.device];
     scope.label = @"Capture Scope";
+    
+    [self updateUniformsForView:view duration:view.frameDuration];
+
     [scope beginScope];
     
     id<MTLCommandBuffer> commandBuffer = [self.commandQueue commandBuffer];
@@ -119,14 +75,16 @@ static const NSInteger inFlightBufferCount = 3;
         self.bufferIndex = (self.bufferIndex + 1) % inFlightBufferCount;
         dispatch_semaphore_signal(self.displaySemaphore);
     }];
+    
     [scope endScope];
+    
     [commandBuffer commit];
 }
 
 - (void)renderObjectsInView:(MetalView *)view withCommandBuffer:(id<MTLCommandBuffer>)commandBuffer {
     MTLRenderPassDescriptor *descriptor = [self renderObjectsPassDescriptorForView:view];
     id<MTLRenderCommandEncoder> encoder = [commandBuffer renderCommandEncoderWithDescriptor:descriptor];
-    [encoder setRenderPipelineState:_renderObjectsPipelineState];
+    [encoder setRenderPipelineState:_renderStateProvider.renderObjectsPipelineState];
     [encoder setDepthStencilState:_depthStencilState];
     [encoder setFrontFacingWinding:MTLWindingCounterClockwise];
     [encoder setCullMode:MTLCullModeBack];
@@ -144,7 +102,7 @@ static const NSInteger inFlightBufferCount = 3;
 - (void)applyBloomInView:(MetalView *)view withCommandBuffer:(id<MTLCommandBuffer>)commandBuffer {
     MTLRenderPassDescriptor *descriptor = [self applyBloomPassDescriptorForView:view];
     id<MTLRenderCommandEncoder> encoder = [commandBuffer renderCommandEncoderWithDescriptor:descriptor];
-    [encoder setRenderPipelineState:_applyBloomPipelineState];
+    [encoder setRenderPipelineState:_renderStateProvider.applyBloomPipelineState];
     [encoder setFragmentTexture:self.renderObjectsTexture atIndex:0];
     [encoder drawPrimitives:MTLPrimitiveTypeTriangleStrip vertexStart:0 vertexCount:4];
     [encoder endEncoding];
