@@ -11,18 +11,9 @@
 #import "MetalRenderer.h"
 #import "MathFunctions.h"
 #import "OBJMesh.h"
-@import simd;
+#import "ShaderTypes.h"
 @import Metal;
 @import QuartzCore.CAMetalLayer;
-
-typedef struct {
-    vector_float4 position;
-    vector_float4 color;
-} MetalVertex;
-
-typedef struct {
-    matrix_float4x4 modelViewProjectionMatrix;
-} MetalUniforms;
 
 typedef uint16_t MetalIndex;
 const MTLIndexType MetalIndexType = MTLIndexTypeUInt16;
@@ -78,21 +69,6 @@ static const NSInteger inFlightBufferCount = 3;
     depthStencilDescriptor.depthCompareFunction = MTLCompareFunctionLess;
     depthStencilDescriptor.depthWriteEnabled = YES;
     _depthStencilState = [_device newDepthStencilStateWithDescriptor:depthStencilDescriptor];
-}
-
-/**
- * Encodes graphics state for a configured graphics rendering pipeline, to use with MTLRenderCommandEncoder to encode
- * commands for a rendering pass. Set it before any draw calls.
- */
-- (MTLRenderPipelineDescriptor *)createPipelineDescriptorWithVertexFunction:(id<MTLFunction>)vertexFunction
-                                                           fragmentFunction:(id<MTLFunction>)fragmentFunction
-                                                                pixelFormat:(MTLPixelFormat)format {
-    MTLRenderPipelineDescriptor *descriptor = [MTLRenderPipelineDescriptor new];
-    descriptor.vertexFunction = vertexFunction;
-    descriptor.fragmentFunction = fragmentFunction;
-    descriptor.colorAttachments[0].pixelFormat = format;
-    descriptor.depthAttachmentPixelFormat = MTLPixelFormatDepth32Float;
-    return descriptor;
 }
 
 - (void)setupUniformBuffer {
@@ -151,7 +127,7 @@ static const NSInteger inFlightBufferCount = 3;
     self.rotationX += duration * (M_PI / 2);
     self.rotationY += duration * (M_PI / 3);
     
-    float scaleFactor = sinf(5 * self.time) * 0.5 + 1;
+    float scaleFactor = sinf(5 * self.time) * 0.5 + 3;
     
     const vector_float3 translation = { 0, 0, 0 };
     const vector_float3 xAxis = { 1, 0, 0 };

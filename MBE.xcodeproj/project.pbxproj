@@ -28,6 +28,7 @@
 /* Begin PBXFileReference section */
 		60EEBCCF205C114900D2EEDA /* MBETypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MBETypes.h; sourceTree = "<group>"; };
 		60EEBCD4205C1D2D00D2EEDA /* teapot.obj */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = teapot.obj; sourceTree = "<group>"; };
+		60EEBCD6205D713100D2EEDA /* ShaderTypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ShaderTypes.h; sourceTree = "<group>"; };
 		9F066B671FACE10C00AF820A /* MBE.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MBE.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9F066B6A1FACE10C00AF820A /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		9F066B6B1FACE10C00AF820A /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -139,6 +140,7 @@
 				9F066B881FACF56800AF820A /* Shaders.metal */,
 				9F2D391E1FBC8E9D00F7578F /* MetalRenderer.h */,
 				9F2D391F1FBC8E9D00F7578F /* MetalRenderer.m */,
+				60EEBCD6205D713100D2EEDA /* ShaderTypes.h */,
 			);
 			path = Renderer;
 			sourceTree = "<group>";
