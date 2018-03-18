@@ -37,13 +37,14 @@
     id<MTLLibrary> library = [device newDefaultLibrary];
     MTLRenderPipelineDescriptor *bloomDescriptor = [MTLRenderPipelineDescriptor new];
     bloomDescriptor.vertexFunction = [library newFunctionWithName:@"map_texture"];
-    bloomDescriptor.fragmentFunction = [library newFunctionWithName:@"bloom_texture"];
+    bloomDescriptor.fragmentFunction = [library newFunctionWithName:@"dof_blur_texture"];
     bloomDescriptor.colorAttachments[0].pixelFormat = MTLPixelFormatBGRA8Unorm;
     bloomDescriptor.depthAttachmentPixelFormat = MTLPixelFormatInvalid;
     return [self createRenderPipelineStateWith:bloomDescriptor onDevice:device];
 }
 
--(id<MTLRenderPipelineState>)createRenderPipelineStateWith:(MTLRenderPipelineDescriptor*)descriptor onDevice:(id<MTLDevice>)device {
+-(id<MTLRenderPipelineState>)createRenderPipelineStateWith:(MTLRenderPipelineDescriptor*)descriptor
+                                                  onDevice:(id<MTLDevice>)device {
     // TODO: Real error handling
     NSError *error = nil;
     id<MTLRenderPipelineState> pipelineState = [device newRenderPipelineStateWithDescriptor:descriptor error:&error];

@@ -69,23 +69,22 @@ map_texture(unsigned int vertex_id [[ vertex_id ]]) {
 constexpr sampler sampl(address::clamp_to_zero, filter::linear, coord::normalized);
 
 /**
- Adds bloom effect to provided texture.
+ Adds DoF effect from provided color and depth texture.
  */
 fragment half4
-bloom_texture(TextureMappingVertex mappingVertex [[stage_in]],
-              texture2d<float, access::sample> colorTexture [[texture(0)]],
-              texture2d<float, access::sample> depthTexture [[texture(1)]]) {
-    half4 bloomSum(0.0, 0.0, 0.0, 0.0);
-    for (int i = -2; i <= 2; i++) {
-        for (int j = -2; i <= 2; i++) {
-            float2 offset = float2(i, j) * float2(0.005, 0.005);
-            bloomSum += half4(colorTexture.sample(sampl, mappingVertex.textureCoordinate + offset));
-        }
-    }
-    half4 bloomedPixel = (bloomSum / 25.0) + half4(colorTexture.sample(sampl, mappingVertex.textureCoordinate));
+dof_blur_texture(TextureMappingVertex mappingVertex [[stage_in]],
+                 texture2d<float, access::sample> colorTexture [[texture(0)]],
+                 texture2d<float, access::sample> depthTexture [[texture(1)]]) {
+//    Bloom code
+//    half4 bloomSum(0.0, 0.0, 0.0, 0.0);
+//    for (int i = -2; i <= 2; i++) {
+//        for (int j = -2; i <= 2; i++) {
+//            float2 offset = float2(i, j) * float2(0.005, 0.005);
+//            bloomSum += half4(colorTexture.sample(sampl, mappingVertex.textureCoordinate + offset));
+//        }
+//    }
+//    half4 bloomedPixel = (bloomSum / 25.0) + half4(colorTexture.sample(sampl, mappingVertex.textureCoordinate));
     
-    
-    
-    return bloomedPixel;
+    return half4(colorTexture.sample(sampl, mappingVertex.textureCoordinate));
 }
 
