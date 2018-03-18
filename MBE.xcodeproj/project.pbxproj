@@ -82,6 +82,13 @@
 			path = Builder;
 			sourceTree = "<group>";
 		};
+		60EEBCDB205ED97B00D2EEDA /* Model */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
 		9F066B5E1FACE10C00AF820A = {
 			isa = PBXGroup;
 			children = (
@@ -149,6 +156,7 @@
 		9F2D391D1FBC8E7F00F7578F /* Renderer */ = {
 			isa = PBXGroup;
 			children = (
+				60EEBCDB205ED97B00D2EEDA /* Model */,
 				60EEBCD7205DAC7300D2EEDA /* Builder */,
 				60EEBCD6205D713100D2EEDA /* ShaderTypes.h */,
 				9F066B881FACF56800AF820A /* Shaders.metal */,

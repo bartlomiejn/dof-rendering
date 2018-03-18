@@ -16,15 +16,19 @@ typedef struct {
     float4 color;
 } MetalVertex;
 typedef struct {
-    float4x4 modelViewProjectionMatrix;
+    float4x4 modelMatrix;
+    float4x4 viewMatrix;
+    float4x4 projectionMatrix;
 } RenderObjectUniforms;
 
 vertex MetalVertex
 map_vertices(device MetalVertex *inputVerts [[buffer(0)]],
              constant RenderObjectUniforms *uniforms [[buffer(1)]],
              uint vid [[vertex_id]]) {
+    float4x4 mvpMatrix = uniforms->projectionMatrix * (uniforms->viewMatrix * uniforms->modelMatrix);
+    
     MetalVertex outputVert;
-    outputVert.position = uniforms->modelViewProjectionMatrix * inputVerts[vid].position;
+    outputVert.position = mvpMatrix * inputVerts[vid].position;
     outputVert.color = inputVerts[vid].color;
     return outputVert;
 }
@@ -69,14 +73,19 @@ constexpr sampler sampl(address::clamp_to_zero, filter::linear, coord::normalize
  */
 fragment half4
 bloom_texture(TextureMappingVertex mappingVertex [[stage_in]],
-               texture2d<float, access::sample> texture [[texture(0)]]) {
+              texture2d<float, access::sample> colorTexture [[texture(0)]],
+              texture2d<float, access::sample> depthTexture [[texture(1)]]) {
     half4 bloomSum(0.0, 0.0, 0.0, 0.0);
     for (int i = -2; i <= 2; i++) {
         for (int j = -2; i <= 2; i++) {
             float2 offset = float2(i, j) * float2(0.005, 0.005);
-            bloomSum += half4(texture.sample(sampl, mappingVertex.textureCoordinate + offset));
+            bloomSum += half4(colorTexture.sample(sampl, mappingVertex.textureCoordinate + offset));
         }
     }
-    return (bloomSum / 25.0) + half4(texture.sample(sampl, mappingVertex.textureCoordinate));
+    half4 bloomedPixel = (bloomSum / 25.0) + half4(colorTexture.sample(sampl, mappingVertex.textureCoordinate));
+    
+    
+    
+    return bloomedPixel;
 }
 
