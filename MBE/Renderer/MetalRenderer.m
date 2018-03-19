@@ -49,6 +49,7 @@ typedef struct {
 @property (strong) id<MTLTexture> depthTexture;
 @property (strong) id<MTLTexture> inFocusColorTexture;
 @property (strong) id<MTLTexture> outOfFocusColorTexture;
+@property (strong) id<MTLTexture> blurredOutOfFocusColorTexture;
 @property (strong) id<MTLDepthStencilState> depthStencilState;
 @property (strong) dispatch_semaphore_t displaySemaphore;
 @property (assign) NSInteger bufferIndex;
@@ -110,9 +111,9 @@ typedef struct {
     scope.label = @"Capture Scope";
     [scope beginScope];
     [self drawObjectsInView:view withCommandBuffer:commandBuffer];
-    [self maskInFocusInView:view withCommandBuffer:commandBuffer];
-    [self maskOutOfFocusInView:view withCommandBuffer:commandBuffer];
-    [self applyHorizontalBlurOnOutOfFocusTextureInView:view withCommandBuffer:commandBuffer];
+    [self maskInFocusToTextureInView:view withCommandBuffer:commandBuffer];
+    [self maskOutOfFocusToTextureInView:view withCommandBuffer:commandBuffer];
+    [self blurHorizontallyOnOutOfFocusTextureInView:view withCommandBuffer:commandBuffer];
     [commandBuffer presentDrawable:view.currentDrawable];
     [scope endScope];
     
@@ -129,12 +130,18 @@ typedef struct {
     }
     if (self.inFocusColorTexture.width != drawableSize.width
         || self.inFocusColorTexture.height != drawableSize.height) {
-        self.inFocusColorTexture = [self readAndRenderTargetUsageTextureOfSize:drawableSize format:MTLPixelFormatBGRA8Unorm];
+        self.inFocusColorTexture = [self readAndRenderTargetUsageTextureOfSize:drawableSize
+                                                                        format:MTLPixelFormatBGRA8Unorm];
     }
     if (self.outOfFocusColorTexture.width != drawableSize.width
         || self.outOfFocusColorTexture.height != drawableSize.height) {
         self.outOfFocusColorTexture = [self readAndRenderTargetUsageTextureOfSize:drawableSize
                                                                       format:MTLPixelFormatBGRA8Unorm];
+    }
+    if (self.blurredOutOfFocusColorTexture.width != drawableSize.width
+        || self.blurredOutOfFocusColorTexture.height != drawableSize.height) {
+        self.blurredOutOfFocusColorTexture = [self readAndRenderTargetUsageTextureOfSize:drawableSize
+                                                                           format:MTLPixelFormatBGRA8Unorm];
     }
 }
 
@@ -164,7 +171,7 @@ typedef struct {
     [encoder endEncoding];
 }
 
--(void)maskInFocusInView:(MetalView *)view withCommandBuffer:(id<MTLCommandBuffer>)commandBuffer {
+-(void)maskInFocusToTextureInView:(MetalView *)view withCommandBuffer:(id<MTLCommandBuffer>)commandBuffer {
     MTLRenderPassDescriptor *descriptor
         = [self.passDescriptorBuilder outputToColorTextureDescriptorOfSize:view.metalLayer.drawableSize
                                                                 clearColor:view.clearColor
@@ -178,7 +185,7 @@ typedef struct {
     [encoder endEncoding];
 }
 
--(void)maskOutOfFocusInView:(MetalView *)view withCommandBuffer:(id<MTLCommandBuffer>)commandBuffer {
+-(void)maskOutOfFocusToTextureInView:(MetalView *)view withCommandBuffer:(id<MTLCommandBuffer>)commandBuffer {
     MTLRenderPassDescriptor *descriptor
         = [self.passDescriptorBuilder outputToColorTextureDescriptorOfSize:view.metalLayer.drawableSize
                                                                  clearColor:view.clearColor
@@ -192,17 +199,17 @@ typedef struct {
     [encoder endEncoding];
 }
 
--(void)applyHorizontalBlurOnOutOfFocusTextureInView:(MetalView *)view
+-(void)blurHorizontallyOnOutOfFocusTextureInView:(MetalView *)view
                                    withCommandBuffer:(id<MTLCommandBuffer>)commandBuffer {
     MTLRenderPassDescriptor *descriptor
         = [self.passDescriptorBuilder outputToColorTextureDescriptorOfSize:view.metalLayer.drawableSize
                                                                 clearColor:view.clearColor
-                                                               withTexture:self.outOfFocusColorTexture];
+                                                               withTexture:view.currentDrawable.texture];
     id<MTLRenderCommandEncoder> encoder = [commandBuffer renderCommandEncoderWithDescriptor:descriptor];
     [encoder setLabel:@"Horizontal Blur Out Of Focus Encoder"];
     [encoder setRenderPipelineState:_renderStateProvider.applyHorizontalBlurFieldPipelineState];
     [encoder setFragmentBuffer:self.gaussianBlurUniforms offset:0 atIndex:0];
-    [encoder setFragmentTexture:self.colorTexture atIndex:0];
+    [encoder setFragmentTexture:self.outOfFocusColorTexture atIndex:0];
     [encoder setFragmentTexture:self.depthTexture atIndex:1];
     [encoder drawPrimitives:MTLPrimitiveTypeTriangleStrip vertexStart:0 vertexCount:4];
     [encoder endEncoding];
