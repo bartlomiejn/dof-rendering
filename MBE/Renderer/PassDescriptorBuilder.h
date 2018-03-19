@@ -11,9 +11,11 @@
 #import <Metal/Metal.h>
 
 @interface PassDescriptorBuilder : NSObject
--(MTLRenderPassDescriptor *)renderObjectsPassDescriptorForView:(MetalView *)view
-                                            outputColorTexture:(id<MTLTexture>)colorTexture
-                                            outputDepthTexture:(id<MTLTexture>)depthTexture;
--(MTLRenderPassDescriptor *)outputToColorTextureDescriptorForView:(MetalView *)view
-                                                      withTexture:(id<MTLTexture>)colorTexture;
+-(MTLRenderPassDescriptor *)renderObjectsPassDescriptorOfSize:(CGSize)size
+                                                   clearColor:(MTLClearColor)clearColor
+                                           outputColorTexture:(id<MTLTexture>)colorTexture
+                                           outputDepthTexture:(id<MTLTexture>)depthTexture;
+-(MTLRenderPassDescriptor *)outputToColorTextureDescriptorOfSize:(CGSize)size
+                                                      clearColor:(MTLClearColor)clearColor
+                                                     withTexture:(id<MTLTexture>)colorTexture;
 @end

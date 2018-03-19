@@ -13,32 +13,34 @@
 
 @implementation PassDescriptorBuilder
 
--(MTLRenderPassDescriptor *)renderObjectsPassDescriptorForView:(MetalView *)view
-                                            outputColorTexture:(id<MTLTexture>)colorTexture
-                                            outputDepthTexture:(id<MTLTexture>)depthTexture {
+-(MTLRenderPassDescriptor *)renderObjectsPassDescriptorOfSize:(CGSize)size
+                                                   clearColor:(MTLClearColor)clearColor
+                                           outputColorTexture:(id<MTLTexture>)colorTexture
+                                           outputDepthTexture:(id<MTLTexture>)depthTexture {
     MTLRenderPassDescriptor *descriptor = [MTLRenderPassDescriptor renderPassDescriptor];
     descriptor.colorAttachments[0].texture = colorTexture;
-    descriptor.colorAttachments[0].clearColor = view.clearColor;
+    descriptor.colorAttachments[0].clearColor = clearColor;
     descriptor.colorAttachments[0].loadAction = MTLLoadActionClear;
     descriptor.colorAttachments[0].storeAction = MTLStoreActionStore;
     descriptor.depthAttachment.texture = depthTexture;
     descriptor.depthAttachment.clearDepth = 1.0;
     descriptor.depthAttachment.loadAction = MTLLoadActionClear;
     descriptor.depthAttachment.storeAction = MTLStoreActionStore;
-    descriptor.renderTargetWidth = view.metalLayer.drawableSize.width;
-    descriptor.renderTargetHeight = view.metalLayer.drawableSize.height;
+    descriptor.renderTargetWidth = size.width;
+    descriptor.renderTargetHeight = size.height;
     return descriptor;
 }
 
--(MTLRenderPassDescriptor *)outputToColorTextureDescriptorForView:(MetalView *)view
-                                                      withTexture:(id<MTLTexture>)colorTexture {
+-(MTLRenderPassDescriptor *)outputToColorTextureDescriptorOfSize:(CGSize)size
+                                                      clearColor:(MTLClearColor)clearColor
+                                                     withTexture:(id<MTLTexture>)colorTexture {
     MTLRenderPassDescriptor *descriptor = [MTLRenderPassDescriptor renderPassDescriptor];
     descriptor.colorAttachments[0].texture = colorTexture;
-    descriptor.colorAttachments[0].clearColor = view.clearColor;
+    descriptor.colorAttachments[0].clearColor = clearColor;
     descriptor.colorAttachments[0].storeAction = MTLStoreActionStore;
     descriptor.colorAttachments[0].loadAction = MTLLoadActionLoad;
-    descriptor.renderTargetWidth = view.metalLayer.drawableSize.width;
-    descriptor.renderTargetHeight = view.metalLayer.drawableSize.height;
+    descriptor.renderTargetWidth = size.width;
+    descriptor.renderTargetHeight = size.height;
     return descriptor;
 }
 

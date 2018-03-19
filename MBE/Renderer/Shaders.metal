@@ -87,3 +87,19 @@ mask_outoffocus_field(TextureMappingVertex mappingVertex [[stage_in]],
     return half4(colorFrag);
 }
 
+typedef struct {
+    float2 imageDimensions;
+    float blurRadius;
+} GaussianBlurUniforms;
+
+/**
+ Applies horizontal gaussian blur to texture.
+ */
+fragment half4
+horizontal_gaussian_blur(TextureMappingVertex mappingVertex [[stage_in]],
+                         constant GaussianBlurUniforms *uniforms [[buffer(0)]],
+                         texture2d<float, access::sample> colorTexture [[texture(0)]],
+                         texture2d<float, access::sample> depthTexture [[texture(1)]]) {
+    return half4(colorTexture.sample(sampl, mappingVertex.textureCoordinate));
+}
+
