@@ -1,7 +1,9 @@
 # MBE
 
-Repository for learning Metal following Metal By Example (http://metalbyexample.com) book by Warren Moore.
+- Loading of OBJ model files
+- Rendering of OBJ model files
+- Translation, rotation and scale animation of models
+- Masking of out of / in focus parts of image
+- Horizontal gaussian blur of out of focus parts
 
-- Rendering in 3D
-- Loading and rendering of OBJ model files
-- Bloom filter applied to obj model drawing output
+WIP
