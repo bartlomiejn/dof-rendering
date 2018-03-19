@@ -88,8 +88,8 @@ mask_outoffocus_field(TextureMappingVertex mappingVertex [[stage_in]],
 }
 
 typedef struct {
-    float2 imageDimensions;
     float blurRadius;
+    float2 imageDimensions;
 } GaussianBlurUniforms;
 
 /**
@@ -100,6 +100,20 @@ horizontal_gaussian_blur(TextureMappingVertex mappingVertex [[stage_in]],
                          constant GaussianBlurUniforms *uniforms [[buffer(0)]],
                          texture2d<float, access::sample> colorTexture [[texture(0)]],
                          texture2d<float, access::sample> depthTexture [[texture(1)]]) {
-    return half4(colorTexture.sample(sampl, mappingVertex.textureCoordinate));
+    float2 texCoord = mappingVertex.textureCoordinate;
+    float4 sum = float4(0.0);
+    float blurStep = uniforms->blurRadius / uniforms->imageDimensions.x;
+    sum += colorTexture.sample(sampl, float2(texCoord.x - 4.0*blurStep, texCoord.y) * 0.0162162162);
+    sum += colorTexture.sample(sampl, float2(texCoord.x - 3.0*blurStep, texCoord.y) * 0.0540540541);
+    sum += colorTexture.sample(sampl, float2(texCoord.x - 2.0*blurStep, texCoord.y) * 0.1216216216);
+    sum += colorTexture.sample(sampl, float2(texCoord.x - 1.0*blurStep, texCoord.y) * 0.1945945946);
+    sum += colorTexture.sample(sampl, texCoord * 0.2270270270);
+    sum += colorTexture.sample(sampl, float2(texCoord.x + 1.0*blurStep, texCoord.y) * 0.1945945946);
+    sum += colorTexture.sample(sampl, float2(texCoord.x + 2.0*blurStep, texCoord.y) * 0.1216216216);
+    sum += colorTexture.sample(sampl, float2(texCoord.x + 3.0*blurStep, texCoord.y) * 0.0540540541);
+    sum += colorTexture.sample(sampl, float2(texCoord.x + 4.0*blurStep, texCoord.y) * 0.0162162162);
+    half4 frag = half4(colorTexture.sample(sampl, texCoord) * sum);
+    frag.a = 1.0;
+    return frag;
 }
 

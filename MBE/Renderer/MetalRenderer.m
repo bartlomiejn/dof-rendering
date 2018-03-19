@@ -21,20 +21,20 @@ typedef uint16_t MetalIndex;
 const MTLIndexType MetalIndexType = MTLIndexTypeUInt16;
 static const NSInteger inFlightBufferCount = 3;
 
-typedef struct __attribute((packed)) {
-    vector_float4 position;
-    vector_float4 color;
+typedef struct {
+    simd_float4 position;
+    simd_float4 color;
 } MetalVertex;
 
-typedef struct __attribute((packed)) {
-    matrix_float4x4 modelMatrix;
-    matrix_float4x4 viewMatrix;
-    matrix_float4x4 projectionMatrix;
+typedef struct {
+    simd_float4x4 modelMatrix;
+    simd_float4x4 viewMatrix;
+    simd_float4x4 projectionMatrix;
 } RenderObjectUniforms;
 
-typedef struct __attribute((packed)) {
-    vector_float2 imageDimensions;
-    float blurRadius;
+typedef struct {
+    simd_float1 blurRadius;
+    simd_float2 imageDimensions;
 } GaussianBlurUniforms;
 
 @interface MetalRenderer ()
@@ -201,7 +201,7 @@ typedef struct __attribute((packed)) {
     id<MTLRenderCommandEncoder> encoder = [commandBuffer renderCommandEncoderWithDescriptor:descriptor];
     [encoder setLabel:@"Horizontal Blur Out Of Focus Encoder"];
     [encoder setRenderPipelineState:_renderStateProvider.applyHorizontalBlurFieldPipelineState];
-    [encoder setVertexBuffer:self.gaussianBlurUniforms offset:0 atIndex:0];
+    [encoder setFragmentBuffer:self.gaussianBlurUniforms offset:0 atIndex:0];
     [encoder setFragmentTexture:self.colorTexture atIndex:0];
     [encoder setFragmentTexture:self.depthTexture atIndex:1];
     [encoder drawPrimitives:MTLPrimitiveTypeTriangleStrip vertexStart:0 vertexCount:4];
@@ -215,11 +215,11 @@ typedef struct __attribute((packed)) {
     self.rotationZ = 0;
     
     GaussianBlurUniforms uniforms;
-    uniforms.blurRadius = 5.0;
     uniforms.imageDimensions = (vector_float2) {
         view.metalLayer.drawableSize.width,
         view.metalLayer.drawableSize.height
     };
+    uniforms.blurRadius = 5.0;
     memcpy(self.gaussianBlurUniforms.contents, &uniforms, sizeof(uniforms));
     
     const NSUInteger uniformBufferOffset = sizeof(RenderObjectUniforms) * self.bufferIndex;
