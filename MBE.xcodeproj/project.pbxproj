@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		60EEBCD5205C1D2D00D2EEDA /* teapot.obj in Resources */ = {isa = PBXBuildFile; fileRef = 60EEBCD4205C1D2D00D2EEDA /* teapot.obj */; };
 		60EEBCDA205DAC9700D2EEDA /* RenderStateProvider.m in Sources */ = {isa = PBXBuildFile; fileRef = 60EEBCD9205DAC9700D2EEDA /* RenderStateProvider.m */; };
+		60EEBCE12060142600D2EEDA /* PassDescriptorBuilder.m in Sources */ = {isa = PBXBuildFile; fileRef = 60EEBCE02060142600D2EEDA /* PassDescriptorBuilder.m */; };
 		9F066B6C1FACE10C00AF820A /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 9F066B6B1FACE10C00AF820A /* AppDelegate.m */; };
 		9F066B6F1FACE10C00AF820A /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9F066B6E1FACE10C00AF820A /* ViewController.m */; };
 		9F066B741FACE10C00AF820A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9F066B731FACE10C00AF820A /* Assets.xcassets */; };
@@ -32,6 +33,8 @@
 		60EEBCD6205D713100D2EEDA /* ShaderTypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ShaderTypes.h; sourceTree = "<group>"; };
 		60EEBCD8205DAC9700D2EEDA /* RenderStateProvider.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RenderStateProvider.h; sourceTree = "<group>"; };
 		60EEBCD9205DAC9700D2EEDA /* RenderStateProvider.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RenderStateProvider.m; sourceTree = "<group>"; };
+		60EEBCDF2060142600D2EEDA /* PassDescriptorBuilder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PassDescriptorBuilder.h; sourceTree = "<group>"; };
+		60EEBCE02060142600D2EEDA /* PassDescriptorBuilder.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = PassDescriptorBuilder.m; sourceTree = "<group>"; };
 		9F066B671FACE10C00AF820A /* MBE.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MBE.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9F066B6A1FACE10C00AF820A /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		9F066B6B1FACE10C00AF820A /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -73,22 +76,6 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		60EEBCD7205DAC7300D2EEDA /* Builder */ = {
-			isa = PBXGroup;
-			children = (
-				60EEBCD8205DAC9700D2EEDA /* RenderStateProvider.h */,
-				60EEBCD9205DAC9700D2EEDA /* RenderStateProvider.m */,
-			);
-			path = Builder;
-			sourceTree = "<group>";
-		};
-		60EEBCDB205ED97B00D2EEDA /* Model */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Model;
-			sourceTree = "<group>";
-		};
 		9F066B5E1FACE10C00AF820A = {
 			isa = PBXGroup;
 			children = (
@@ -109,8 +96,8 @@
 		9F066B691FACE10C00AF820A /* MBE */ = {
 			isa = PBXGroup;
 			children = (
-				9F843C041FC7210A00A15944 /* Model */,
 				9F2D39191FBC8BD400F7578F /* Auxiliary */,
+				9F843C041FC7210A00A15944 /* Model */,
 				9F2D391D1FBC8E7F00F7578F /* Renderer */,
 				9F2D39181FBC8BD000F7578F /* View */,
 				9F066B6A1FACE10C00AF820A /* AppDelegate.h */,
@@ -156,10 +143,12 @@
 		9F2D391D1FBC8E7F00F7578F /* Renderer */ = {
 			isa = PBXGroup;
 			children = (
-				60EEBCDB205ED97B00D2EEDA /* Model */,
-				60EEBCD7205DAC7300D2EEDA /* Builder */,
 				60EEBCD6205D713100D2EEDA /* ShaderTypes.h */,
 				9F066B881FACF56800AF820A /* Shaders.metal */,
+				60EEBCD8205DAC9700D2EEDA /* RenderStateProvider.h */,
+				60EEBCD9205DAC9700D2EEDA /* RenderStateProvider.m */,
+				60EEBCDF2060142600D2EEDA /* PassDescriptorBuilder.h */,
+				60EEBCE02060142600D2EEDA /* PassDescriptorBuilder.m */,
 				9F2D391E1FBC8E9D00F7578F /* MetalRenderer.h */,
 				9F2D391F1FBC8E9D00F7578F /* MetalRenderer.m */,
 			);
@@ -265,6 +254,7 @@
 				9F066B7A1FACE10C00AF820A /* main.m in Sources */,
 				9F066B6C1FACE10C00AF820A /* AppDelegate.m in Sources */,
 				9F843C101FC74D9E00A15944 /* OBJMesh.m in Sources */,
+				60EEBCE12060142600D2EEDA /* PassDescriptorBuilder.m in Sources */,
 				9F2D391C1FBC8C2400F7578F /* MathFunctions.m in Sources */,
 				9F066B891FACF56800AF820A /* Shaders.metal in Sources */,
 				9F066B8A1FB39F2F00AF820A /* MetalView.m in Sources */,

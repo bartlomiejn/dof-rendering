@@ -5,15 +5,15 @@
 //  Created by Bartłomiej Nowak on 15/11/2017.
 //  Copyright © 2017 Bartłomiej Nowak. All rights reserved.
 //
-//  Includes code taken from Metal By Example book repository at: https://github.com/metal-by-example/sample-code
-//
 
 #import "MetalRenderer.h"
 #import "MathFunctions.h"
 #import "OBJMesh.h"
 #import "ShaderTypes.h"
 #import "RenderStateProvider.h"
+#import "PassDescriptorBuilder.h"
 #import <simd/simd.h>
+#import <SpriteKit/SpriteKit.h>
 @import Metal;
 @import QuartzCore.CAMetalLayer;
 
@@ -32,14 +32,23 @@ typedef struct __attribute((packed)) {
     matrix_float4x4 projectionMatrix;
 } RenderObjectUniforms;
 
+typedef struct __attribute((packed)) {
+    vector_float2 textureDimensions;
+    float radius;
+} GaussianBlurUniforms;
+
 @interface MetalRenderer ()
 @property (strong) id<MTLDevice> device;
 @property (strong) OBJMesh *mesh;
-@property (strong) NSMutableArray<id<MTLBuffer>> *uniformBuffers;
 @property (strong) id<MTLCommandQueue> commandQueue;
+@property (strong, nonatomic) PassDescriptorBuilder *passDescriptorBuilder;
 @property (strong, nonatomic) RenderStateProvider *renderStateProvider;
-@property (strong) id<MTLTexture> renderObjectsTexture;
+@property (strong) NSMutableArray<id<MTLBuffer>> *drawObjectUniforms;
+@property (strong) id<MTLBuffer> gaussianBlurUniforms;
+@property (strong) id<MTLTexture> colorTexture;
 @property (strong) id<MTLTexture> depthTexture;
+@property (strong) id<MTLTexture> inFocusColorTexture;
+@property (strong) id<MTLTexture> outOfFocusColorTexture;
 @property (strong) id<MTLDepthStencilState> depthStencilState;
 @property (strong) dispatch_semaphore_t displaySemaphore;
 @property (assign) NSInteger bufferIndex;
@@ -51,32 +60,31 @@ typedef struct __attribute((packed)) {
 - (instancetype)initWithDevice:(id<MTLDevice>)device {
     self = [super init];
     if (self) {
-        _device = device;
-        _displaySemaphore = dispatch_semaphore_create(inFlightBufferCount);
-        _commandQueue = [_device newCommandQueue];
-        _renderStateProvider = [[RenderStateProvider alloc] initWithDevice:_device];
-        
-        int teapotCount = 2;
-        _uniformBuffers = [[NSMutableArray alloc] init];
+        self.device = device;
+        self.displaySemaphore = dispatch_semaphore_create(inFlightBufferCount);
+        self.commandQueue = [self.device newCommandQueue];
+        self.renderStateProvider = [[RenderStateProvider alloc] initWithDevice:self.device];
+        self.passDescriptorBuilder = [[PassDescriptorBuilder alloc] init];
+        int teapotCount = 3;
+        self.drawObjectUniforms = [[NSMutableArray alloc] init];
         for (int i = 0; i < teapotCount; i++) {
-            id<MTLBuffer> uniformBuffer = [_device newBufferWithLength:sizeof(RenderObjectUniforms) * inFlightBufferCount
-                                                               options:MTLResourceOptionCPUCacheModeDefault];
-            uniformBuffer.label = @"Uniforms";
-            [_uniformBuffers addObject:uniformBuffer];
+            id<MTLBuffer> buffer = [self.device newBufferWithLength:sizeof(RenderObjectUniforms) * inFlightBufferCount
+                                                            options:MTLResourceOptionCPUCacheModeDefault];
+            buffer.label = @"Uniforms";
+            [self.drawObjectUniforms addObject:buffer];
         }
     }
     return self;
 }
 
 - (void)setupMeshFromOBJGroup:(OBJGroup*)group {
-    _mesh = [[OBJMesh alloc] initWithGroup:group device:_device];
+    self.mesh = [[OBJMesh alloc] initWithGroup:group device:self.device];
 }
 
 #pragma mark - MetalViewDelegate
 
 - (void)drawInView:(MetalView *)view {
     dispatch_semaphore_wait(self.displaySemaphore, DISPATCH_TIME_FOREVER);
-    
     [self updateUniformsForView:view duration:view.frameDuration];
     
     id<MTLCommandBuffer> commandBuffer = [self.commandQueue commandBuffer];
@@ -88,27 +96,50 @@ typedef struct __attribute((packed)) {
     id<MTLCaptureScope> scope = [[MTLCaptureManager sharedCaptureManager] newCaptureScopeWithDevice:self.device];
     scope.label = @"Capture Scope";
     [scope beginScope];
-    
-    [self renderObjectsInView:view withCommandBuffer:commandBuffer];
-    [self applyBloomInView:view withCommandBuffer:commandBuffer];
+    [self drawObjectsInView:view withCommandBuffer:commandBuffer];
+    [self maskInFocusInView:view withCommandBuffer:commandBuffer];
+    [self maskOutOfFocusInView:view withCommandBuffer:commandBuffer];
     [commandBuffer presentDrawable:view.currentDrawable];
-    
     [scope endScope];
     
     [commandBuffer commit];
 }
 
-- (void)renderObjectsInView:(MetalView *)view withCommandBuffer:(id<MTLCommandBuffer>)commandBuffer {
-    MTLRenderPassDescriptor *descriptor = [self renderObjectsPassDescriptorForView:view];
+- (void)frameAdjustedForView:(MetalView *)view {
+    CGSize drawableSize = view.metalLayer.drawableSize;
+    if (self.colorTexture.width != drawableSize.width || self.colorTexture.height != drawableSize.height) {
+        self.colorTexture = [self readAndRenderTargetTextureOfSize:drawableSize format:MTLPixelFormatBGRA8Unorm];
+    }
+    if (self.depthTexture.width != drawableSize.width || self.depthTexture.height != drawableSize.height) {
+        self.depthTexture = [self readAndRenderTargetTextureOfSize:drawableSize format:MTLPixelFormatDepth32Float];
+    }
+    if (self.inFocusColorTexture.width != drawableSize.width
+        || self.inFocusColorTexture.height != drawableSize.height) {
+        self.inFocusColorTexture = [self readAndRenderTargetTextureOfSize:drawableSize format:MTLPixelFormatBGRA8Unorm];
+    }
+    if (self.outOfFocusColorTexture.width != drawableSize.width
+        || self.outOfFocusColorTexture.height != drawableSize.height) {
+        self.outOfFocusColorTexture = [self readAndRenderTargetTextureOfSize:drawableSize
+                                                                      format:MTLPixelFormatBGRA8Unorm];
+    }
+}
+
+
+- (void)drawObjectsInView:(MetalView *)view withCommandBuffer:(id<MTLCommandBuffer>)commandBuffer {
+    MTLRenderPassDescriptor *descriptor
+        = [self.passDescriptorBuilder renderObjectsPassDescriptorForView:view
+                                                       outputColorTexture:self.colorTexture
+                                                       outputDepthTexture:self.depthTexture];
     id<MTLRenderCommandEncoder> encoder = [commandBuffer renderCommandEncoderWithDescriptor:descriptor];
-    [encoder setRenderPipelineState:_renderStateProvider.renderObjectsPipelineState];
+    [encoder setLabel:@"DrawObjectsEncoder"];
+    [encoder setRenderPipelineState:_renderStateProvider.drawObjectsPipelineState];
     [encoder setDepthStencilState:_renderStateProvider.depthStencilState];
     [encoder setFrontFacingWinding:MTLWindingCounterClockwise];
     [encoder setCullMode:MTLCullModeBack];
     [encoder setVertexBuffer:self.mesh.vertexBuffer offset:0 atIndex:0];
     const NSUInteger uniformBufferOffset = sizeof(RenderObjectUniforms) * self.bufferIndex;
-    for (int i = 0; i < self.uniformBuffers.count; i++) {
-        [encoder setVertexBuffer:self.uniformBuffers[i] offset:uniformBufferOffset atIndex:1];
+    for (int i = 0; i < self.drawObjectUniforms.count; i++) {
+        [encoder setVertexBuffer:self.drawObjectUniforms[i] offset:uniformBufferOffset atIndex:1];
         [encoder drawIndexedPrimitives:MTLPrimitiveTypeTriangle
                             indexCount:[self.mesh.indexBuffer length] / sizeof(MetalIndex)
                              indexType:MetalIndexType
@@ -118,19 +149,29 @@ typedef struct __attribute((packed)) {
     [encoder endEncoding];
 }
 
-- (void)applyBloomInView:(MetalView *)view withCommandBuffer:(id<MTLCommandBuffer>)commandBuffer {
-    MTLRenderPassDescriptor *descriptor = [self applyBloomPassDescriptorForView:view];
+- (void)maskInFocusInView:(MetalView *)view withCommandBuffer:(id<MTLCommandBuffer>)commandBuffer {
+    MTLRenderPassDescriptor *descriptor
+        = [self.passDescriptorBuilder outputToColorTextureDescriptorForView:view withTexture:self.inFocusColorTexture];
     id<MTLRenderCommandEncoder> encoder = [commandBuffer renderCommandEncoderWithDescriptor:descriptor];
-    [encoder setRenderPipelineState:_renderStateProvider.applyBloomPipelineState];
-    [encoder setFragmentTexture:self.renderObjectsTexture atIndex:0];
+    [encoder setLabel:@"MaskInFocusEncoder"];
+    [encoder setRenderPipelineState:_renderStateProvider.maskFocusFieldPipelineState];
+    [encoder setFragmentTexture:self.colorTexture atIndex:0];
     [encoder setFragmentTexture:self.depthTexture atIndex:1];
     [encoder drawPrimitives:MTLPrimitiveTypeTriangleStrip vertexStart:0 vertexCount:4];
     [encoder endEncoding];
 }
 
-- (void)frameAdjustedForView:(MetalView *)view {
-    [self setupRenderObjectsTextureForView:view];
-    [self setupDepthTextureForView:view];
+- (void)maskOutOfFocusInView:(MetalView *)view withCommandBuffer:(id<MTLCommandBuffer>)commandBuffer {
+    MTLRenderPassDescriptor *descriptor
+        = [self.passDescriptorBuilder outputToColorTextureDescriptorForView:view
+                                                                withTexture:self.outOfFocusColorTexture];
+    id<MTLRenderCommandEncoder> encoder = [commandBuffer renderCommandEncoderWithDescriptor:descriptor];
+    [encoder setLabel:@"MaskOutOfFocusEncoder"];
+    [encoder setRenderPipelineState:_renderStateProvider.maskOutOfFocusFieldPipelineState];
+    [encoder setFragmentTexture:self.colorTexture atIndex:0];
+    [encoder setFragmentTexture:self.depthTexture atIndex:1];
+    [encoder drawPrimitives:MTLPrimitiveTypeTriangleStrip vertexStart:0 vertexCount:4];
+    [encoder endEncoding];
 }
 
 - (void)updateUniformsForView:(MetalView *)view duration:(NSTimeInterval)duration {
@@ -141,18 +182,26 @@ typedef struct __attribute((packed)) {
     
     const NSUInteger uniformBufferOffset = sizeof(RenderObjectUniforms) * self.bufferIndex;
     
-    for (int i = 0; i < _uniformBuffers.count; i++) {
+    for (int i = 0; i < self.drawObjectUniforms.count; i++) {
         RenderObjectUniforms uniforms;
         uniforms.modelMatrix = [self modelMatrixForTeapotIndex:i];
         uniforms.viewMatrix = [self viewMatrix];
         uniforms.projectionMatrix = [self projectionMatrixForView:view];
-        memcpy([self.uniformBuffers[i] contents] + uniformBufferOffset, &uniforms, sizeof(uniforms));
+        memcpy([self.drawObjectUniforms[i] contents] + uniformBufferOffset, &uniforms, sizeof(uniforms));
     }
 }
 
 - (matrix_float4x4)modelMatrixForTeapotIndex:(int)index {
-    const vector_float3 translation = { index*1, index*1.4, -index*6 };
+    vector_float3 translation;
+    if (index == 1) {
+        translation = (vector_float3){ 0, 0, 0 };
+    } else if (index == 2) {
+        translation = (vector_float3){ 0.8, 4.1, -20.0 };
+    } else {
+        translation = (vector_float3){ -0.7, -4.1, -3.0 };
+    }
     const matrix_float4x4 transMatrix = matrix_float4x4_translation(translation);
+    
     const vector_float3 xAxis = { 1, 0, 0 };
     const vector_float3 yAxis = { 0, 1, 0 };
     const vector_float3 zAxis = { 0, 0, 1 };
@@ -160,10 +209,18 @@ typedef struct __attribute((packed)) {
     const matrix_float4x4 yRot = matrix_float4x4_rotation(yAxis, self.rotationY);
     const matrix_float4x4 zRot = matrix_float4x4_rotation(zAxis, self.rotationZ);
     const matrix_float4x4 rotMatrix = matrix_multiply(matrix_multiply(xRot, yRot), zRot);
-    float scaleFactor = sinf(5 * self.time) * 0.5 + 3;
+    
+    float scaleFactor;
+    if (index == 1) {
+        scaleFactor = sinf(5 * self.time) * 0.5 + 3;
+    } else if (index == 2) {
+        scaleFactor = sinf(5 * self.time) * 0.5 + 6;
+    } else {
+        scaleFactor = sinf(5 * self.time) * 0.5 + 3;
+    }
     const matrix_float4x4 scaleMatrix = matrix_float4x4_uniform_scale(scaleFactor);
-    const matrix_float4x4 modelMatrix = matrix_multiply(matrix_multiply(transMatrix, rotMatrix), scaleMatrix);
-    return modelMatrix;
+    
+    return matrix_multiply(matrix_multiply(transMatrix, rotMatrix), scaleMatrix);
 }
 
 - (matrix_float4x4)viewMatrix {
@@ -182,57 +239,13 @@ typedef struct __attribute((packed)) {
     return projectionMatrix;
 }
 
-- (MTLRenderPassDescriptor *)renderObjectsPassDescriptorForView:(MetalView*)view {
-    MTLRenderPassDescriptor *passDescriptor = [MTLRenderPassDescriptor renderPassDescriptor];
-    passDescriptor.colorAttachments[0].texture = self.renderObjectsTexture;
-    passDescriptor.colorAttachments[0].clearColor = view.clearColor;
-    passDescriptor.colorAttachments[0].loadAction = MTLLoadActionClear;
-    passDescriptor.colorAttachments[0].storeAction = MTLStoreActionStore;
-    passDescriptor.depthAttachment.texture = self.depthTexture;
-    passDescriptor.depthAttachment.clearDepth = 1.0;
-    passDescriptor.depthAttachment.loadAction = MTLLoadActionClear;
-    passDescriptor.depthAttachment.storeAction = MTLStoreActionStore;
-    passDescriptor.renderTargetWidth = view.metalLayer.drawableSize.width;
-    passDescriptor.renderTargetHeight = view.metalLayer.drawableSize.height;
-    return passDescriptor;
-}
-
-- (MTLRenderPassDescriptor *)applyBloomPassDescriptorForView:(MetalView*)view {
-    MTLRenderPassDescriptor *passDescriptor = [MTLRenderPassDescriptor renderPassDescriptor];
-    passDescriptor.colorAttachments[0].texture = [view.currentDrawable texture];
-    passDescriptor.colorAttachments[0].clearColor = view.clearColor;
-    passDescriptor.colorAttachments[0].storeAction = MTLStoreActionStore;
-    passDescriptor.colorAttachments[0].loadAction = MTLLoadActionLoad;
-    passDescriptor.renderTargetWidth = view.metalLayer.drawableSize.width;
-    passDescriptor.renderTargetHeight = view.metalLayer.drawableSize.height;
-    return passDescriptor;
-}
-
-- (void)setupRenderObjectsTextureForView:(MetalView *)view {
-    CGSize drawableSize = view.metalLayer.drawableSize;
-    
-    if (self.renderObjectsTexture.width != drawableSize.width
-        || self.renderObjectsTexture.height != drawableSize.height) {
-        MTLTextureDescriptor *desc = [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:MTLPixelFormatBGRA8Unorm
-                                                                                        width:drawableSize.width
-                                                                                       height:drawableSize.height
-                                                                                    mipmapped:NO];
-        desc.usage = MTLTextureUsageRenderTarget & MTLTextureUsageShaderRead;
-        self.renderObjectsTexture = [self.device newTextureWithDescriptor:desc];
-    }
-}
-
-- (void)setupDepthTextureForView:(MetalView *)view {
-    CGSize drawableSize = view.metalLayer.drawableSize;
-    
-    if (self.depthTexture.width != drawableSize.width || self.depthTexture.height != drawableSize.height) {
-        MTLTextureDescriptor *desc = [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:MTLPixelFormatDepth32Float
-                                                                                        width:drawableSize.width
-                                                                                       height:drawableSize.height
-                                                                                    mipmapped:NO];
-        desc.usage = MTLTextureUsageRenderTarget & MTLTextureUsageShaderRead;
-        self.depthTexture = [self.device newTextureWithDescriptor:desc];
-    }
+-(id<MTLTexture>)readAndRenderTargetTextureOfSize:(CGSize)size format:(MTLPixelFormat)format {
+    MTLTextureDescriptor *desc = [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:format
+                                                                                    width:size.width
+                                                                                   height:size.height
+                                                                                mipmapped:NO];
+    desc.usage = MTLTextureUsageRenderTarget & MTLTextureUsageShaderRead;
+    return [self.device newTextureWithDescriptor:desc];
 }
 
 @end

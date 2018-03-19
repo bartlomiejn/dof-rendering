@@ -1,5 +1,5 @@
 //
-//  RenderPipelineStateBuilder.h
+//  RenderStateProvider.h
 //  MBE
 //
 //  Created by Bartłomiej Nowak on 17.03.2018.
@@ -10,8 +10,9 @@
 #import <Metal/Metal.h>
 
 @interface RenderStateProvider : NSObject
-@property (strong, nonatomic) id<MTLRenderPipelineState> renderObjectsPipelineState;
-@property (strong, nonatomic) id<MTLRenderPipelineState> applyBloomPipelineState;
+@property (strong, nonatomic) id<MTLRenderPipelineState> drawObjectsPipelineState;
+@property (strong, nonatomic) id<MTLRenderPipelineState> maskFocusFieldPipelineState;
+@property (strong, nonatomic) id<MTLRenderPipelineState> maskOutOfFocusFieldPipelineState;
 @property (strong, nonatomic) id<MTLDepthStencilState> depthStencilState;
 -(instancetype)initWithDevice:(id<MTLDevice>)device;
 @end

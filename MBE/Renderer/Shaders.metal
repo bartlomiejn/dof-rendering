@@ -26,7 +26,6 @@ map_vertices(device MetalVertex *inputVerts [[buffer(0)]],
              constant RenderObjectUniforms *uniforms [[buffer(1)]],
              uint vid [[vertex_id]]) {
     float4x4 mvpMatrix = uniforms->projectionMatrix * (uniforms->viewMatrix * uniforms->modelMatrix);
-    
     MetalVertex outputVert;
     outputVert.position = mvpMatrix * inputVerts[vid].position;
     outputVert.color = inputVerts[vid].color;
@@ -38,8 +37,6 @@ color_passthrough(MetalVertex inputVert [[stage_in]]) {
     return half4(inputVert.color);
 }
 
-#pragma mark - Bloom
-
 typedef struct {
     float4 renderedCoordinate [[position]];
     float2 textureCoordinate;
@@ -50,7 +47,6 @@ typedef struct {
  */
 vertex TextureMappingVertex
 map_texture(unsigned int vertex_id [[ vertex_id ]]) {
-    
     float4x4 renderedCoordinates = float4x4(float4(-1.0, -1.0, 0.0, 1.0),
                                             float4( 1.0, -1.0, 0.0, 1.0),
                                             float4(-1.0,  1.0, 0.0, 1.0),
@@ -59,7 +55,6 @@ map_texture(unsigned int vertex_id [[ vertex_id ]]) {
                                            float2(1.0, 1.0),
                                            float2(0.0, 0.0),
                                            float2(1.0, 0.0));
-    
     TextureMappingVertex outVertex;
     outVertex.renderedCoordinate = renderedCoordinates[vertex_id];
     outVertex.textureCoordinate = textureCoordinates[vertex_id];
@@ -69,22 +64,26 @@ map_texture(unsigned int vertex_id [[ vertex_id ]]) {
 constexpr sampler sampl(address::clamp_to_zero, filter::linear, coord::normalized);
 
 /**
- Adds DoF effect from provided color and depth texture.
+ Masks RGB near field using inverted D texture as mask.
  */
 fragment half4
-dof_blur_texture(TextureMappingVertex mappingVertex [[stage_in]],
+mask_focus_field(TextureMappingVertex mappingVertex [[stage_in]],
                  texture2d<float, access::sample> colorTexture [[texture(0)]],
                  texture2d<float, access::sample> depthTexture [[texture(1)]]) {
-//    Bloom code
-//    half4 bloomSum(0.0, 0.0, 0.0, 0.0);
-//    for (int i = -2; i <= 2; i++) {
-//        for (int j = -2; i <= 2; i++) {
-//            float2 offset = float2(i, j) * float2(0.005, 0.005);
-//            bloomSum += half4(colorTexture.sample(sampl, mappingVertex.textureCoordinate + offset));
-//        }
-//    }
-//    half4 bloomedPixel = (bloomSum / 25.0) + half4(colorTexture.sample(sampl, mappingVertex.textureCoordinate));
-    
-    return half4(colorTexture.sample(sampl, mappingVertex.textureCoordinate));
+    float4 colorFrag = colorTexture.sample(sampl, mappingVertex.textureCoordinate);
+    colorFrag.a = (1.0 - depthTexture.sample(sampl, mappingVertex.textureCoordinate).r);
+    return half4(colorFrag);
+}
+
+/**
+ Masks RGB far field using D texture as mask.
+ */
+fragment half4
+mask_outoffocus_field(TextureMappingVertex mappingVertex [[stage_in]],
+                      texture2d<float, access::sample> colorTexture [[texture(0)]],
+                      texture2d<float, access::sample> depthTexture [[texture(1)]]) {
+    float4 colorFrag = colorTexture.sample(sampl, mappingVertex.textureCoordinate);
+    colorFrag.a = depthTexture.sample(sampl, mappingVertex.textureCoordinate).r;
+    return half4(colorFrag);
 }
 

@@ -1,5 +1,5 @@
 //
-//  RenderPipelineStateBuilder.m
+//  RenderStateProvider.m
 //  MBE
 //
 //  Created by Bartłomiej Nowak on 17.03.2018.
@@ -16,14 +16,15 @@
 -(instancetype)initWithDevice:(id<MTLDevice>)device {
     self = [super init];
     if (self) {
-        _renderObjectsPipelineState = [self renderObjectsPipelineStateOnDevice:device];
-        _applyBloomPipelineState = [self applyBloomPipelineStateOnDevice:device];
-        _depthStencilState = [self depthStencilStateOnDevice:device];
+        self.drawObjectsPipelineState = [self drawObjectsPipelineStateOnDevice:device];
+        self.maskFocusFieldPipelineState = [self maskFocusFieldPipelineStateOnDevice:device];
+        self.maskOutOfFocusFieldPipelineState = [self maskOutOfFocusFieldPipelineStateOnDevice:device];
+        self.depthStencilState = [self depthStencilStateOnDevice:device];
     }
     return self;
 }
 
--(id<MTLRenderPipelineState>)renderObjectsPipelineStateOnDevice:(id<MTLDevice>)device {
+-(id<MTLRenderPipelineState>)drawObjectsPipelineStateOnDevice:(id<MTLDevice>)device {
     id<MTLLibrary> library = [device newDefaultLibrary];
     MTLRenderPipelineDescriptor *renderObjectsDescriptor = [MTLRenderPipelineDescriptor new];
     renderObjectsDescriptor.vertexFunction = [library newFunctionWithName:@"map_vertices"];
@@ -33,14 +34,31 @@
     return [self createRenderPipelineStateWith:renderObjectsDescriptor onDevice:device];
 }
 
--(id<MTLRenderPipelineState>)applyBloomPipelineStateOnDevice:(id<MTLDevice>)device {
+-(id<MTLRenderPipelineState>)maskFocusFieldPipelineStateOnDevice:(id<MTLDevice>)device {
     id<MTLLibrary> library = [device newDefaultLibrary];
     MTLRenderPipelineDescriptor *bloomDescriptor = [MTLRenderPipelineDescriptor new];
     bloomDescriptor.vertexFunction = [library newFunctionWithName:@"map_texture"];
-    bloomDescriptor.fragmentFunction = [library newFunctionWithName:@"dof_blur_texture"];
+    bloomDescriptor.fragmentFunction = [library newFunctionWithName:@"mask_focus_field"];
     bloomDescriptor.colorAttachments[0].pixelFormat = MTLPixelFormatBGRA8Unorm;
     bloomDescriptor.depthAttachmentPixelFormat = MTLPixelFormatInvalid;
     return [self createRenderPipelineStateWith:bloomDescriptor onDevice:device];
+}
+
+-(id<MTLRenderPipelineState>)maskOutOfFocusFieldPipelineStateOnDevice:(id<MTLDevice>)device {
+    id<MTLLibrary> library = [device newDefaultLibrary];
+    MTLRenderPipelineDescriptor *bloomDescriptor = [MTLRenderPipelineDescriptor new];
+    bloomDescriptor.vertexFunction = [library newFunctionWithName:@"map_texture"];
+    bloomDescriptor.fragmentFunction = [library newFunctionWithName:@"mask_outoffocus_field"];
+    bloomDescriptor.colorAttachments[0].pixelFormat = MTLPixelFormatBGRA8Unorm;
+    bloomDescriptor.depthAttachmentPixelFormat = MTLPixelFormatInvalid;
+    return [self createRenderPipelineStateWith:bloomDescriptor onDevice:device];
+}
+
+-(id<MTLDepthStencilState>)depthStencilStateOnDevice:(id<MTLDevice>)device {
+    MTLDepthStencilDescriptor *depthStencilDescriptor = [MTLDepthStencilDescriptor new];
+    depthStencilDescriptor.depthCompareFunction = MTLCompareFunctionLess;
+    depthStencilDescriptor.depthWriteEnabled = YES;
+    return [device newDepthStencilStateWithDescriptor:depthStencilDescriptor];
 }
 
 -(id<MTLRenderPipelineState>)createRenderPipelineStateWith:(MTLRenderPipelineDescriptor*)descriptor
@@ -54,11 +72,5 @@
     return pipelineState;
 }
 
--(id<MTLDepthStencilState>)depthStencilStateOnDevice:(id<MTLDevice>)device {
-    MTLDepthStencilDescriptor *depthStencilDescriptor = [MTLDepthStencilDescriptor new];
-    depthStencilDescriptor.depthCompareFunction = MTLCompareFunctionLess;
-    depthStencilDescriptor.depthWriteEnabled = YES;
-    return [device newDepthStencilStateWithDescriptor:depthStencilDescriptor];
-}
 
 @end
