@@ -17,5 +17,5 @@
                                            outputDepthTexture:(id<MTLTexture>)depthTexture;
 -(MTLRenderPassDescriptor *)outputToColorTextureDescriptorOfSize:(CGSize)size
                                                       clearColor:(MTLClearColor)clearColor
-                                                     withTexture:(id<MTLTexture>)colorTexture;
+                                                     toTexture:(id<MTLTexture>)colorTexture;
 @end

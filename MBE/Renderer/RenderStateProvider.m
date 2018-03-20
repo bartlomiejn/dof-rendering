@@ -13,13 +13,15 @@
 
 @implementation RenderStateProvider
 
+#pragma mark - Public
+
 -(instancetype)initWithDevice:(id<MTLDevice>)device {
     self = [super init];
     if (self) {
         self.drawObjectsPipelineState = [self drawObjectsPipelineStateOnDevice:device];
         self.maskFocusFieldPipelineState = [self maskFocusFieldPipelineStateOnDevice:device];
         self.maskOutOfFocusFieldPipelineState = [self maskOutOfFocusFieldPipelineStateOnDevice:device];
-        self.applyHorizontalBlurFieldPipelineState = [self applyHorizontalBlurPipelineStateOnDevice:device];
+        self.applyGaussianBlurFieldPipelineState = [self applyGaussianBlurPipelineStateOnDevice:device];
         self.depthStencilState = [self depthStencilStateOnDevice:device];
     }
     return self;
@@ -37,36 +39,21 @@
 }
 
 -(id<MTLRenderPipelineState>)maskFocusFieldPipelineStateOnDevice:(id<MTLDevice>)device {
-    id<MTLLibrary> library = [device newDefaultLibrary];
-    MTLRenderPipelineDescriptor *descriptor = [MTLRenderPipelineDescriptor new];
-    descriptor.label = @"Mask Focus Pipeline State";
-    descriptor.vertexFunction = [library newFunctionWithName:@"map_texture"];
-    descriptor.fragmentFunction = [library newFunctionWithName:@"mask_focus_field"];
-    descriptor.colorAttachments[0].pixelFormat = MTLPixelFormatBGRA8Unorm;
-    descriptor.depthAttachmentPixelFormat = MTLPixelFormatInvalid;
-    return [self createRenderPipelineStateWith:descriptor onDevice:device];
+    return [self BGRA8UNormProjectTexturePipelineStateWithLabel:@"Mask Focus Pipeline State"
+                                                       onDevice:device
+                                               fragmentFunction:@"mask_focus_field"];
 }
 
 -(id<MTLRenderPipelineState>)maskOutOfFocusFieldPipelineStateOnDevice:(id<MTLDevice>)device {
-    id<MTLLibrary> library = [device newDefaultLibrary];
-    MTLRenderPipelineDescriptor *descriptor = [MTLRenderPipelineDescriptor new];
-    descriptor.label = @"Mask Out Of Focus Pipeline State";
-    descriptor.vertexFunction = [library newFunctionWithName:@"map_texture"];
-    descriptor.fragmentFunction = [library newFunctionWithName:@"mask_outoffocus_field"];
-    descriptor.colorAttachments[0].pixelFormat = MTLPixelFormatBGRA8Unorm;
-    descriptor.depthAttachmentPixelFormat = MTLPixelFormatInvalid;
-    return [self createRenderPipelineStateWith:descriptor onDevice:device];
+    return [self BGRA8UNormProjectTexturePipelineStateWithLabel:@"Mask Out Of Focus Pipeline State"
+                                                       onDevice:device
+                                               fragmentFunction:@"mask_outoffocus_field"];
 }
 
--(id<MTLRenderPipelineState>)applyHorizontalBlurPipelineStateOnDevice:(id<MTLDevice>)device {
-    id<MTLLibrary> library = [device newDefaultLibrary];
-    MTLRenderPipelineDescriptor *descriptor = [MTLRenderPipelineDescriptor new];
-    descriptor.label = @"Horizontal Blur Pipeline State";
-    descriptor.vertexFunction = [library newFunctionWithName:@"map_texture"];
-    descriptor.fragmentFunction = [library newFunctionWithName:@"horizontal_gaussian_blur"];
-    descriptor.colorAttachments[0].pixelFormat = MTLPixelFormatBGRA8Unorm;
-    descriptor.depthAttachmentPixelFormat = MTLPixelFormatInvalid;
-    return [self createRenderPipelineStateWith:descriptor onDevice:device];
+-(id<MTLRenderPipelineState>)applyGaussianBlurPipelineStateOnDevice:(id<MTLDevice>)device {
+    return [self BGRA8UNormProjectTexturePipelineStateWithLabel:@"Gaussian Blur Pipeline State"
+                                                       onDevice:device
+                                               fragmentFunction:@"gaussian_blur"];
 }
 
 -(id<MTLDepthStencilState>)depthStencilStateOnDevice:(id<MTLDevice>)device {
@@ -74,6 +61,21 @@
     depthStencilDescriptor.depthCompareFunction = MTLCompareFunctionLess;
     depthStencilDescriptor.depthWriteEnabled = YES;
     return [device newDepthStencilStateWithDescriptor:depthStencilDescriptor];
+}
+
+#pragma mark - Private
+
+-(id<MTLRenderPipelineState>)BGRA8UNormProjectTexturePipelineStateWithLabel:(NSString*)label
+                                                                   onDevice:(id<MTLDevice>)device
+                                                           fragmentFunction:(NSString*)fragFunctionName {
+    id<MTLLibrary> library = [device newDefaultLibrary];
+    MTLRenderPipelineDescriptor *descriptor = [MTLRenderPipelineDescriptor new];
+    descriptor.label = label;
+    descriptor.vertexFunction = [library newFunctionWithName:@"project_texture"];
+    descriptor.fragmentFunction = [library newFunctionWithName:fragFunctionName];
+    descriptor.colorAttachments[0].pixelFormat = MTLPixelFormatBGRA8Unorm;
+    descriptor.depthAttachmentPixelFormat = MTLPixelFormatInvalid;
+    return [self createRenderPipelineStateWith:descriptor onDevice:device];
 }
 
 -(id<MTLRenderPipelineState>)createRenderPipelineStateWith:(MTLRenderPipelineDescriptor*)descriptor
@@ -86,6 +88,5 @@
     }
     return pipelineState;
 }
-
 
 @end
