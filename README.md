@@ -1,9 +1,11 @@
-# Experiments with Metal / MLSL
+# DoF rendering
 
 - Loading of OBJ model files
 - Rendering of OBJ model files
 - Translation, rotation and scale animation of models
 - Masking of out of / in focus parts of image
-- Approximate 9-tap gaussian blur of out of focus parts
+- Composition of both elements into end image
 
-WIP
+Implementation is kind of naive and slow for now - it's the first time i'm writing GPU code. Optimizations are currently WIP
+
+![Example image](https://raw.githubusercontent.com/bartlomiejn/dof-rendering-metal/master/dof_rendering.gif)
