@@ -69,9 +69,9 @@ constexpr sampler sampl(address::clamp_to_zero, filter::linear, coord::normalize
 fragment half4
 mask_focus_field(TextureMappingVertex mappingVertex [[stage_in]],
                  texture2d<float, access::sample> colorTexture [[texture(0)]],
-                 texture2d<float, access::sample> depthTexture [[texture(1)]]) {
+                 depth2d<float, access::sample> depthTexture [[texture(1)]]) {
     float4 colorFrag = colorTexture.sample(sampl, mappingVertex.textureCoordinate);
-    colorFrag.a = (1.0 - depthTexture.sample(sampl, mappingVertex.textureCoordinate).r);
+    colorFrag.a = (1.0 - depthTexture.sample(sampl, mappingVertex.textureCoordinate));
     return half4(colorFrag);
 }
 
@@ -82,9 +82,9 @@ mask_focus_field(TextureMappingVertex mappingVertex [[stage_in]],
 fragment half4
 mask_outoffocus_field(TextureMappingVertex mappingVertex [[stage_in]],
                       texture2d<float, access::sample> colorTexture [[texture(0)]],
-                      texture2d<float, access::sample> depthTexture [[texture(1)]]) {
+                      depth2d<float, access::sample> depthTexture [[texture(1)]]) {
     float4 colorFrag = colorTexture.sample(sampl, mappingVertex.textureCoordinate);
-    colorFrag.a = depthTexture.sample(sampl, mappingVertex.textureCoordinate).r;
+    colorFrag.a = depthTexture.sample(sampl, mappingVertex.textureCoordinate);
     return half4(colorFrag);
 }
 
@@ -101,12 +101,10 @@ fragment half4
 gaussian_blur(TextureMappingVertex mappingVertex [[stage_in]],
               constant GaussianBlurUniforms *uniforms [[buffer(0)]],
               texture2d<float, access::sample> colorTexture [[texture(0)]],
-              texture2d<float, access::sample> depthTexture [[texture(1)]]) {
+              depth2d<float, access::sample> depthTexture [[texture(1)]]) {
     float2 texCoord = mappingVertex.textureCoordinate;
-    
-    // Reduce step to 0.0 if isVertical
+    // Reduce X step to 0.0 if isVertical, vice versa for Y
     float xBlurOffsetStep = uniforms->blurRadius / uniforms->imageDimensions.x * (uniforms->isVertical ? 0.0 : 1.0);
-    // Vice versa
     float yBlurOffsetStep = uniforms->blurRadius / uniforms->imageDimensions.x * (uniforms->isVertical ? 1.0 : 0.0);
     
     float4 sum = float4(0.0);
@@ -120,4 +118,15 @@ gaussian_blur(TextureMappingVertex mappingVertex [[stage_in]],
     sum += colorTexture.sample(sampl, float2(texCoord.x + 3.0*xBlurOffsetStep, texCoord.y + 3.0*yBlurOffsetStep)) * 0.0540540541;
     sum += colorTexture.sample(sampl, float2(texCoord.x + 4.0*xBlurOffsetStep, texCoord.y + 4.0*yBlurOffsetStep)) * 0.0162162162;
     return half4(sum);
+}
+
+fragment half4
+composite_textures(TextureMappingVertex mappingVertex [[stage_in]],
+                   texture2d<float, access::sample> focusTexture [[texture(0)]],
+                   texture2d<float, access::sample> outOfFocusTexture [[texture(1)]]) { 
+    float4 fSample = focusTexture.sample(sampl, mappingVertex.textureCoordinate);
+    float3 fRgb = fSample.rgb * fSample.a;
+    float4 oofSample = outOfFocusTexture.sample(sampl, mappingVertex.textureCoordinate);
+    float3 oofRgb = oofSample.rgb * oofSample.a;
+    return half4(fRgb.r + oofRgb.r, fRgb.g + oofRgb.g, fRgb.b + oofRgb.b, 255.0);
 }

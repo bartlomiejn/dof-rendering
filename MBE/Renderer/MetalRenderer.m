@@ -121,6 +121,7 @@ typedef struct {
     [self maskOutOfFocusToTextureInView:view withCommandBuffer:commandBuffer];
     [self horizontalBlurOnOutOfFocusTextureInView:view withCommandBuffer:commandBuffer];
     [self verticalBlurOnOutOfFocusTextureInView:view withCommandBuffer:commandBuffer];
+    [self compositeTexturesInView:view withCommandBuffer:commandBuffer];
     [commandBuffer presentDrawable:view.currentDrawable];
     [scope endScope];
     
@@ -233,13 +234,27 @@ typedef struct {
     MTLRenderPassDescriptor *descriptor
     = [self.passDescriptorBuilder outputToColorTextureDescriptorOfSize:view.metalLayer.drawableSize
                                                             clearColor:view.clearColor
-                                                             toTexture:view.currentDrawable.texture];
+                                                             toTexture:self.blurredOutOfFocusColorTexture2];
     id<MTLRenderCommandEncoder> encoder = [commandBuffer renderCommandEncoderWithDescriptor:descriptor];
     [encoder setLabel:[[NSString alloc] initWithFormat:@"Vertical Blur Out Of Focus Encoder"]];
     [encoder setRenderPipelineState:self.renderStateProvider.applyGaussianBlurFieldPipelineState];
     [encoder setFragmentBuffer:self.gaussianBlurUniforms[1] offset:0 atIndex:0];
     [encoder setFragmentTexture:self.blurredOutOfFocusColorTexture atIndex:0];
     [encoder setFragmentTexture:self.depthTexture atIndex:1];
+    [encoder drawPrimitives:MTLPrimitiveTypeTriangleStrip vertexStart:0 vertexCount:4];
+    [encoder endEncoding];
+}
+
+-(void)compositeTexturesInView:(MetalView *)view withCommandBuffer:(id<MTLCommandBuffer>)commandBuffer {
+    MTLRenderPassDescriptor *descriptor
+    = [self.passDescriptorBuilder outputToColorTextureDescriptorOfSize:view.metalLayer.drawableSize
+                                                            clearColor:view.clearColor
+                                                             toTexture:view.currentDrawable.texture];
+    id<MTLRenderCommandEncoder> encoder = [commandBuffer renderCommandEncoderWithDescriptor:descriptor];
+    [encoder setLabel:[[NSString alloc] initWithFormat:@"Composite Encoder"]];
+    [encoder setRenderPipelineState:self.renderStateProvider.compositePipelineState];
+    [encoder setFragmentTexture:self.inFocusColorTexture atIndex:0];
+    [encoder setFragmentTexture:self.blurredOutOfFocusColorTexture2 atIndex:1];
     [encoder drawPrimitives:MTLPrimitiveTypeTriangleStrip vertexStart:0 vertexCount:4];
     [encoder endEncoding];
 }
@@ -257,7 +272,7 @@ typedef struct {
             view.metalLayer.drawableSize.width,
             view.metalLayer.drawableSize.height
         };
-        uniforms.blurRadius = 5.0;
+        uniforms.blurRadius = 10.0;
         memcpy(self.gaussianBlurUniforms[i].contents, &uniforms, sizeof(uniforms));
     }
     
@@ -274,9 +289,9 @@ typedef struct {
 -(matrix_float4x4)modelMatrixForTeapotIndex:(int)index {
     vector_float3 translation;
     if (index == 1) {
-        translation = (vector_float3){ 0, 0, 0 };
+        translation = (vector_float3){ 0, 0, sinf(5 * self.time) * 0.5 + 1.5 };
     } else if (index == 2) {
-        translation = (vector_float3){ 0.8, 4.1, -20.0 };
+        translation = (vector_float3){ 0.8, 12, -20.0 };
     } else {
         translation = (vector_float3){ -0.7, -4.1, -3.0 };
     }
@@ -292,7 +307,7 @@ typedef struct {
     
     float scaleFactor;
     if (index == 1) {
-        scaleFactor = sinf(5 * self.time) * 0.5 + 3;
+        scaleFactor = 2.8;
     } else if (index == 2) {
         scaleFactor = sinf(5 * self.time) * 0.5 + 6;
     } else {
@@ -313,7 +328,7 @@ typedef struct {
     const CGSize drawableSize = view.metalLayer.drawableSize;
     const float aspect = drawableSize.width / drawableSize.height;
     const float fov = (2 * M_PI) / 5;
-    const float near = 1;
+    const float near = 1.0;
     const float far = 100;
     const matrix_float4x4 projectionMatrix = matrix_float4x4_perspective(aspect, fov, near, far);
     return projectionMatrix;

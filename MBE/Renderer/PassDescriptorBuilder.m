@@ -33,7 +33,7 @@
 
 -(MTLRenderPassDescriptor *)outputToColorTextureDescriptorOfSize:(CGSize)size
                                                       clearColor:(MTLClearColor)clearColor
-                                                     toTexture:(id<MTLTexture>)colorTexture {
+                                                       toTexture:(id<MTLTexture>)colorTexture {
     MTLRenderPassDescriptor *descriptor = [MTLRenderPassDescriptor renderPassDescriptor];
     descriptor.colorAttachments[0].texture = colorTexture;
     descriptor.colorAttachments[0].clearColor = clearColor;

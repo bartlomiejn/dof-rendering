@@ -19,13 +19,9 @@
 
 @implementation MetalView
 
-#pragma mark - Layer
-
 + (id)layerClass {
     return [CAMetalLayer class];
 }
-
-#pragma mark - Get / Set
 
 - (MTLPixelFormat)colorPixelFormat {
     return _metalLayer.pixelFormat;
@@ -43,20 +39,16 @@
     _displayLink.preferredFramesPerSecond = preferredFramesPerSecond;
 }
 
-#pragma mark - Initialization
-
 - (instancetype)initWithDevice:(id<MTLDevice>)device {
     self = [super init];
     if (self) {
         _metalLayer = (CAMetalLayer *)self.layer;
         _metalLayer.device = device;
-        _clearColor = MTLClearColorMake(1.0, 1.0, 1.0, 1.0);
+        _clearColor = MTLClearColorMake(0.0, 0.0, 0.0, 1.0);
         self.preferredFramesPerSecond = 60;
     }
     return self;
 }
-
-#pragma mark - UIView
 
 - (void)didMoveToSuperview {
     [super didMoveToSuperview];
@@ -72,17 +64,15 @@
 {
     [super setFrame:frame];
     
-    // During the first layout pass, we will not be in a view hierarchy, so we guess our scale
-    CGFloat scale = [UIScreen mainScreen].scale;
-    
+    // During the first layout pass, we will not be in a view hierarchy, so we take the screen scale
     // If we've moved to a window by the time our frame is being set, we can take its scale as our own
+    CGFloat scale = [UIScreen mainScreen].scale;
     if (self.window) {
         scale = self.window.screen.scale;
     }
     
-    CGSize drawableSize = self.bounds.size;
-    
     // Since drawable size is in pixels, we need to multiply by the scale to move from points to pixels
+    CGSize drawableSize = self.bounds.size;
     drawableSize.width *= scale;
     drawableSize.height *= scale;
     
@@ -101,8 +91,6 @@
     [_displayLink invalidate];
     _displayLink = nil;
 }
-
-#pragma mark - CADisplayLink Action
 
 - (void)displayLinkDidFire:(CADisplayLink *)displayLink {
     _currentDrawable = [_metalLayer nextDrawable];

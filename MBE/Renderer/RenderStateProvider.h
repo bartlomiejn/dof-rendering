@@ -14,6 +14,7 @@
 @property (strong, nonatomic) id<MTLRenderPipelineState> maskFocusFieldPipelineState;
 @property (strong, nonatomic) id<MTLRenderPipelineState> maskOutOfFocusFieldPipelineState;
 @property (strong, nonatomic) id<MTLRenderPipelineState> applyGaussianBlurFieldPipelineState;
+@property (strong, nonatomic) id<MTLRenderPipelineState> compositePipelineState;
 @property (strong, nonatomic) id<MTLDepthStencilState> depthStencilState;
 -(instancetype)initWithDevice:(id<MTLDevice>)device;
 @end

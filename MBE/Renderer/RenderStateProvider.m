@@ -22,6 +22,7 @@
         self.maskFocusFieldPipelineState = [self maskFocusFieldPipelineStateOnDevice:device];
         self.maskOutOfFocusFieldPipelineState = [self maskOutOfFocusFieldPipelineStateOnDevice:device];
         self.applyGaussianBlurFieldPipelineState = [self applyGaussianBlurPipelineStateOnDevice:device];
+        self.compositePipelineState = [self compositePipelineStateOnDevice:device];
         self.depthStencilState = [self depthStencilStateOnDevice:device];
     }
     return self;
@@ -54,6 +55,12 @@
     return [self BGRA8UNormProjectTexturePipelineStateWithLabel:@"Gaussian Blur Pipeline State"
                                                        onDevice:device
                                                fragmentFunction:@"gaussian_blur"];
+}
+
+-(id<MTLRenderPipelineState>)compositePipelineStateOnDevice:(id<MTLDevice>)device {
+    return [self BGRA8UNormProjectTexturePipelineStateWithLabel:@"Composite Pipeline State"
+                                                       onDevice:device
+                                               fragmentFunction:@"composite_textures"];
 }
 
 -(id<MTLDepthStencilState>)depthStencilStateOnDevice:(id<MTLDevice>)device {
