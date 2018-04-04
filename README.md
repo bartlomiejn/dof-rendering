@@ -7,6 +7,6 @@
 - Gaussian blur with approximated constant coefficients of out of focus parts of image
 - Composition of both elements into end image
 
-Implementation is kind of slow for now - optimizations are currently WIP
+Optimizations are WIP
 
 ![Example image](https://raw.githubusercontent.com/bartlomiejn/dof-rendering-metal/master/dof_rendering.gif)
