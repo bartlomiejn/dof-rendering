@@ -8,7 +8,7 @@
 - Composition of both elements into end image
 
 # TODO
-- Rendering passes optimization
+- Fix poor performance
 - Sampling issues that give the grid effect
 
 ![Example image](https://raw.githubusercontent.com/bartlomiejn/dof-rendering-metal/master/dof_rendering.gif)
