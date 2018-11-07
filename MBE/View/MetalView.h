@@ -5,8 +5,6 @@
 //  Created by Bartłomiej Nowak on 03/11/2017.
 //  Copyright © 2017 Bartłomiej Nowak. All rights reserved.
 //
-//  Includes code taken from Metal By Example book repository at: https://github.com/metal-by-example/sample-code
-//
 
 @import UIKit;
 @import Metal;

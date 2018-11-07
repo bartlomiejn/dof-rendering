@@ -52,9 +52,9 @@
 }
 
 -(id<MTLRenderPipelineState>)applyGaussianBlurPipelineStateOnDevice:(id<MTLDevice>)device {
-    return [self BGRA8UNormProjectTexturePipelineStateWithLabel:@"Gaussian Blur Pipeline State"
+    return [self BGRA8UNormProjectTexturePipelineStateWithLabel:@"Single Side Gaussian Blur Pipeline State"
                                                        onDevice:device
-                                               fragmentFunction:@"gaussian_blur"];
+                                               fragmentFunction:@"single_side_gaussian_blur"];
 }
 
 -(id<MTLRenderPipelineState>)compositePipelineStateOnDevice:(id<MTLDevice>)device {

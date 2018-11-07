@@ -19,13 +19,9 @@
 
 @implementation ViewController
 
-#pragma mark - Get / Set
-
 - (MetalView *)metalView {
     return (MetalView *)self.view;
 }
-
-#pragma mark - UIViewController
 
 - (BOOL)prefersStatusBarHidden {
     return YES;

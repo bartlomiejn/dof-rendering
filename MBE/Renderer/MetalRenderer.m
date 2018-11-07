@@ -12,8 +12,8 @@
 #import "ShaderTypes.h"
 #import "RenderStateProvider.h"
 #import "PassDescriptorBuilder.h"
-#import <simd/simd.h>
-#import <SpriteKit/SpriteKit.h>
+@import simd;
+@import SpriteKit;
 @import Metal;
 @import QuartzCore.CAMetalLayer;
 
@@ -112,7 +112,6 @@ typedef struct {
         self.bufferIndex = (self.bufferIndex + 1) % inFlightBufferCount;
         dispatch_semaphore_signal(self.displaySemaphore);
     }];
-    
     id<MTLCaptureScope> scope = [[MTLCaptureManager sharedCaptureManager] newCaptureScopeWithDevice:self.device];
     scope.label = @"Capture Scope";
     [scope beginScope];
@@ -124,9 +123,9 @@ typedef struct {
     [self compositeTexturesInView:view withCommandBuffer:commandBuffer];
     [commandBuffer presentDrawable:view.currentDrawable];
     [scope endScope];
-    
     [commandBuffer commit];
 }
+
 
 -(void)frameAdjustedForView:(MetalView *)view {
     CGSize drawableSize = view.metalLayer.drawableSize;
@@ -137,28 +136,27 @@ typedef struct {
         self.depthTexture = [self readAndRenderTargetUsageTextureOfSize:drawableSize format:MTLPixelFormatDepth32Float];
     }
     if (self.inFocusColorTexture.width != drawableSize.width
-        || self.inFocusColorTexture.height != drawableSize.height) {
+    || self.inFocusColorTexture.height != drawableSize.height) {
         self.inFocusColorTexture = [self readAndRenderTargetUsageTextureOfSize:drawableSize
                                                                         format:MTLPixelFormatBGRA8Unorm];
     }
     if (self.outOfFocusColorTexture.width != drawableSize.width
-        || self.outOfFocusColorTexture.height != drawableSize.height) {
+    || self.outOfFocusColorTexture.height != drawableSize.height) {
         self.outOfFocusColorTexture = [self readAndRenderTargetUsageTextureOfSize:drawableSize
                                                                            format:MTLPixelFormatBGRA8Unorm];
     }
     if (self.blurredOutOfFocusColorTexture.width != drawableSize.width
-        || self.blurredOutOfFocusColorTexture.height != drawableSize.height) {
+    || self.blurredOutOfFocusColorTexture.height != drawableSize.height) {
         self.blurredOutOfFocusColorTexture = [self readAndRenderTargetUsageTextureOfSize:drawableSize
                                                                                   format:MTLPixelFormatBGRA8Unorm];
     }
     
     if (self.blurredOutOfFocusColorTexture2.width != drawableSize.width
-        || self.blurredOutOfFocusColorTexture2.height != drawableSize.height) {
+    || self.blurredOutOfFocusColorTexture2.height != drawableSize.height) {
         self.blurredOutOfFocusColorTexture2 = [self readAndRenderTargetUsageTextureOfSize:drawableSize
                                                                                    format:MTLPixelFormatBGRA8Unorm];
     }
 }
-
 
 -(void)drawObjectsInView:(MetalView *)view withCommandBuffer:(id<MTLCommandBuffer>)commandBuffer {
     MTLRenderPassDescriptor *descriptor
