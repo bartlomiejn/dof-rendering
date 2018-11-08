@@ -8,6 +8,7 @@
 
 #import "SliderStackView.h"
 #import "SliderView.h"
+#import "WeakSelf.h"
 
 @interface SliderStackView ()
 @property (nonatomic, strong) NSMutableArray<SliderView*> *sliderViews;
@@ -20,6 +21,7 @@
     self = [super init];
     if (self) {
         self.backgroundColor = [UIColor clearColor];
+        self.axis = UILayoutConstraintAxisVertical;
     }
     return self;
 }
@@ -31,11 +33,12 @@
     }
     self.sliderViews = [@[] mutableCopy];
     [viewModel.sliders enumerateObjectsUsingBlock:^(SliderViewModel *sliderViewModel, NSUInteger idx, BOOL *stop) {
-        SliderView *view = [[SliderView alloc] init];
+        SliderView *view = [[UINib nibWithNibName:@"SliderView" bundle:nil] instantiateWithOwner:nil options:nil][0];
         [view setupWith:sliderViewModel];
+        WEAK_SELF weakSelf = self;
         view.onValueChange = ^(float value) {
-            if (self.onValueChange) {
-                self.onValueChange((int)idx, value);
+            if (weakSelf && weakSelf.onValueChange) {
+                weakSelf.onValueChange((int)idx, value);
             }
         };
         [self addArrangedSubview:view];

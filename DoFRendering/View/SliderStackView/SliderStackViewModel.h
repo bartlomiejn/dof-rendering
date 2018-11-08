@@ -13,6 +13,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface SliderStackViewModel : NSObject
 @property (nonatomic) NSArray<SliderViewModel*> *sliders;
+-(instancetype)initWith:(NSArray<SliderViewModel*>*)viewModels;
 @end
 
 NS_ASSUME_NONNULL_END

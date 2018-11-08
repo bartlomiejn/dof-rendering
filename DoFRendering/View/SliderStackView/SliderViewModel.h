@@ -15,6 +15,10 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic) float maxValue;
 @property (nonatomic) float currentValue;
 @property (nonatomic) float minValue;
+-(instancetype)initWithName:(NSString*)name
+                   maxValue:(float)maxValue
+               currentValue:(float)currentValue
+                   minValue:(float)minValue;
 @end
 
 NS_ASSUME_NONNULL_END

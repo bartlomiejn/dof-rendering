@@ -7,7 +7,7 @@
 //
 
 #import "AppDelegate.h"
-#import "ViewController.h"
+#import "ViewportViewController.h"
 
 @interface AppDelegate ()
 @end
@@ -15,11 +15,13 @@
 @implementation AppDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
+    ViewportViewController *controller = [ViewportViewController new];
+    controller.presenter = [ViewportPresenter new];
+    controller.presenter.view = controller;
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
-    self.window.rootViewController = [[ViewController alloc] init];
+    self.window.rootViewController = controller;
     [self.window makeKeyAndVisible];
-    
-    return YES;
+    return true;
 }
 
 @end

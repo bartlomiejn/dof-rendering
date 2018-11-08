@@ -13,11 +13,12 @@
 		604E6BC42194AFC6005FAF4A /* SliderView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 604E6BC32194AFC6005FAF4A /* SliderView.xib */; };
 		604E6BC72194B179005FAF4A /* SliderViewModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 604E6BC62194B179005FAF4A /* SliderViewModel.m */; };
 		604E6BCB2194B3D3005FAF4A /* SliderStackViewModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 604E6BCA2194B3D3005FAF4A /* SliderStackViewModel.m */; };
+		604E6BCF2194B9CF005FAF4A /* ViewportPresenter.m in Sources */ = {isa = PBXBuildFile; fileRef = 604E6BCE2194B9CF005FAF4A /* ViewportPresenter.m */; };
 		60EEBCD5205C1D2D00D2EEDA /* teapot.obj in Resources */ = {isa = PBXBuildFile; fileRef = 60EEBCD4205C1D2D00D2EEDA /* teapot.obj */; };
 		60EEBCDA205DAC9700D2EEDA /* RenderStateProvider.m in Sources */ = {isa = PBXBuildFile; fileRef = 60EEBCD9205DAC9700D2EEDA /* RenderStateProvider.m */; };
 		60EEBCE12060142600D2EEDA /* PassDescriptorBuilder.m in Sources */ = {isa = PBXBuildFile; fileRef = 60EEBCE02060142600D2EEDA /* PassDescriptorBuilder.m */; };
 		9F066B6C1FACE10C00AF820A /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 9F066B6B1FACE10C00AF820A /* AppDelegate.m */; };
-		9F066B6F1FACE10C00AF820A /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9F066B6E1FACE10C00AF820A /* ViewController.m */; };
+		9F066B6F1FACE10C00AF820A /* ViewportViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9F066B6E1FACE10C00AF820A /* ViewportViewController.m */; };
 		9F066B741FACE10C00AF820A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9F066B731FACE10C00AF820A /* Assets.xcassets */; };
 		9F066B771FACE10C00AF820A /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9F066B751FACE10C00AF820A /* LaunchScreen.storyboard */; };
 		9F066B7A1FACE10C00AF820A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 9F066B791FACE10C00AF820A /* main.m */; };
@@ -44,6 +45,10 @@
 		604E6BC62194B179005FAF4A /* SliderViewModel.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SliderViewModel.m; sourceTree = "<group>"; };
 		604E6BC92194B3D3005FAF4A /* SliderStackViewModel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SliderStackViewModel.h; sourceTree = "<group>"; };
 		604E6BCA2194B3D3005FAF4A /* SliderStackViewModel.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SliderStackViewModel.m; sourceTree = "<group>"; };
+		604E6BCD2194B9CF005FAF4A /* ViewportPresenter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewportPresenter.h; sourceTree = "<group>"; };
+		604E6BCE2194B9CF005FAF4A /* ViewportPresenter.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewportPresenter.m; sourceTree = "<group>"; };
+		604E6BD02194BD3E005FAF4A /* ViewportViewProtocol.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewportViewProtocol.h; sourceTree = "<group>"; };
+		604E6BD12194BFE9005FAF4A /* WeakSelf.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WeakSelf.h; sourceTree = "<group>"; };
 		60EEBCCF205C114900D2EEDA /* MBETypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MBETypes.h; sourceTree = "<group>"; };
 		60EEBCD4205C1D2D00D2EEDA /* teapot.obj */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = teapot.obj; sourceTree = "<group>"; };
 		60EEBCD6205D713100D2EEDA /* ShaderTypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ShaderTypes.h; sourceTree = "<group>"; };
@@ -51,11 +56,11 @@
 		60EEBCD9205DAC9700D2EEDA /* RenderStateProvider.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RenderStateProvider.m; sourceTree = "<group>"; };
 		60EEBCDF2060142600D2EEDA /* PassDescriptorBuilder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PassDescriptorBuilder.h; sourceTree = "<group>"; };
 		60EEBCE02060142600D2EEDA /* PassDescriptorBuilder.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = PassDescriptorBuilder.m; sourceTree = "<group>"; };
-		9F066B671FACE10C00AF820A /* MBE.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MBE.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		9F066B671FACE10C00AF820A /* DoFRendering.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DoFRendering.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9F066B6A1FACE10C00AF820A /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		9F066B6B1FACE10C00AF820A /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
-		9F066B6D1FACE10C00AF820A /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
-		9F066B6E1FACE10C00AF820A /* ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
+		9F066B6D1FACE10C00AF820A /* ViewportViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewportViewController.h; sourceTree = "<group>"; };
+		9F066B6E1FACE10C00AF820A /* ViewportViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewportViewController.m; sourceTree = "<group>"; };
 		9F066B731FACE10C00AF820A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		9F066B761FACE10C00AF820A /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		9F066B781FACE10C00AF820A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -120,7 +125,7 @@
 		9F066B5E1FACE10C00AF820A = {
 			isa = PBXGroup;
 			children = (
-				9F066B691FACE10C00AF820A /* MBE */,
+				9F066B691FACE10C00AF820A /* DoFRendering */,
 				9F066B681FACE10C00AF820A /* Products */,
 				9F066B831FACF38500AF820A /* Frameworks */,
 			);
@@ -129,12 +134,12 @@
 		9F066B681FACE10C00AF820A /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				9F066B671FACE10C00AF820A /* MBE.app */,
+				9F066B671FACE10C00AF820A /* DoFRendering.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		9F066B691FACE10C00AF820A /* MBE */ = {
+		9F066B691FACE10C00AF820A /* DoFRendering */ = {
 			isa = PBXGroup;
 			children = (
 				9F2D39191FBC8BD400F7578F /* Auxiliary */,
@@ -143,8 +148,11 @@
 				9F2D39181FBC8BD000F7578F /* View */,
 				9F066B6A1FACE10C00AF820A /* AppDelegate.h */,
 				9F066B6B1FACE10C00AF820A /* AppDelegate.m */,
-				9F066B6D1FACE10C00AF820A /* ViewController.h */,
-				9F066B6E1FACE10C00AF820A /* ViewController.m */,
+				604E6BCD2194B9CF005FAF4A /* ViewportPresenter.h */,
+				604E6BCE2194B9CF005FAF4A /* ViewportPresenter.m */,
+				604E6BD02194BD3E005FAF4A /* ViewportViewProtocol.h */,
+				9F066B6D1FACE10C00AF820A /* ViewportViewController.h */,
+				9F066B6E1FACE10C00AF820A /* ViewportViewController.m */,
 				604E6BBB2194AEC4005FAF4A /* View.storyboard */,
 				60EEBCD4205C1D2D00D2EEDA /* teapot.obj */,
 				9F066B731FACE10C00AF820A /* Assets.xcassets */,
@@ -152,7 +160,7 @@
 				9F066B781FACE10C00AF820A /* Info.plist */,
 				9F066B791FACE10C00AF820A /* main.m */,
 			);
-			path = MBE;
+			path = DoFRendering;
 			sourceTree = "<group>";
 		};
 		9F066B831FACF38500AF820A /* Frameworks */ = {
@@ -176,6 +184,7 @@
 		9F2D39191FBC8BD400F7578F /* Auxiliary */ = {
 			isa = PBXGroup;
 			children = (
+				604E6BD12194BFE9005FAF4A /* WeakSelf.h */,
 				9F2D391A1FBC8BF400F7578F /* MathFunctions.h */,
 				9F2D391B1FBC8C2400F7578F /* MathFunctions.m */,
 			);
@@ -224,9 +233,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		9F066B661FACE10C00AF820A /* MBE */ = {
+		9F066B661FACE10C00AF820A /* DoFRendering */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 9F066B7D1FACE10C00AF820A /* Build configuration list for PBXNativeTarget "MBE" */;
+			buildConfigurationList = 9F066B7D1FACE10C00AF820A /* Build configuration list for PBXNativeTarget "DoFRendering" */;
 			buildPhases = (
 				9F066B631FACE10C00AF820A /* Sources */,
 				9F066B641FACE10C00AF820A /* Frameworks */,
@@ -236,9 +245,9 @@
 			);
 			dependencies = (
 			);
-			name = MBE;
+			name = DoFRendering;
 			productName = MBE;
-			productReference = 9F066B671FACE10C00AF820A /* MBE.app */;
+			productReference = 9F066B671FACE10C00AF820A /* DoFRendering.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -256,7 +265,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 9F066B621FACE10C00AF820A /* Build configuration list for PBXProject "MBE" */;
+			buildConfigurationList = 9F066B621FACE10C00AF820A /* Build configuration list for PBXProject "DoFRendering" */;
 			compatibilityVersion = "Xcode 8.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -269,7 +278,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				9F066B661FACE10C00AF820A /* MBE */,
+				9F066B661FACE10C00AF820A /* DoFRendering */,
 			);
 		};
 /* End PBXProject section */
@@ -294,7 +303,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				9F066B6F1FACE10C00AF820A /* ViewController.m in Sources */,
+				9F066B6F1FACE10C00AF820A /* ViewportViewController.m in Sources */,
 				9F066B7A1FACE10C00AF820A /* main.m in Sources */,
 				604E6BCB2194B3D3005FAF4A /* SliderStackViewModel.m in Sources */,
 				9F066B6C1FACE10C00AF820A /* AppDelegate.m in Sources */,
@@ -310,6 +319,7 @@
 				60EEBCDA205DAC9700D2EEDA /* RenderStateProvider.m in Sources */,
 				9F843C0D1FC73DA900A15944 /* OBJGroup.mm in Sources */,
 				604E6BBF2194AFA0005FAF4A /* SliderStackView.m in Sources */,
+				604E6BCF2194B9CF005FAF4A /* ViewportPresenter.m in Sources */,
 				9F2D39201FBC8E9D00F7578F /* MetalRenderer.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -438,9 +448,9 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = B6NDM93MJT;
-				INFOPLIST_FILE = MBE/Info.plist;
+				INFOPLIST_FILE = DoFRendering/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = "io.bartlomiejnowak.dof-rendering";
+				PRODUCT_BUNDLE_IDENTIFIER = io.bartlomiejnowak.dof;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TARGETED_DEVICE_FAMILY = 1;
 			};
@@ -452,9 +462,9 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = B6NDM93MJT;
-				INFOPLIST_FILE = MBE/Info.plist;
+				INFOPLIST_FILE = DoFRendering/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = "io.bartlomiejnowak.dof-rendering";
+				PRODUCT_BUNDLE_IDENTIFIER = io.bartlomiejnowak.dof;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TARGETED_DEVICE_FAMILY = 1;
 			};
@@ -463,7 +473,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		9F066B621FACE10C00AF820A /* Build configuration list for PBXProject "MBE" */ = {
+		9F066B621FACE10C00AF820A /* Build configuration list for PBXProject "DoFRendering" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				9F066B7B1FACE10C00AF820A /* Debug */,
@@ -472,7 +482,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		9F066B7D1FACE10C00AF820A /* Build configuration list for PBXNativeTarget "MBE" */ = {
+		9F066B7D1FACE10C00AF820A /* Build configuration list for PBXNativeTarget "DoFRendering" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				9F066B7E1FACE10C00AF820A /* Debug */,

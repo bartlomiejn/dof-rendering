@@ -1,13 +1,14 @@
 //
-//  SliderViewModel.m
+//  WeakSelf.h
 //  MBE
 //
 //  Created by Bartłomiej Nowak on 08/11/2018.
 //  Copyright © 2018 Bartłomiej Nowak. All rights reserved.
 //
 
-#import "SliderViewModel.h"
+#ifndef WeakSelf_h
+#define WeakSelf_h
 
-@implementation SliderViewModel
+#define WEAK_SELF __weak __typeof__(self)
 
-@end
+#endif /* WeakSelf_h */

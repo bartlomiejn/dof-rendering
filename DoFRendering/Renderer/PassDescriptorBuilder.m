@@ -16,7 +16,8 @@
 -(MTLRenderPassDescriptor *)renderObjectsPassDescriptorOfSize:(CGSize)size
                                                    clearColor:(MTLClearColor)clearColor
                                            outputColorTexture:(id<MTLTexture>)colorTexture
-                                           outputDepthTexture:(id<MTLTexture>)depthTexture {
+                                           outputDepthTexture:(id<MTLTexture>)depthTexture
+{
     MTLRenderPassDescriptor *descriptor = [MTLRenderPassDescriptor renderPassDescriptor];
     descriptor.colorAttachments[0].texture = colorTexture;
     descriptor.colorAttachments[0].clearColor = clearColor;
@@ -33,7 +34,8 @@
 
 -(MTLRenderPassDescriptor *)outputToColorTextureDescriptorOfSize:(CGSize)size
                                                       clearColor:(MTLClearColor)clearColor
-                                                       toTexture:(id<MTLTexture>)colorTexture {
+                                                       toTexture:(id<MTLTexture>)colorTexture
+{
     MTLRenderPassDescriptor *descriptor = [MTLRenderPassDescriptor renderPassDescriptor];
     descriptor.colorAttachments[0].texture = colorTexture;
     descriptor.colorAttachments[0].clearColor = clearColor;
@@ -44,7 +46,8 @@
     return descriptor;
 }
 
--(MTLRenderPassDescriptor *)outputToDepthTextureDescriptorOfSize:(CGSize)size toTexture:(id<MTLTexture>)depthTexture {
+-(MTLRenderPassDescriptor *)outputToDepthTextureDescriptorOfSize:(CGSize)size toTexture:(id<MTLTexture>)depthTexture
+{
     MTLRenderPassDescriptor *descriptor = [MTLRenderPassDescriptor renderPassDescriptor];
     descriptor.depthAttachment.texture = depthTexture;
     descriptor.depthAttachment.loadAction = MTLLoadActionLoad;

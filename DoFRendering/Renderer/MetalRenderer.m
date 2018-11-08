@@ -113,7 +113,8 @@ typedef struct {
 
 #pragma mark - MetalViewDelegate
 
--(void)drawInView:(MetalView *)view {
+-(void)drawInView:(MetalView *)view
+{
     dispatch_semaphore_wait(self.displaySemaphore, DISPATCH_TIME_FOREVER);
     [self updateUniformsForView:view duration:view.frameDuration];
     
@@ -126,18 +127,19 @@ typedef struct {
     scope.label = @"Capture Scope";
     [scope beginScope];
     [self drawObjectsInView:view withCommandBuffer:commandBuffer];
-//    [self maskInFocusToTextureInView:view withCommandBuffer:commandBuffer];
-//    [self maskOutOfFocusToTextureInView:view withCommandBuffer:commandBuffer];
-//    [self horizontalBlurOnOutOfFocusTextureInView:view withCommandBuffer:commandBuffer];
-//    [self verticalBlurOnOutOfFocusTextureInView:view withCommandBuffer:commandBuffer];
-//    [self compositeTexturesInView:view withCommandBuffer:commandBuffer];
+    [self maskInFocusToTextureInView:view withCommandBuffer:commandBuffer];
+    [self maskOutOfFocusToTextureInView:view withCommandBuffer:commandBuffer];
+    [self horizontalBlurOnOutOfFocusTextureInView:view withCommandBuffer:commandBuffer];
+    [self verticalBlurOnOutOfFocusTextureInView:view withCommandBuffer:commandBuffer];
+    [self compositeTexturesInView:view withCommandBuffer:commandBuffer];
     [commandBuffer presentDrawable:view.currentDrawable];
     [scope endScope];
     [commandBuffer commit];
 }
 
 
--(void)frameAdjustedForView:(MetalView *)view {
+-(void)frameAdjustedForView:(MetalView *)view
+{
     CGSize drawableSize = view.metalLayer.drawableSize;
     if (self.colorTexture.width != drawableSize.width || self.colorTexture.height != drawableSize.height) {
         self.colorTexture = [self readAndRenderTargetUsageTextureOfSize:drawableSize format:MTLPixelFormatBGRA8Unorm];
@@ -168,7 +170,8 @@ typedef struct {
     }
 }
 
--(void)drawObjectsInView:(MetalView *)view withCommandBuffer:(id<MTLCommandBuffer>)commandBuffer {
+-(void)drawObjectsInView:(MetalView *)view withCommandBuffer:(id<MTLCommandBuffer>)commandBuffer
+{
     MTLRenderPassDescriptor *descriptor
     = [self.passDescriptorBuilder renderObjectsPassDescriptorOfSize:view.metalLayer.drawableSize
                                                          clearColor:view.clearColor

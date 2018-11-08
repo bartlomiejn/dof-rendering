@@ -10,14 +10,9 @@
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
-        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="SliderView" customModule="MBE" customModuleProvider="target">
-            <connections>
-                <outlet property="parameterNameLabel" destination="Biv-F4-5O2" id="Dg2-oM-9P5"/>
-                <outlet property="slider" destination="lcA-zU-9wQ" id="f99-VC-YGq"/>
-            </connections>
-        </placeholder>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
         <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
-        <view contentMode="scaleToFill" id="iN0-l3-epB">
+        <view contentMode="scaleToFill" id="iN0-l3-epB" customClass="SliderView">
             <rect key="frame" x="0.0" y="0.0" width="377" height="49"/>
             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
             <subviews>
@@ -29,9 +24,6 @@
                 </label>
                 <slider opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="0.5" minValue="0.0" maxValue="1" translatesAutoresizingMaskIntoConstraints="NO" id="lcA-zU-9wQ">
                     <rect key="frame" x="14" y="19" width="349" height="31"/>
-                    <connections>
-                        <action selector="sliderValueChanged:" destination="-1" eventType="valueChanged" id="vFU-po-m4h"/>
-                    </connections>
                 </slider>
             </subviews>
             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
@@ -48,6 +40,10 @@
             <nil key="simulatedBottomBarMetrics"/>
             <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
             <viewLayoutGuide key="safeArea" id="vUN-kp-3ea"/>
+            <connections>
+                <outlet property="parameterNameLabel" destination="Biv-F4-5O2" id="KJO-Gf-Ji1"/>
+                <outlet property="slider" destination="lcA-zU-9wQ" id="zp7-zN-DvH"/>
+            </connections>
             <point key="canvasLocation" x="140" y="-124.58770614692655"/>
         </view>
     </objects>

@@ -9,4 +9,13 @@
 #import "SliderStackViewModel.h"
 
 @implementation SliderStackViewModel
+
+-(instancetype)initWith:(NSArray<SliderViewModel*>*)viewModels {
+    self = [super init];
+    if (self) {
+        self.sliders = viewModels;
+    }
+    return self;
+}
+
 @end
