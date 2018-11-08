@@ -22,14 +22,11 @@ const MTLIndexType MetalIndexType = MTLIndexTypeUInt16;
 static const NSInteger inFlightBufferCount = 3;
 
 typedef struct {
-    simd_float4 position;
-    simd_float4 color;
+    simd_float4 position, color;
 } MetalVertex;
 
 typedef struct {
-    simd_float4x4 modelMatrix;
-    simd_float4x4 viewMatrix;
-    simd_float4x4 projectionMatrix;
+    simd_float4x4 modelMatrix, viewMatrix, projectionMatrix;
 } RenderObjectUniforms;
 
 typedef struct {
@@ -37,6 +34,10 @@ typedef struct {
     simd_float1 blurRadius;
     simd_float2 imageDimensions;
 } GaussianBlurUniforms;
+
+typedef struct {
+    simd_float1 focusDist, focusRange;
+} CoCUniforms;
 
 @interface MetalRenderer ()
 @property (strong) id<MTLDevice> device;
@@ -46,6 +47,7 @@ typedef struct {
 @property (strong, nonatomic) RenderStateProvider *renderStateProvider;
 @property (strong) NSArray<id<MTLBuffer>> *drawObjectUniforms;
 @property (strong) NSArray<id<MTLBuffer>> *gaussianBlurUniforms;
+@property (strong) id<MTLBuffer> circleOfConfusionUniforms;
 @property (strong) id<MTLTexture> colorTexture;
 @property (strong) id<MTLTexture> depthTexture;
 @property (strong) id<MTLTexture> inFocusColorTexture;
@@ -70,6 +72,7 @@ typedef struct {
         self.passDescriptorBuilder = [[PassDescriptorBuilder alloc] init];
         self.drawObjectUniforms = [self makeDrawObjectUniforms];
         self.gaussianBlurUniforms = [self makeGaussianBlurUniforms];
+        self.circleOfConfusionUniforms = [self makeCircleOfConfusionUniforms];
     }
     return self;
 }
@@ -97,6 +100,13 @@ typedef struct {
     return uniforms;
 }
 
+-(id<MTLBuffer>)makeCircleOfConfusionUniforms {
+    id<MTLBuffer> buffer = [self.device newBufferWithLength:sizeof(CoCUniforms)
+                                                    options:MTLResourceOptionCPUCacheModeDefault];
+    buffer.label = @"Circle Of Confusion Pass Uniforms";
+    return buffer;
+}
+
 -(void)setupMeshFromOBJGroup:(OBJGroup*)group {
     self.mesh = [[OBJMesh alloc] initWithGroup:group device:self.device];
 }
@@ -116,11 +126,11 @@ typedef struct {
     scope.label = @"Capture Scope";
     [scope beginScope];
     [self drawObjectsInView:view withCommandBuffer:commandBuffer];
-    [self maskInFocusToTextureInView:view withCommandBuffer:commandBuffer];
-    [self maskOutOfFocusToTextureInView:view withCommandBuffer:commandBuffer];
-    [self horizontalBlurOnOutOfFocusTextureInView:view withCommandBuffer:commandBuffer];
-    [self verticalBlurOnOutOfFocusTextureInView:view withCommandBuffer:commandBuffer];
-    [self compositeTexturesInView:view withCommandBuffer:commandBuffer];
+//    [self maskInFocusToTextureInView:view withCommandBuffer:commandBuffer];
+//    [self maskOutOfFocusToTextureInView:view withCommandBuffer:commandBuffer];
+//    [self horizontalBlurOnOutOfFocusTextureInView:view withCommandBuffer:commandBuffer];
+//    [self verticalBlurOnOutOfFocusTextureInView:view withCommandBuffer:commandBuffer];
+//    [self compositeTexturesInView:view withCommandBuffer:commandBuffer];
     [commandBuffer presentDrawable:view.currentDrawable];
     [scope endScope];
     [commandBuffer commit];
@@ -180,6 +190,19 @@ typedef struct {
                            indexBuffer:self.mesh.indexBuffer
                      indexBufferOffset:0];
     }
+    [encoder endEncoding];
+}
+
+-(void)circleOfConfusionInView:(MetalView*)view withCommandBuffer:(id<MTLCommandBuffer>)commandBuffer {
+    MTLRenderPassDescriptor *desc = [self.passDescriptorBuilder outputToDepthTextureDescriptorOfSize:view.metalLayer.drawableSize
+                                                                                           toTexture:self.depthTexture];
+    id<MTLRenderCommandEncoder> encoder = [commandBuffer renderCommandEncoderWithDescriptor:desc];
+    [encoder setLabel:@"Circle Of Confusion Pass Encoder"];
+    [encoder setRenderPipelineState:self.renderStateProvider.circleOfConfusionPipelineState];
+    [encoder setFragmentBuffer:self.circleOfConfusionUniforms offset:0 atIndex:0];
+    [encoder setFragmentTexture:self.colorTexture atIndex:0];
+    [encoder setFragmentTexture:self.depthTexture atIndex:1];
+    [encoder drawPrimitives:MTLPrimitiveTypeTriangleStrip vertexStart:0 vertexCount:4];
     [encoder endEncoding];
 }
 
@@ -274,6 +297,13 @@ typedef struct {
         memcpy(self.gaussianBlurUniforms[i].contents, &uniforms, sizeof(uniforms));
     }
     
+    {
+        CoCUniforms uniforms;
+        uniforms.focusDist = 10;
+        uniforms.focusRange = 5;
+        memcpy(self.circleOfConfusionUniforms.contents, &uniforms, sizeof(uniforms));
+    }
+        
     const NSUInteger uniformBufferOffset = sizeof(RenderObjectUniforms) * self.bufferIndex;
     for (int i = 0; i < self.drawObjectUniforms.count; i++) {
         RenderObjectUniforms uniforms;

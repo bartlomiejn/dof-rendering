@@ -19,6 +19,7 @@
     self = [super init];
     if (self) {
         self.drawObjectsPipelineState = [self drawObjectsPipelineStateOnDevice:device];
+        self.circleOfConfusionPipelineState = [self circleOfConfusionPipelineStateOnDevice:device];
         self.maskFocusFieldPipelineState = [self maskFocusFieldPipelineStateOnDevice:device];
         self.maskOutOfFocusFieldPipelineState = [self maskOutOfFocusFieldPipelineStateOnDevice:device];
         self.applyGaussianBlurFieldPipelineState = [self applyGaussianBlurPipelineStateOnDevice:device];
@@ -35,6 +36,17 @@
     descriptor.vertexFunction = [library newFunctionWithName:@"map_vertices"];
     descriptor.fragmentFunction = [library newFunctionWithName:@"color_passthrough"];
     descriptor.colorAttachments[0].pixelFormat = MTLPixelFormatBGRA8Unorm;
+    descriptor.depthAttachmentPixelFormat = MTLPixelFormatDepth32Float;
+    return [self createRenderPipelineStateWith:descriptor onDevice:device];
+}
+
+-(id<MTLRenderPipelineState>)circleOfConfusionPipelineStateOnDevice:(id<MTLDevice>)device {
+    id<MTLLibrary> library = [device newDefaultLibrary];
+    MTLRenderPipelineDescriptor *descriptor = [MTLRenderPipelineDescriptor new];
+    descriptor.label = @"Circle Of Confusion Pipeline State";
+    descriptor.vertexFunction = [library newFunctionWithName:@"project_texture"];
+    descriptor.fragmentFunction = [library newFunctionWithName:@"circle_of_confusion_pass"];
+    descriptor.colorAttachments[0].pixelFormat = MTLPixelFormatInvalid;
     descriptor.depthAttachmentPixelFormat = MTLPixelFormatDepth32Float;
     return [self createRenderPipelineStateWith:descriptor onDevice:device];
 }

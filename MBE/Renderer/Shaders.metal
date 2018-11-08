@@ -147,6 +147,6 @@ circle_of_confusion_pass(TextureMappingVertex vert [[stage_in]],
                          constant CoCUniforms *uni [[buffer(0)]],
                          depth2d<float, access::sample> depthTex [[texture(0)]]) {
     half depth = depthTex.sample(sampl, vert.textureCoordinate);
-    float coc = (depth - uni.focusDist) / focusRange;
-    return half4(0.0, 0.0, 0.0, 0.0);
+    float coc = (depth - uni->focusDist) / uni->focusRange;
+    return half4(coc);
 }

@@ -7,6 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		604E6BBC2194AEC4005FAF4A /* View.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 604E6BBB2194AEC4005FAF4A /* View.storyboard */; };
+		604E6BBF2194AFA0005FAF4A /* SliderStackView.m in Sources */ = {isa = PBXBuildFile; fileRef = 604E6BBE2194AFA0005FAF4A /* SliderStackView.m */; };
+		604E6BC22194AFBC005FAF4A /* SliderView.m in Sources */ = {isa = PBXBuildFile; fileRef = 604E6BC12194AFBC005FAF4A /* SliderView.m */; };
+		604E6BC42194AFC6005FAF4A /* SliderView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 604E6BC32194AFC6005FAF4A /* SliderView.xib */; };
+		604E6BC72194B179005FAF4A /* SliderViewModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 604E6BC62194B179005FAF4A /* SliderViewModel.m */; };
+		604E6BCB2194B3D3005FAF4A /* SliderStackViewModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 604E6BCA2194B3D3005FAF4A /* SliderStackViewModel.m */; };
 		60EEBCD5205C1D2D00D2EEDA /* teapot.obj in Resources */ = {isa = PBXBuildFile; fileRef = 60EEBCD4205C1D2D00D2EEDA /* teapot.obj */; };
 		60EEBCDA205DAC9700D2EEDA /* RenderStateProvider.m in Sources */ = {isa = PBXBuildFile; fileRef = 60EEBCD9205DAC9700D2EEDA /* RenderStateProvider.m */; };
 		60EEBCE12060142600D2EEDA /* PassDescriptorBuilder.m in Sources */ = {isa = PBXBuildFile; fileRef = 60EEBCE02060142600D2EEDA /* PassDescriptorBuilder.m */; };
@@ -28,6 +34,16 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		604E6BBB2194AEC4005FAF4A /* View.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = View.storyboard; sourceTree = "<group>"; };
+		604E6BBD2194AFA0005FAF4A /* SliderStackView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SliderStackView.h; sourceTree = "<group>"; };
+		604E6BBE2194AFA0005FAF4A /* SliderStackView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SliderStackView.m; sourceTree = "<group>"; };
+		604E6BC02194AFBC005FAF4A /* SliderView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SliderView.h; sourceTree = "<group>"; };
+		604E6BC12194AFBC005FAF4A /* SliderView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SliderView.m; sourceTree = "<group>"; };
+		604E6BC32194AFC6005FAF4A /* SliderView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = SliderView.xib; sourceTree = "<group>"; };
+		604E6BC52194B179005FAF4A /* SliderViewModel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SliderViewModel.h; sourceTree = "<group>"; };
+		604E6BC62194B179005FAF4A /* SliderViewModel.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SliderViewModel.m; sourceTree = "<group>"; };
+		604E6BC92194B3D3005FAF4A /* SliderStackViewModel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SliderStackViewModel.h; sourceTree = "<group>"; };
+		604E6BCA2194B3D3005FAF4A /* SliderStackViewModel.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SliderStackViewModel.m; sourceTree = "<group>"; };
 		60EEBCCF205C114900D2EEDA /* MBETypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MBETypes.h; sourceTree = "<group>"; };
 		60EEBCD4205C1D2D00D2EEDA /* teapot.obj */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = teapot.obj; sourceTree = "<group>"; };
 		60EEBCD6205D713100D2EEDA /* ShaderTypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ShaderTypes.h; sourceTree = "<group>"; };
@@ -76,6 +92,31 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		604E6BC82194B2A2005FAF4A /* SliderStackView */ = {
+			isa = PBXGroup;
+			children = (
+				604E6BC92194B3D3005FAF4A /* SliderStackViewModel.h */,
+				604E6BCA2194B3D3005FAF4A /* SliderStackViewModel.m */,
+				604E6BBD2194AFA0005FAF4A /* SliderStackView.h */,
+				604E6BBE2194AFA0005FAF4A /* SliderStackView.m */,
+				604E6BC52194B179005FAF4A /* SliderViewModel.h */,
+				604E6BC62194B179005FAF4A /* SliderViewModel.m */,
+				604E6BC02194AFBC005FAF4A /* SliderView.h */,
+				604E6BC12194AFBC005FAF4A /* SliderView.m */,
+				604E6BC32194AFC6005FAF4A /* SliderView.xib */,
+			);
+			path = SliderStackView;
+			sourceTree = "<group>";
+		};
+		604E6BCC2194B80F005FAF4A /* MetalView */ = {
+			isa = PBXGroup;
+			children = (
+				9F066B801FACE19700AF820A /* MetalView.h */,
+				9F066B811FACE19700AF820A /* MetalView.m */,
+			);
+			path = MetalView;
+			sourceTree = "<group>";
+		};
 		9F066B5E1FACE10C00AF820A = {
 			isa = PBXGroup;
 			children = (
@@ -104,6 +145,7 @@
 				9F066B6B1FACE10C00AF820A /* AppDelegate.m */,
 				9F066B6D1FACE10C00AF820A /* ViewController.h */,
 				9F066B6E1FACE10C00AF820A /* ViewController.m */,
+				604E6BBB2194AEC4005FAF4A /* View.storyboard */,
 				60EEBCD4205C1D2D00D2EEDA /* teapot.obj */,
 				9F066B731FACE10C00AF820A /* Assets.xcassets */,
 				9F066B751FACE10C00AF820A /* LaunchScreen.storyboard */,
@@ -125,8 +167,8 @@
 		9F2D39181FBC8BD000F7578F /* View */ = {
 			isa = PBXGroup;
 			children = (
-				9F066B801FACE19700AF820A /* MetalView.h */,
-				9F066B811FACE19700AF820A /* MetalView.m */,
+				604E6BCC2194B80F005FAF4A /* MetalView */,
+				604E6BC82194B2A2005FAF4A /* SliderStackView */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -238,6 +280,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				9F066B771FACE10C00AF820A /* LaunchScreen.storyboard in Resources */,
+				604E6BBC2194AEC4005FAF4A /* View.storyboard in Resources */,
+				604E6BC42194AFC6005FAF4A /* SliderView.xib in Resources */,
 				9F066B741FACE10C00AF820A /* Assets.xcassets in Resources */,
 				60EEBCD5205C1D2D00D2EEDA /* teapot.obj in Resources */,
 			);
@@ -252,6 +296,7 @@
 			files = (
 				9F066B6F1FACE10C00AF820A /* ViewController.m in Sources */,
 				9F066B7A1FACE10C00AF820A /* main.m in Sources */,
+				604E6BCB2194B3D3005FAF4A /* SliderStackViewModel.m in Sources */,
 				9F066B6C1FACE10C00AF820A /* AppDelegate.m in Sources */,
 				9F843C101FC74D9E00A15944 /* OBJMesh.m in Sources */,
 				60EEBCE12060142600D2EEDA /* PassDescriptorBuilder.m in Sources */,
@@ -260,8 +305,11 @@
 				9F066B8A1FB39F2F00AF820A /* MetalView.m in Sources */,
 				9F843C071FC7212200A15944 /* Mesh.m in Sources */,
 				9F843C0A1FC723DF00A15944 /* OBJModel.mm in Sources */,
+				604E6BC22194AFBC005FAF4A /* SliderView.m in Sources */,
+				604E6BC72194B179005FAF4A /* SliderViewModel.m in Sources */,
 				60EEBCDA205DAC9700D2EEDA /* RenderStateProvider.m in Sources */,
 				9F843C0D1FC73DA900A15944 /* OBJGroup.mm in Sources */,
+				604E6BBF2194AFA0005FAF4A /* SliderStackView.m in Sources */,
 				9F2D39201FBC8E9D00F7578F /* MetalRenderer.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
