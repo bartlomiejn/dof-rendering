@@ -296,7 +296,7 @@ typedef struct {
             view.metalLayer.drawableSize.width,
             view.metalLayer.drawableSize.height
         };
-        uniforms.blurRadius = 10.0;
+        uniforms.blurRadius = 3.0;
         memcpy(self.gaussianBlurUniforms[i].contents, &uniforms, sizeof(uniforms));
     }
     

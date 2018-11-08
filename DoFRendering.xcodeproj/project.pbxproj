@@ -450,6 +450,7 @@
 				DEVELOPMENT_TEAM = B6NDM93MJT;
 				INFOPLIST_FILE = DoFRendering/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				PRODUCT_BUNDLE_IDENTIFIER = io.bartlomiejnowak.dof;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TARGETED_DEVICE_FAMILY = 1;
