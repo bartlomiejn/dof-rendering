@@ -8,6 +8,7 @@
 - Composition of both elements into end image
 
 # TODO
+- Add real CoC calculations and base sampling off it
 - Fix poor performance
 - Sampling issues that give the grid effect
 
