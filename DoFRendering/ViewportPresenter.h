@@ -15,6 +15,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, weak) id<ViewportViewProtocol> view;
 -(void)viewDidLoad;
 -(void)sliderValueChangedFor:(int)idx with:(float)value;
+-(void)willRenderNextFrameWithDuration:(float)frameDuration;
 @end
 
 NS_ASSUME_NONNULL_END

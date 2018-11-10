@@ -10,9 +10,11 @@
 #define ViewportViewProtocol_h
 
 #import "SliderStackViewModel.h"
+#import "TeapotModel.h"
 
 @protocol ViewportViewProtocol <NSObject>
 - (void)presentSliders:(SliderStackViewModel*)viewModel;
+- (void)presentModels:(NSArray<TeapotModel*>*)models;
 @end
 
 #endif /* ViewportViewProtocol_h */

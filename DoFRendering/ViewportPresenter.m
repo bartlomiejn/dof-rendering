@@ -9,9 +9,12 @@
 #import "ViewportPresenter.h"
 #import "SliderStackViewModel.h"
 #import "SliderViewModel.h"
+#import "TeapotModel.h"
 
 @interface ViewportPresenter ()
-@property (nonatomic, strong) SliderStackViewModel *sliders;
+@property (nonatomic, strong) SliderStackViewModel* sliders;
+@property (nonatomic, strong) NSArray<TeapotModel*>* teapots;
+@property (nonatomic) float elapsedTime;
 @end
 
 @implementation ViewportPresenter
@@ -40,6 +43,10 @@
         return;
     }
     _sliders.sliders[idx].currentValue = value;
+}
+
+- (void)willRenderNextFrameWithDuration:(float)frameDuration {
+    
 }
 
 @end

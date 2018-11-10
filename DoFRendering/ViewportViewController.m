@@ -11,9 +11,6 @@
 #import "SliderStackViewModel.h"
 #import "MetalRenderer.h"
 #import "MetalView.h"
-#import "OBJMesh.h"
-#import "OBJModel.h"
-#import "OBJGroup.h"
 #import "WeakSelf.h"
 
 @interface ViewportViewController ()
@@ -29,18 +26,14 @@
     return YES;
 }
 
-- (void)loadView {
-    self.view = [[UIView alloc] init];
-}
-
 - (void)viewDidLoad {
     [super viewDidLoad];
+    [_presenter viewDidLoad];
     id<MTLDevice> device = MTLCreateSystemDefaultDevice();
     MTLPixelFormat colorPixelFormat = MTLPixelFormatBGRA8Unorm;
     [self setupMetalViewWithDevice:device colorFormat:colorPixelFormat];
     [self setupRendererWithDevice:device colorFormat:colorPixelFormat];
     _metalView.delegate = _renderer;
-    [_presenter viewDidLoad];
 }
 
 - (void)setupMetalViewWithDevice:(id<MTLDevice>)device colorFormat:(MTLPixelFormat)format {
@@ -81,6 +74,10 @@
     [NSLayoutConstraint activateConstraints:@[[stackView.bottomAnchor constraintEqualToAnchor:self.view.bottomAnchor],
                                               [stackView.leadingAnchor constraintEqualToAnchor:self.view.leadingAnchor],
                                               [stackView.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor]]];
+}
+
+- (void)presentModels:(NSArray<TeapotModel*>*)models {
+    
 }
 
 @end

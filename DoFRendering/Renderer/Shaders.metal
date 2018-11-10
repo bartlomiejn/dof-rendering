@@ -9,35 +9,6 @@
 #include <metal_stdlib>
 using namespace metal;
 
-#pragma mark - Draw Objects
-
-typedef struct {
-    float4 position [[position]];
-    float4 color;
-} MetalVertex;
-
-typedef struct {
-    float4x4 modelMatrix;
-    float4x4 viewMatrix;
-    float4x4 projectionMatrix;
-} RenderObjectUniforms;
-
-vertex MetalVertex
-map_vertices(device MetalVertex *inputVerts [[buffer(0)]],
-             constant RenderObjectUniforms *uniforms [[buffer(1)]],
-             uint vid [[vertex_id]]) {
-    float4x4 mvpMatrix = uniforms->projectionMatrix * (uniforms->viewMatrix * uniforms->modelMatrix);
-    MetalVertex outputVert;
-    outputVert.position = mvpMatrix * inputVerts[vid].position;
-    outputVert.color = inputVerts[vid].color;
-    return outputVert;
-}
-
-fragment half4
-color_passthrough(MetalVertex inputVert [[stage_in]]) {
-    return half4(inputVert.color);
-}
-
 #pragma mark - DOF
 
 typedef struct {
@@ -51,9 +22,7 @@ typedef struct {
     float2 imageDimensions;
 } GaussianBlurUniforms;
 
-/**
- Projects provided vertices to corners of drawable texture.
- */
+/// Projects provided vertices to corners of drawable texture.
 vertex TextureMappingVertex
 project_texture(unsigned int vertex_id [[ vertex_id ]]) {
     float4x4 renderedCoordinates = float4x4(float4(-1.0, -1.0, 0.0, 1.0),
@@ -72,9 +41,7 @@ project_texture(unsigned int vertex_id [[ vertex_id ]]) {
 
 constexpr sampler sampl(address::clamp_to_zero, filter::linear, coord::normalized);
 
-/**
- Masks RGB focus field using inverted depth texture as mask.
- */
+/// Masks RGB focus field using inverted depth texture as mask.
 fragment half4
 mask_focus_field(TextureMappingVertex mappingVertex [[stage_in]],
                  texture2d<float, access::sample> colorTexture [[texture(0)]],
@@ -84,10 +51,8 @@ mask_focus_field(TextureMappingVertex mappingVertex [[stage_in]],
     return half4(colorFrag);
 }
 
-/**
- Masks RGB out of focus field using depth texture as mask.
- TODO: Merge with above with inversion passed as parameter to uniform
- */
+/// Masks RGB out of focus field using depth texture as mask.
+/// TODO: Merge with above with inversion passed as parameter to uniform
 fragment half4
 mask_outoffocus_field(TextureMappingVertex mappingVertex [[stage_in]],
                       texture2d<float, access::sample> colorTexture [[texture(0)]],
@@ -97,9 +62,7 @@ mask_outoffocus_field(TextureMappingVertex mappingVertex [[stage_in]],
     return half4(colorFrag);
 }
 
-/**
- Applies horizontal or vertical approximated gaussian blur to texture.
- */
+/// Applies horizontal or vertical approximated gaussian blur to texture.
 fragment half4
 gaussian_blur(TextureMappingVertex mappingVertex [[stage_in]],
               constant GaussianBlurUniforms *uniforms [[buffer(0)]],

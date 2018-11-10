@@ -6,16 +6,15 @@
 //  Copyright © 2017 Bartłomiej Nowak. All rights reserved.
 //
 
-#import "MetalRenderer.h"
-#import "MathFunctions.h"
-#import "OBJMesh.h"
-#import "ShaderTypes.h"
-#import "RenderStateProvider.h"
-#import "PassDescriptorBuilder.h"
 @import simd;
 @import SpriteKit;
 @import Metal;
 @import QuartzCore.CAMetalLayer;
+#import "MetalRenderer.h"
+#import "RenderStateProvider.h"
+#import "PassDescriptorBuilder.h"
+#import "MathFunctions.h"
+#import "Model.h"
 
 typedef uint16_t MetalIndex;
 const MTLIndexType MetalIndexType = MTLIndexTypeUInt16;
@@ -26,8 +25,12 @@ typedef struct {
 } MetalVertex;
 
 typedef struct {
-    simd_float4x4 modelMatrix, viewMatrix, projectionMatrix;
-} RenderObjectUniforms;
+    simd_float4x4 modelMatrix;
+} ModelUniforms;
+
+typedef struct {
+    simd_float4x4 viewMatrix, projectionMatrix;
+} ViewProjectionUniforms;
 
 typedef struct {
     simd_bool isVertical;
@@ -41,11 +44,13 @@ typedef struct {
 
 @interface MetalRenderer ()
 @property (strong) id<MTLDevice> device;
-@property (strong) OBJMesh *mesh;
 @property (strong) id<MTLCommandQueue> commandQueue;
 @property (strong, nonatomic) PassDescriptorBuilder *passDescriptorBuilder;
 @property (strong, nonatomic) RenderStateProvider *renderStateProvider;
-@property (strong) NSArray<id<MTLBuffer>> *drawObjectUniforms;
+@property (strong) OBJMesh *mesh;
+@property (strong) NSArray<Model*> *models;
+@property (strong) NSArray<id<MTLBuffer>> *modelUniforms;
+@property (strong) id<MTLBuffer> viewProjectionUniforms;
 @property (strong) NSArray<id<MTLBuffer>> *gaussianBlurUniforms;
 @property (strong) id<MTLBuffer> circleOfConfusionUniforms;
 @property (strong) id<MTLTexture> colorTexture;
@@ -70,20 +75,20 @@ typedef struct {
         self.commandQueue = [self.device newCommandQueue];
         self.renderStateProvider = [[RenderStateProvider alloc] initWithDevice:self.device];
         self.passDescriptorBuilder = [[PassDescriptorBuilder alloc] init];
-        self.drawObjectUniforms = [self makeDrawObjectUniforms];
+        self.modelUniforms = [self makeDrawModelsUniforms];
         self.gaussianBlurUniforms = [self makeGaussianBlurUniforms];
         self.circleOfConfusionUniforms = [self makeCircleOfConfusionUniforms];
     }
     return self;
 }
 
--(NSArray<id<MTLBuffer>> *)makeDrawObjectUniforms {
+-(NSArray<id<MTLBuffer>> *)makeDrawModelsUniforms {
     int teapotCount = 3;
     NSMutableArray *drawObjectUniforms = [[NSMutableArray alloc] init];
     for (int i = 0; i < teapotCount; i++) {
-        id<MTLBuffer> buffer = [self.device newBufferWithLength:sizeof(RenderObjectUniforms) * inFlightBufferCount
+        id<MTLBuffer> buffer = [self.device newBufferWithLength:sizeof(ModelUniforms) * inFlightBufferCount
                                                         options:MTLResourceOptionCPUCacheModeDefault];
-        buffer.label = [[NSString alloc] initWithFormat:@"Teapot Uniforms %d", i];
+        buffer.label = [[NSString alloc] initWithFormat:@"Model Uniforms %d", i];
         [drawObjectUniforms addObject:buffer];
     }
     return drawObjectUniforms;
@@ -184,9 +189,9 @@ typedef struct {
     [encoder setFrontFacingWinding:MTLWindingCounterClockwise];
     [encoder setCullMode:MTLCullModeBack];
     [encoder setVertexBuffer:self.mesh.vertexBuffer offset:0 atIndex:0];
-    const NSUInteger uniformBufferOffset = sizeof(RenderObjectUniforms) * self.bufferIndex;
-    for (int i = 0; i < self.drawObjectUniforms.count; i++) {
-        [encoder setVertexBuffer:self.drawObjectUniforms[i] offset:uniformBufferOffset atIndex:1];
+    const NSUInteger uniformBufferOffset = sizeof(ViewUniforms) * self.bufferIndex;
+    for (int i = 0; i < self.modelUniforms.count; i++) {
+        [encoder setVertexBuffer:self.modelUniforms[i] offset:uniformBufferOffset atIndex:1];
         [encoder drawIndexedPrimitives:MTLPrimitiveTypeTriangle
                             indexCount:[self.mesh.indexBuffer length] / sizeof(MetalIndex)
                              indexType:MetalIndexType
@@ -307,13 +312,13 @@ typedef struct {
         memcpy(self.circleOfConfusionUniforms.contents, &uniforms, sizeof(uniforms));
     }
         
-    const NSUInteger uniformBufferOffset = sizeof(RenderObjectUniforms) * self.bufferIndex;
-    for (int i = 0; i < self.drawObjectUniforms.count; i++) {
-        RenderObjectUniforms uniforms;
+    const NSUInteger uniformBufferOffset = sizeof(ViewUniforms) * self.bufferIndex;
+    for (int i = 0; i < self.modelUniforms.count; i++) {
+        ViewUniforms uniforms;
         uniforms.modelMatrix = [self modelMatrixForTeapotIndex:i];
         uniforms.viewMatrix = [self viewMatrix];
         uniforms.projectionMatrix = [self projectionMatrixForView:view];
-        memcpy([self.drawObjectUniforms[i] contents] + uniformBufferOffset, &uniforms, sizeof(uniforms));
+        memcpy([self.modelUniforms[i] contents] + uniformBufferOffset, &uniforms, sizeof(uniforms));
     }
 }
 
@@ -327,7 +332,7 @@ typedef struct {
         translation = (vector_float3){ -0.7, -4.1, -3.0 };
     }
     const matrix_float4x4 transMatrix = matrix_float4x4_translation(translation);
-    
+
     const vector_float3 xAxis = { 1, 0, 0 };
     const vector_float3 yAxis = { 0, 1, 0 };
     const vector_float3 zAxis = { 0, 0, 1 };
