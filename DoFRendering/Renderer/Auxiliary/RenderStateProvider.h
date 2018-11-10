@@ -10,13 +10,9 @@
 #import <Metal/Metal.h>
 
 @interface RenderStateProvider : NSObject
-
+-(instancetype)initWithDevice:(id<MTLDevice>)device;
 @property (strong, nonatomic) id<MTLRenderPipelineState> drawObjectsPipelineState;
 @property (strong, nonatomic) id<MTLDepthStencilState> depthStencilState;
-
-#pragma mark - DOF v2
-
-@property (strong, nonatomic) id<MTLRenderPipelineState> circleOfConfusionPipelineState;
 
 #pragma mark - DOF v1
 
@@ -25,5 +21,7 @@
 @property (strong, nonatomic) id<MTLRenderPipelineState> applyGaussianBlurFieldPipelineState;
 @property (strong, nonatomic) id<MTLRenderPipelineState> compositePipelineState;
 
--(instancetype)initWithDevice:(id<MTLDevice>)device;
+#pragma mark - DOF v2
+
+@property (strong, nonatomic) id<MTLRenderPipelineState> circleOfConfusionPipelineState;
 @end

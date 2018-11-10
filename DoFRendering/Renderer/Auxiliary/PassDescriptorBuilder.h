@@ -6,9 +6,9 @@
 //  Copyright © 2018 Bartłomiej Nowak. All rights reserved.
 //
 
+@import Foundation;
+@import Metal;
 #import "MetalView.h"
-#import <Foundation/Foundation.h>
-#import <Metal/Metal.h>
 
 @interface PassDescriptorBuilder : NSObject
 -(MTLRenderPassDescriptor *)renderObjectsPassDescriptorOfSize:(CGSize)size

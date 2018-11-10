@@ -5,8 +5,6 @@
 //  Created by Bartłomiej Nowak on 03/11/2017.
 //  Copyright © 2017 Bartłomiej Nowak. All rights reserved.
 //
-//  Includes code taken from Metal By Example book repository at: https://github.com/metal-by-example/sample-code
-//
 
 #import "MetalView.h"
 #import "MathFunctions.h"
@@ -44,7 +42,6 @@
     if (self) {
         _metalLayer = (CAMetalLayer *)self.layer;
         _metalLayer.device = device;
-        _clearColor = MTLClearColorMake(0.0, 0.0, 0.0, 1.0);
         self.preferredFramesPerSecond = 60;
     }
     return self;
@@ -63,14 +60,12 @@
 - (void)layoutSubviews {
     [super layoutSubviews];
     
-    // During the first layout pass, we will not be in a view hierarchy, so we take the screen scale
-    // If we've moved to a window by the time our frame is being set, we can take its scale as our own
     CGFloat scale = [UIScreen mainScreen].scale;
     if (self.window) {
         scale = self.window.screen.scale;
     }
     
-    // Since drawable size is in pixels, we need to multiply by the scale to move from points to pixels
+    // Drawable size is in pixels
     CGSize drawableSize = self.bounds.size;
     drawableSize.width *= scale;
     drawableSize.height *= scale;
@@ -95,8 +90,12 @@
     _currentDrawable = [_metalLayer nextDrawable];
     _frameDuration = displayLink.duration;
     
-    if ([self.delegate respondsToSelector:@selector(drawInView:)])
-        [self.delegate drawInView:self];
+    if ([self.delegate respondsToSelector:@selector(drawInView:)]) {
+        [self.delegate drawInView:self
+                  currentDrawable:currentDrawable
+                     drawableSize:_metalLayer.drawableSize
+                    frameDuration:_frameDuration];
+    }
 }
 
 @end

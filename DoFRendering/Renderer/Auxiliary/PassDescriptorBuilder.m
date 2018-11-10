@@ -8,9 +8,6 @@
 
 #import "PassDescriptorBuilder.h"
 
-@interface PassDescriptorBuilder ()
-@end
-
 @implementation PassDescriptorBuilder
 
 -(MTLRenderPassDescriptor *)renderObjectsPassDescriptorOfSize:(CGSize)size

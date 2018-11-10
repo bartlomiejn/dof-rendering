@@ -8,9 +8,6 @@
 
 #import "RenderStateProvider.h"
 
-@interface RenderStateProvider ()
-@end
-
 @implementation RenderStateProvider
 
 #pragma mark - Public

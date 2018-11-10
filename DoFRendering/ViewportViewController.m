@@ -16,6 +16,7 @@
 @interface ViewportViewController ()
 @property (nonatomic, strong) MetalRenderer* renderer;
 @property (nonatomic, strong) MetalView* metalView;
+@property (nonatomic, strong) NSArray<TeapotModel*>* models;
 @end
 
 @implementation ViewportViewController
@@ -51,14 +52,14 @@
 - (void)setupRendererWithDevice:(id<MTLDevice>)device colorFormat:(MTLPixelFormat)format {
     _renderer = [[MetalRenderer alloc] initWithDevice:device];
     _renderer.colorPixelFormat = format;
-    [_renderer setupMeshFromOBJGroup:[self loadOBJGroupFromModelNamed:@"teapot" groupNamed:@"teapot"]];
+//    [_renderer setupMeshFromOBJGroup:[self loadOBJGroupFromModelNamed:@"teapot" groupNamed:@"teapot"]];
 }
 
-- (OBJGroup *)loadOBJGroupFromModelNamed:(NSString *)name groupNamed:(NSString *)groupName {
-    NSURL *modelURL = [[NSBundle mainBundle] URLForResource:name withExtension:@"obj"];
-    OBJModel *model = [[OBJModel alloc] initWithContentsOfURL:modelURL generateNormals:YES];
-    return [model groupForName:groupName];
-}
+//- (OBJGroup *)loadOBJGroupFromModelNamed:(NSString *)name groupNamed:(NSString *)groupName {
+//    NSURL *modelURL = [[NSBundle mainBundle] URLForResource:name withExtension:@"obj"];
+//    OBJModel *model = [[OBJModel alloc] initWithContentsOfURL:modelURL generateNormals:YES];
+//    return [model groupForName:groupName];
+//}
 
 #pragma mark - ViewportViewProtocol
 
@@ -77,7 +78,7 @@
 }
 
 - (void)presentModels:(NSArray<TeapotModel*>*)models {
-    
+    _models = models;
 }
 
 @end

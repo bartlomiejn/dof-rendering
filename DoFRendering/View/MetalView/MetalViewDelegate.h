@@ -9,9 +9,12 @@
 #ifndef MetalViewDelegate_h
 #define MetalViewDelegate_h
 
+@import Foundation;
+#import "MetalView.h"
+
 @protocol MetalViewDelegate <NSObject>
--(void)drawInView:(MetalView *)view;
--(void)frameAdjustedForView:(MetalView *)view;
+-(void)drawToDrawable:(id<CAMetalDrawable>)drawable ofSize:(CGSize)drawableSize frameDuration:(float)frameDuration;
+-(void)frameAdjustedForView:(MetalView*)view;
 @end
 
 #endif /* MetalViewDelegate_h */
