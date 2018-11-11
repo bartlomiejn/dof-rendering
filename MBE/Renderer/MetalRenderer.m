@@ -105,11 +105,11 @@ typedef struct {
 
 -(void)drawInView:(MetalView *)view {
     dispatch_semaphore_wait(self.displaySemaphore, DISPATCH_TIME_FOREVER);
+    self.bufferIndex = (self.bufferIndex + 1) % inFlightBufferCount;
     [self updateUniformsForView:view duration:view.frameDuration];
     
     id<MTLCommandBuffer> commandBuffer = [self.commandQueue commandBuffer];
     [commandBuffer addCompletedHandler:^(id<MTLCommandBuffer> commandBuffer) {
-        self.bufferIndex = (self.bufferIndex + 1) % inFlightBufferCount;
         dispatch_semaphore_signal(self.displaySemaphore);
     }];
     

@@ -389,10 +389,10 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = B6NDM93MJT;
+				DEVELOPMENT_TEAM = 9FTKHT3TNN;
 				INFOPLIST_FILE = MBE/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = "bartlomiej-nowak.MBE";
+				PRODUCT_BUNDLE_IDENTIFIER = "io.bartlomiej-nowak.MBE";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -403,10 +403,10 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = B6NDM93MJT;
+				DEVELOPMENT_TEAM = 9FTKHT3TNN;
 				INFOPLIST_FILE = MBE/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = "bartlomiej-nowak.MBE";
+				PRODUCT_BUNDLE_IDENTIFIER = "io.bartlomiej-nowak.MBE";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
