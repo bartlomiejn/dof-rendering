@@ -9,7 +9,5 @@
 
 # TODO
 - Add real CoC calculations and base sampling off it
-- Fix poor performance
-- Sampling issues that give the grid effect
 
 ![Example image](https://raw.githubusercontent.com/bartlomiejn/dof-rendering-metal/master/dof_rendering.gif)
