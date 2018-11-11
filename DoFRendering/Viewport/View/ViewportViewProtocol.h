@@ -10,11 +10,11 @@
 #define ViewportViewProtocol_h
 
 #import "SliderStackViewModel.h"
-#import "Model.h"
+#import "ModelGroup.h"
 
 @protocol ViewportViewProtocol <NSObject>
 - (void)presentSliders:(SliderStackViewModel*)viewModel;
-- (void)presentModels:(NSArray<Model*>*)models;
+- (void)presentModelGroup:(ModelGroup*)modelGroup;
 - (void)drawNextFrameTo:(id<CAMetalDrawable>)drawable ofSize:(CGSize)drawableSize;
 @end
 

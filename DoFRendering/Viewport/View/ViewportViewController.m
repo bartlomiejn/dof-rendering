@@ -16,7 +16,6 @@
 @interface ViewportViewController ()
 @property (nonatomic, strong) MetalRenderer* renderer;
 @property (nonatomic, strong) MetalView* metalView;
-@property (nonatomic, strong) NSArray<TeapotModel*>* models;
 @end
 
 @implementation ViewportViewController
@@ -83,8 +82,8 @@
                                                constraintEqualToAnchor:self.view.trailingAnchor]]];
 }
 
-- (void)presentModels:(NSArray<Model*>*)models {
-    _renderer.drawedModels = models;
+- (void)presentModelGroup:(ModelGroup*)modelGroup {
+    _renderer.drawableModelGroup = modelGroup;
 }
 
 - (void)drawNextFrameTo:(id<CAMetalDrawable>)drawable ofSize:(CGSize)drawableSize {

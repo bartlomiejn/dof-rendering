@@ -6,13 +6,13 @@
 //  Copyright © 2017 Bartłomiej Nowak. All rights reserved.
 //
 
-#import <Foundation/Foundation.h>
+@import Foundation;
 #import "MetalView.h"
-#import "Model.h"
+#import "ModelGroup.h"
 
 @interface MetalRenderer : NSObject
 @property (nonatomic) MTLPixelFormat colorPixelFormat;
-@property (nonatomic, strong) NSArray<Model*> *drawedModels;
+@property (nonatomic, strong) ModelGroup *drawableModelGroup;
 - (instancetype)initWithDevice:(id<MTLDevice>)device;
 -(void)drawToDrawable:(id<CAMetalDrawable>)drawable ofSize:(CGSize)drawableSize;
 -(void)adjustedDrawableSize:(CGSize)drawableSize;

@@ -72,8 +72,8 @@
     
     self.metalLayer.drawableSize = drawableSize;
     
-    if ([_delegate respondsToSelector:@selector(frameAdjustedForView:)])
-        [self.delegate frameAdjustedForView:self];
+    if ([_delegate respondsToSelector:@selector(adjustedDrawableSize:)])
+        [self.delegate adjustedDrawableSize:drawableSize];
 }
 
 - (void)setupDisplayLink {
