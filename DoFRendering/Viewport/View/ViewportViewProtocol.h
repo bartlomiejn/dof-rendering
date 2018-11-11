@@ -10,7 +10,7 @@
 #define ViewportViewProtocol_h
 
 #import "SliderStackViewModel.h"
-#import "TeapotModel.h"
+#import "Model.h"
 
 @protocol ViewportViewProtocol <NSObject>
 - (void)presentSliders:(SliderStackViewModel*)viewModel;

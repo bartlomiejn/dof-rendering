@@ -10,11 +10,11 @@
 
 @implementation Model
 
--(instancetype)initWithMesh:(OBJMesh*)mesh modelMatrix:(matrix_float4x4)modelMatrix {
+-(instancetype)initWithMesh:(OBJMesh*)mesh transformation:(matrix_float4x4)transformation {
     self = [super init];
     if (self) {
         _mesh = mesh;
-        _modelMatrix = modelMatrix;
+        _transformation = transformation;
     }
     return self;
 }

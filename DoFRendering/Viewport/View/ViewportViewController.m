@@ -83,7 +83,7 @@
                                                constraintEqualToAnchor:self.view.trailingAnchor]]];
 }
 
-- (void)presentModels:(NSArray<TeapotModel*>*)models {
+- (void)presentModels:(NSArray<Model*>*)models {
     _renderer.drawedModels = models;
 }
 
