@@ -43,17 +43,18 @@ typedef struct {
 } CoCUniforms;
 
 @interface MetalRenderer ()
-@property (nonatomic) MTLClearColor clearColor;
+
+// Metal top-level objects
 @property (nonatomic, strong) id<MTLDevice> device;
 @property (nonatomic, strong) id<MTLCommandQueue> commandQueue;
-@property (nonatomic, strong) PassDescriptorBuilder *passDescriptorBuilder;
-@property (nonatomic, strong) RenderStateProvider *renderStateProvider;
-@property (nonatomic, strong) OBJMesh *mesh;
-@property (nonatomic, strong) NSArray<Model*> *models;
-@property (nonatomic, strong) NSArray<id<MTLBuffer>> *modelUniforms;
+
+// Uniforms
+@property (nonatomic, strong) NSArray<id<MTLBuffer>> *drawedModelUniforms;
 @property (nonatomic, strong) id<MTLBuffer> viewProjectionUniforms;
 @property (nonatomic, strong) NSArray<id<MTLBuffer>> *gaussianBlurUniforms;
 @property (nonatomic, strong) id<MTLBuffer> circleOfConfusionUniforms;
+
+// Textures / Stencil states
 @property (nonatomic, strong) id<MTLTexture> colorTexture;
 @property (nonatomic, strong) id<MTLTexture> depthTexture;
 @property (nonatomic, strong) id<MTLTexture> inFocusColorTexture;
@@ -61,33 +62,27 @@ typedef struct {
 @property (nonatomic, strong) id<MTLTexture> blurredOutOfFocusColorTexture;
 @property (nonatomic, strong) id<MTLTexture> blurredOutOfFocusColorTexture2;
 @property (nonatomic, strong) id<MTLDepthStencilState> depthStencilState;
+
+// Auxiliary
+@property (nonatomic, strong) PassDescriptorBuilder *passDescriptorBuilder;
+@property (nonatomic, strong) RenderStateProvider *renderStateProvider;
 @property (nonatomic, strong) dispatch_semaphore_t displaySemaphore;
-@property (assign) NSInteger bufferIndex;
+@property (nonatomic) MTLClearColor clearColor;
+@property (assign) NSInteger currentBufferIndex;
 @property (assign) float rotationX, rotationY, rotationZ, time;
 @end
 
 @implementation MetalRenderer
 
--(instancetype)initWithDevice:(id<MTLDevice>)device {
-    self = [super init];
-    if (self) {
-        self.device = device;
-        self.clearColor = MTLClearColorMake(0.0, 0.0, 0.0, 1.0);
-        self.displaySemaphore = dispatch_semaphore_create(inFlightBufferCount);
-        self.commandQueue = [self.device newCommandQueue];
-        self.renderStateProvider = [[RenderStateProvider alloc] initWithDevice:self.device];
-        self.passDescriptorBuilder = [[PassDescriptorBuilder alloc] init];
-        self.modelUniforms = [self makeDrawModelsUniforms];
-        self.gaussianBlurUniforms = [self makeGaussianBlurUniforms];
-        self.circleOfConfusionUniforms = [self makeCircleOfConfusionUniforms];
-    }
-    return self;
+-(void)setDrawedModels:(NSArray<Model*>*)drawedModels {
+    _drawedModels = drawedModels;
+    _drawedModelUniforms = [self makeDrawedModelUniforms];
 }
 
--(NSArray<id<MTLBuffer>> *)makeDrawModelsUniforms {
-    int teapotCount = 3;
-    NSMutableArray *drawObjectUniforms = [[NSMutableArray alloc] init];
-    for (int i = 0; i < teapotCount; i++) {
+-(NSArray<id<MTLBuffer>> *)makeDrawedModelUniforms
+{
+    NSMutableArray *drawObjectUniforms = [NSMutableArray new];
+    for (int i = 0; i < _drawedModels.count; i++) {
         id<MTLBuffer> buffer = [self.device newBufferWithLength:sizeof(ModelUniforms) * inFlightBufferCount
                                                         options:MTLResourceOptionCPUCacheModeDefault];
         buffer.label = [[NSString alloc] initWithFormat:@"Model Uniforms %d", i];
@@ -96,8 +91,26 @@ typedef struct {
     return drawObjectUniforms;
 }
 
--(NSArray<id<MTLBuffer>> *)makeGaussianBlurUniforms {
-    NSMutableArray *uniforms = [[NSMutableArray alloc] init];
+-(instancetype)initWithDevice:(id<MTLDevice>)device
+{
+    self = [super init];
+    if (self) {
+        self.device = device;
+        self.commandQueue = [self.device newCommandQueue];
+        self.drawedModelUniforms = [self makeDrawedModelUniforms];
+        self.gaussianBlurUniforms = [self makeGaussianBlurUniforms];
+        self.circleOfConfusionUniforms = [self makeCircleOfConfusionUniforms];
+        self.renderStateProvider = [[RenderStateProvider alloc] initWithDevice:self.device];
+        self.passDescriptorBuilder = [PassDescriptorBuilder new];
+        self.displaySemaphore = dispatch_semaphore_create(inFlightBufferCount);
+        self.clearColor = MTLClearColorMake(0.0, 0.0, 0.0, 1.0);
+    }
+    return self;
+}
+
+-(NSArray<id<MTLBuffer>> *)makeGaussianBlurUniforms
+{
+    NSMutableArray *uniforms = [NSMutableArray new];
     for (int i = 0; i < 2; i++) {
         id<MTLBuffer> buffer = [self.device newBufferWithLength:sizeof(GaussianBlurUniforms)
                                                         options:MTLResourceOptionCPUCacheModeDefault];
@@ -107,26 +120,23 @@ typedef struct {
     return uniforms;
 }
 
--(id<MTLBuffer>)makeCircleOfConfusionUniforms {
+-(id<MTLBuffer>)makeCircleOfConfusionUniforms
+{
     id<MTLBuffer> buffer = [self.device newBufferWithLength:sizeof(CoCUniforms)
                                                     options:MTLResourceOptionCPUCacheModeDefault];
     buffer.label = @"Circle Of Confusion Pass Uniforms";
     return buffer;
 }
 
--(void)setupMeshFromOBJGroup:(OBJGroup*)group {
-    self.mesh = [[OBJMesh alloc] initWithGroup:group device:self.device];
-}
-
 #pragma mark - MetalViewDelegate
 
--(void)drawToDrawable:(id<CAMetalDrawable>)drawable ofSize:(CGSize)drawableSize frameDuration:(float)frameDuration
+-(void)drawToDrawable:(id<CAMetalDrawable>)drawable ofSize:(CGSize)drawableSize
 {
     dispatch_semaphore_wait(self.displaySemaphore, DISPATCH_TIME_FOREVER);
-    [self updateUniformsForView:view duration:frameDuration];
+    [self updateUniformsWith:drawableSize];
     id<MTLCommandBuffer> commandBuffer = [self.commandQueue commandBuffer];
     [commandBuffer addCompletedHandler:^(id<MTLCommandBuffer> commandBuffer) {
-        self.bufferIndex = (self.bufferIndex + 1) % inFlightBufferCount;
+        self.currentBufferIndex = (self.currentBufferIndex + 1) % inFlightBufferCount;
         dispatch_semaphore_signal(self.displaySemaphore);
     }];
     id<MTLCaptureScope> scope = [[MTLCaptureManager sharedCaptureManager] newCaptureScopeWithDevice:self.device];
@@ -138,41 +148,39 @@ typedef struct {
     [self horizontalBlurOnOutOfFocusTextureIn:commandBuffer with:drawableSize];
     [self verticalBlurOnOutOfFocusTextureIn:commandBuffer with:drawableSize];
     [self compositeTexturesIn:commandBuffer to:drawable.texture with:drawableSize];
-    [commandBuffer presentDrawable:view.currentDrawable];
+    [commandBuffer presentDrawable:drawable];
     [scope endScope];
     [commandBuffer commit];
 }
 
 
--(void)frameAdjustedForView:(MetalView *)view
+-(void)adjustedDrawableSize:(CGSize)drawableSize
 {
-    CGSize drawableSize = view.metalLayer.drawableSize;
     if (self.colorTexture.width != drawableSize.width || self.colorTexture.height != drawableSize.height) {
-        self.colorTexture = [self readAndRenderTargetUsageTextureOfSize:drawableSize format:MTLPixelFormatBGRA8Unorm];
+        self.colorTexture = [self readAndRenderTargetTextureOfSize:drawableSize format:MTLPixelFormatBGRA8Unorm];
     }
     if (self.depthTexture.width != drawableSize.width || self.depthTexture.height != drawableSize.height) {
-        self.depthTexture = [self readAndRenderTargetUsageTextureOfSize:drawableSize format:MTLPixelFormatDepth32Float];
+        self.depthTexture = [self readAndRenderTargetTextureOfSize:drawableSize format:MTLPixelFormatDepth32Float];
     }
     if (self.inFocusColorTexture.width != drawableSize.width
     || self.inFocusColorTexture.height != drawableSize.height) {
-        self.inFocusColorTexture = [self readAndRenderTargetUsageTextureOfSize:drawableSize
-                                                                        format:MTLPixelFormatBGRA8Unorm];
+        self.inFocusColorTexture = [self readAndRenderTargetTextureOfSize:drawableSize format:MTLPixelFormatBGRA8Unorm];
     }
     if (self.outOfFocusColorTexture.width != drawableSize.width
     || self.outOfFocusColorTexture.height != drawableSize.height) {
-        self.outOfFocusColorTexture = [self readAndRenderTargetUsageTextureOfSize:drawableSize
-                                                                           format:MTLPixelFormatBGRA8Unorm];
+        self.outOfFocusColorTexture = [self readAndRenderTargetTextureOfSize:drawableSize
+                                                                      format:MTLPixelFormatBGRA8Unorm];
     }
     if (self.blurredOutOfFocusColorTexture.width != drawableSize.width
     || self.blurredOutOfFocusColorTexture.height != drawableSize.height) {
-        self.blurredOutOfFocusColorTexture = [self readAndRenderTargetUsageTextureOfSize:drawableSize
-                                                                                  format:MTLPixelFormatBGRA8Unorm];
+        self.blurredOutOfFocusColorTexture = [self readAndRenderTargetTextureOfSize:drawableSize
+                                                                             format:MTLPixelFormatBGRA8Unorm];
     }
     
     if (self.blurredOutOfFocusColorTexture2.width != drawableSize.width
     || self.blurredOutOfFocusColorTexture2.height != drawableSize.height) {
-        self.blurredOutOfFocusColorTexture2 = [self readAndRenderTargetUsageTextureOfSize:drawableSize
-                                                                                   format:MTLPixelFormatBGRA8Unorm];
+        self.blurredOutOfFocusColorTexture2 = [self readAndRenderTargetTextureOfSize:drawableSize
+                                                                              format:MTLPixelFormatBGRA8Unorm];
     }
 }
 
@@ -190,9 +198,9 @@ typedef struct {
     [encoder setFrontFacingWinding:MTLWindingCounterClockwise];
     [encoder setCullMode:MTLCullModeBack];
     [encoder setVertexBuffer:self.mesh.vertexBuffer offset:0 atIndex:0];
-    const NSUInteger uniformBufferOffset = sizeof(ViewProjectionUniforms) * self.bufferIndex;
-    for (int i = 0; i < self.modelUniforms.count; i++) {
-        [encoder setVertexBuffer:self.modelUniforms[i] offset:uniformBufferOffset atIndex:1];
+    const NSUInteger uniformBufferOffset = sizeof(ViewProjectionUniforms) * self.currentBufferIndex;
+    for (int i = 0; i < self.drawedModelUniforms.count; i++) {
+        [encoder setVertexBuffer:self.drawedModelUniforms[i] offset:uniformBufferOffset atIndex:1];
         [encoder drawIndexedPrimitives:MTLPrimitiveTypeTriangle
                             indexCount:[self.mesh.indexBuffer length] / sizeof(MetalIndex)
                              indexType:MetalIndexType
@@ -202,7 +210,7 @@ typedef struct {
     [encoder endEncoding];
 }
 
--(void)circleOfConfusionTo:(id<MTLCommandBuffer>)commandBuffer with:(CGSize)drawableSize
+-(void)circleOfConfusionIn:(id<MTLCommandBuffer>)commandBuffer with:(CGSize)drawableSize
 {
     MTLRenderPassDescriptor *desc = [self.passDescriptorBuilder outputToDepthTextureDescriptorOfSize:drawableSize
                                                                                            toTexture:self.depthTexture];
@@ -246,7 +254,7 @@ typedef struct {
     [encoder endEncoding];
 }
 
--(void)horizontalBlurOnOutOfFocusTextureTo:(id<MTLCommandBuffer>)commandBuffer with:(CGSize)drawableSize
+-(void)horizontalBlurOnOutOfFocusTextureIn:(id<MTLCommandBuffer>)commandBuffer with:(CGSize)drawableSize
 {
     MTLRenderPassDescriptor *descriptor
     = [self.passDescriptorBuilder outputToColorTextureDescriptorOfSize:drawableSize
@@ -262,7 +270,7 @@ typedef struct {
     [encoder endEncoding];
 }
 
--(void)verticalBlurOnOutOfFocusTextureTo:(id<MTLCommandBuffer>)commandBuffer with:(CGSize)drawableSize
+-(void)verticalBlurOnOutOfFocusTextureIn:(id<MTLCommandBuffer>)commandBuffer with:(CGSize)drawableSize
 {
     MTLRenderPassDescriptor *descriptor
     = [self.passDescriptorBuilder outputToColorTextureDescriptorOfSize:drawableSize
@@ -278,7 +286,7 @@ typedef struct {
     [encoder endEncoding];
 }
 
--(void)compositeTexturesWith:(id<MTLCommandBuffer>)commandBuffer to:(id<MTLTexture>)texture with:(CGSize)drawableSize
+-(void)compositeTexturesIn:(id<MTLCommandBuffer>)commandBuffer to:(id<MTLTexture>)texture with:(CGSize)drawableSize
 {
     MTLRenderPassDescriptor *descriptor = [self.passDescriptorBuilder
                                            outputToColorTextureDescriptorOfSize:drawableSize
@@ -293,20 +301,12 @@ typedef struct {
     [encoder endEncoding];
 }
 
--(void)updateUniformsForView:(MetalView *)view duration:(NSTimeInterval)duration
+-(void)updateUniformsWith:(CGSize)drawableSize
 {
-    self.time += duration;
-    self.rotationX += duration * (M_PI / 2);
-    self.rotationY += duration * (M_PI / 3);
-    self.rotationZ = 0;
-    
     for (int i = 0; i < 2; i++) {
         GaussianBlurUniforms uniforms;
         uniforms.isVertical = i == 0 ? true : false;
-        uniforms.imageDimensions = (vector_float2) {
-            view.metalLayer.drawableSize.width,
-            view.metalLayer.drawableSize.height
-        };
+        uniforms.imageDimensions = (vector_float2) { drawableSize.width, drawableSize.height };
         uniforms.blurRadius = 3.0;
         memcpy(self.gaussianBlurUniforms[i].contents, &uniforms, sizeof(uniforms));
     }
@@ -318,65 +318,34 @@ typedef struct {
         memcpy(self.circleOfConfusionUniforms.contents, &uniforms, sizeof(uniforms));
     }
         
-    const NSUInteger uniformBufferOffset = sizeof(ViewUniforms) * self.bufferIndex;
-    for (int i = 0; i < self.modelUniforms.count; i++) {
-        ViewUniforms uniforms;
-        uniforms.modelMatrix = [self modelMatrixForTeapotIndex:i];
+    const NSUInteger uniformBufferOffset = sizeof(ViewProjectionUniforms) * self.currentBufferIndex;
+    for (int i = 0; i < self.drawedModelUniforms.count; i++) {
+        ViewProjectionUniforms uniforms;
         uniforms.viewMatrix = [self viewMatrix];
-        uniforms.projectionMatrix = [self projectionMatrixForView:view];
-        memcpy([self.modelUniforms[i] contents] + uniformBufferOffset, &uniforms, sizeof(uniforms));
+        uniforms.projectionMatrix = [self projectionMatrixWith:drawableSize];
+        memcpy([self.drawedModelUniforms[i] contents] + uniformBufferOffset, &uniforms, sizeof(uniforms));
     }
 }
 
--(matrix_float4x4)modelMatrixForTeapotIndex:(int)index {
-    vector_float3 translation;
-    if (index == 1) {
-        translation = (vector_float3){ 0, 0, sinf(5 * self.time) * 0.5 + 1.5 };
-    } else if (index == 2) {
-        translation = (vector_float3){ 0.8, 12, -20.0 };
-    } else {
-        translation = (vector_float3){ -0.7, -4.1, -3.0 };
-    }
-    const matrix_float4x4 transMatrix = matrix_float4x4_translation(translation);
-
-    const vector_float3 xAxis = { 1, 0, 0 };
-    const vector_float3 yAxis = { 0, 1, 0 };
-    const vector_float3 zAxis = { 0, 0, 1 };
-    const matrix_float4x4 xRot = matrix_float4x4_rotation(xAxis, self.rotationX);
-    const matrix_float4x4 yRot = matrix_float4x4_rotation(yAxis, self.rotationY);
-    const matrix_float4x4 zRot = matrix_float4x4_rotation(zAxis, self.rotationZ);
-    const matrix_float4x4 rotMatrix = matrix_multiply(matrix_multiply(xRot, yRot), zRot);
-    
-    float scaleFactor;
-    if (index == 1) {
-        scaleFactor = 2.8;
-    } else if (index == 2) {
-        scaleFactor = sinf(5 * self.time) * 0.5 + 6;
-    } else {
-        scaleFactor = sinf(5 * self.time) * 0.5 + 3;
-    }
-    const matrix_float4x4 scaleMatrix = matrix_float4x4_uniform_scale(scaleFactor);
-    
-    return matrix_multiply(matrix_multiply(transMatrix, rotMatrix), scaleMatrix);
-}
-
--(matrix_float4x4)viewMatrix {
+-(matrix_float4x4)viewMatrix
+{
     const vector_float3 cameraTranslation = { 0, 0, -5 };
     const matrix_float4x4 viewMatrix = matrix_float4x4_translation(cameraTranslation);
     return viewMatrix;
 }
 
--(matrix_float4x4)projectionMatrixForView:(MetalView *)view {
-    const CGSize drawableSize = view.metalLayer.drawableSize;
-    const float aspect = drawableSize.width / drawableSize.height;
+-(matrix_float4x4)projectionMatrixWith:(CGSize)drawableSize
+{
+    const float aspectRatio = drawableSize.width / drawableSize.height;
     const float fov = (2 * M_PI) / 5;
     const float near = 1.0;
     const float far = 100;
-    const matrix_float4x4 projectionMatrix = matrix_float4x4_perspective(aspect, fov, near, far);
+    const matrix_float4x4 projectionMatrix = matrix_float4x4_perspective(aspectRatio, fov, near, far);
     return projectionMatrix;
 }
 
--(id<MTLTexture>)readAndRenderTargetUsageTextureOfSize:(CGSize)size format:(MTLPixelFormat)format {
+-(id<MTLTexture>)readAndRenderTargetTextureOfSize:(CGSize)size format:(MTLPixelFormat)format
+{
     MTLTextureDescriptor *desc = [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:format
                                                                                     width:size.width
                                                                                    height:size.height

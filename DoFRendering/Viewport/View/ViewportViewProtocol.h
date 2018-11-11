@@ -14,7 +14,8 @@
 
 @protocol ViewportViewProtocol <NSObject>
 - (void)presentSliders:(SliderStackViewModel*)viewModel;
-- (void)presentModels:(NSArray<TeapotModel*>*)models;
+- (void)presentModels:(NSArray<Model*>*)models;
+- (void)drawNextFrameTo:(id<CAMetalDrawable>)drawable ofSize:(CGSize)drawableSize;
 @end
 
 #endif /* ViewportViewProtocol_h */

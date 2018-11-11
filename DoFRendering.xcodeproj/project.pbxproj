@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		604E6BBC2194AEC4005FAF4A /* View.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 604E6BBB2194AEC4005FAF4A /* View.storyboard */; };
 		604E6BBF2194AFA0005FAF4A /* SliderStackView.m in Sources */ = {isa = PBXBuildFile; fileRef = 604E6BBE2194AFA0005FAF4A /* SliderStackView.m */; };
 		604E6BC22194AFBC005FAF4A /* SliderView.m in Sources */ = {isa = PBXBuildFile; fileRef = 604E6BC12194AFBC005FAF4A /* SliderView.m */; };
 		604E6BC42194AFC6005FAF4A /* SliderView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 604E6BC32194AFC6005FAF4A /* SliderView.xib */; };
@@ -17,7 +16,6 @@
 		60DD2CE721971A5F007B2CBD /* DrawObjectsRenderingPass.m in Sources */ = {isa = PBXBuildFile; fileRef = 60DD2CE621971A5F007B2CBD /* DrawObjectsRenderingPass.m */; };
 		60DD2CEE21971BE0007B2CBD /* Model.m in Sources */ = {isa = PBXBuildFile; fileRef = 60DD2CED21971BE0007B2CBD /* Model.m */; };
 		60DD2CF221971D41007B2CBD /* DrawObjects.metal in Sources */ = {isa = PBXBuildFile; fileRef = 60DD2CF121971D41007B2CBD /* DrawObjects.metal */; };
-		60DD2CF521971E47007B2CBD /* TeapotModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 60DD2CF421971E47007B2CBD /* TeapotModel.m */; };
 		60EEBCD5205C1D2D00D2EEDA /* teapot.obj in Resources */ = {isa = PBXBuildFile; fileRef = 60EEBCD4205C1D2D00D2EEDA /* teapot.obj */; };
 		60EEBCDA205DAC9700D2EEDA /* RenderStateProvider.m in Sources */ = {isa = PBXBuildFile; fileRef = 60EEBCD9205DAC9700D2EEDA /* RenderStateProvider.m */; };
 		60EEBCE12060142600D2EEDA /* PassDescriptorBuilder.m in Sources */ = {isa = PBXBuildFile; fileRef = 60EEBCE02060142600D2EEDA /* PassDescriptorBuilder.m */; };
@@ -39,7 +37,6 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		604E6BBB2194AEC4005FAF4A /* View.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = View.storyboard; sourceTree = "<group>"; };
 		604E6BBD2194AFA0005FAF4A /* SliderStackView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SliderStackView.h; sourceTree = "<group>"; };
 		604E6BBE2194AFA0005FAF4A /* SliderStackView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SliderStackView.m; sourceTree = "<group>"; };
 		604E6BC02194AFBC005FAF4A /* SliderView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SliderView.h; sourceTree = "<group>"; };
@@ -58,10 +55,7 @@
 		60DD2CEC21971BE0007B2CBD /* Model.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Model.h; sourceTree = "<group>"; };
 		60DD2CED21971BE0007B2CBD /* Model.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Model.m; sourceTree = "<group>"; };
 		60DD2CF121971D41007B2CBD /* DrawObjects.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = DrawObjects.metal; sourceTree = "<group>"; };
-		60DD2CF321971E47007B2CBD /* TeapotModel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TeapotModel.h; sourceTree = "<group>"; };
-		60DD2CF421971E47007B2CBD /* TeapotModel.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TeapotModel.m; sourceTree = "<group>"; };
 		60DD2CF621972ED8007B2CBD /* MetalViewDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MetalViewDelegate.h; sourceTree = "<group>"; };
-		60EEBCCF205C114900D2EEDA /* MBETypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MBETypes.h; sourceTree = "<group>"; };
 		60EEBCD4205C1D2D00D2EEDA /* teapot.obj */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = teapot.obj; sourceTree = "<group>"; };
 		60EEBCD8205DAC9700D2EEDA /* RenderStateProvider.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RenderStateProvider.h; sourceTree = "<group>"; };
 		60EEBCD9205DAC9700D2EEDA /* RenderStateProvider.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RenderStateProvider.m; sourceTree = "<group>"; };
@@ -134,17 +128,6 @@
 			path = MetalView;
 			sourceTree = "<group>";
 		};
-		60DD2CEB21971BD0007B2CBD /* Model */ = {
-			isa = PBXGroup;
-			children = (
-				60DD2CF321971E47007B2CBD /* TeapotModel.h */,
-				60DD2CF421971E47007B2CBD /* TeapotModel.m */,
-				60DD2CEC21971BE0007B2CBD /* Model.h */,
-				60DD2CED21971BE0007B2CBD /* Model.m */,
-			);
-			path = Model;
-			sourceTree = "<group>";
-		};
 		60DD2CEF21971D13007B2CBD /* Rendering Passes */ = {
 			isa = PBXGroup;
 			children = (
@@ -155,15 +138,35 @@
 			path = "Rendering Passes";
 			sourceTree = "<group>";
 		};
-		60DD2CF021971D1C007B2CBD /* Auxiliary */ = {
+		60DD2CF721989583007B2CBD /* Presenter */ = {
 			isa = PBXGroup;
 			children = (
-				60EEBCD8205DAC9700D2EEDA /* RenderStateProvider.h */,
-				60EEBCD9205DAC9700D2EEDA /* RenderStateProvider.m */,
-				60EEBCDF2060142600D2EEDA /* PassDescriptorBuilder.h */,
-				60EEBCE02060142600D2EEDA /* PassDescriptorBuilder.m */,
+				60DD2CF8219895CD007B2CBD /* Model */,
+				9F843C041FC7210A00A15944 /* Mesh */,
+				604E6BCD2194B9CF005FAF4A /* ViewportPresenter.h */,
+				604E6BCE2194B9CF005FAF4A /* ViewportPresenter.m */,
+				60EEBCD4205C1D2D00D2EEDA /* teapot.obj */,
 			);
-			path = Auxiliary;
+			path = Presenter;
+			sourceTree = "<group>";
+		};
+		60DD2CF8219895CD007B2CBD /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				60DD2CEC21971BE0007B2CBD /* Model.h */,
+				60DD2CED21971BE0007B2CBD /* Model.m */,
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
+		60DD2CF92198961E007B2CBD /* Viewport */ = {
+			isa = PBXGroup;
+			children = (
+				60DD2CF721989583007B2CBD /* Presenter */,
+				9F2D391D1FBC8E7F00F7578F /* Renderer */,
+				9F2D39181FBC8BD000F7578F /* View */,
+			);
+			path = Viewport;
 			sourceTree = "<group>";
 		};
 		9F066B5E1FACE10C00AF820A = {
@@ -187,18 +190,9 @@
 			isa = PBXGroup;
 			children = (
 				9F2D39191FBC8BD400F7578F /* Auxiliary */,
-				9F843C041FC7210A00A15944 /* Mesh */,
-				9F2D391D1FBC8E7F00F7578F /* Renderer */,
-				9F2D39181FBC8BD000F7578F /* View */,
+				60DD2CF92198961E007B2CBD /* Viewport */,
 				9F066B6A1FACE10C00AF820A /* AppDelegate.h */,
 				9F066B6B1FACE10C00AF820A /* AppDelegate.m */,
-				604E6BCD2194B9CF005FAF4A /* ViewportPresenter.h */,
-				604E6BCE2194B9CF005FAF4A /* ViewportPresenter.m */,
-				604E6BD02194BD3E005FAF4A /* ViewportViewProtocol.h */,
-				9F066B6D1FACE10C00AF820A /* ViewportViewController.h */,
-				9F066B6E1FACE10C00AF820A /* ViewportViewController.m */,
-				604E6BBB2194AEC4005FAF4A /* View.storyboard */,
-				60EEBCD4205C1D2D00D2EEDA /* teapot.obj */,
 				9F066B731FACE10C00AF820A /* Assets.xcassets */,
 				9F066B751FACE10C00AF820A /* LaunchScreen.storyboard */,
 				9F066B781FACE10C00AF820A /* Info.plist */,
@@ -221,6 +215,9 @@
 			children = (
 				604E6BCC2194B80F005FAF4A /* MetalView */,
 				604E6BC82194B2A2005FAF4A /* SliderStackView */,
+				9F066B6D1FACE10C00AF820A /* ViewportViewController.h */,
+				9F066B6E1FACE10C00AF820A /* ViewportViewController.m */,
+				604E6BD02194BD3E005FAF4A /* ViewportViewProtocol.h */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -228,9 +225,9 @@
 		9F2D39191FBC8BD400F7578F /* Auxiliary */ = {
 			isa = PBXGroup;
 			children = (
-				604E6BD12194BFE9005FAF4A /* WeakSelf.h */,
 				9F2D391A1FBC8BF400F7578F /* MathFunctions.h */,
 				9F2D391B1FBC8C2400F7578F /* MathFunctions.m */,
+				604E6BD12194BFE9005FAF4A /* WeakSelf.h */,
 			);
 			path = Auxiliary;
 			sourceTree = "<group>";
@@ -238,9 +235,11 @@
 		9F2D391D1FBC8E7F00F7578F /* Renderer */ = {
 			isa = PBXGroup;
 			children = (
-				60DD2CF021971D1C007B2CBD /* Auxiliary */,
 				60DD2CEF21971D13007B2CBD /* Rendering Passes */,
-				60DD2CEB21971BD0007B2CBD /* Model */,
+				60EEBCD8205DAC9700D2EEDA /* RenderStateProvider.h */,
+				60EEBCD9205DAC9700D2EEDA /* RenderStateProvider.m */,
+				60EEBCDF2060142600D2EEDA /* PassDescriptorBuilder.h */,
+				60EEBCE02060142600D2EEDA /* PassDescriptorBuilder.m */,
 				9F2D391E1FBC8E9D00F7578F /* MetalRenderer.h */,
 				9F2D391F1FBC8E9D00F7578F /* MetalRenderer.m */,
 				9F066B881FACF56800AF820A /* Shaders.metal */,
@@ -256,7 +255,6 @@
 				9F843C061FC7212200A15944 /* Mesh.m */,
 				9F843C0E1FC74D9E00A15944 /* OBJMesh.h */,
 				9F843C0F1FC74D9E00A15944 /* OBJMesh.m */,
-				60EEBCCF205C114900D2EEDA /* MBETypes.h */,
 			);
 			path = Mesh;
 			sourceTree = "<group>";
@@ -331,7 +329,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				9F066B771FACE10C00AF820A /* LaunchScreen.storyboard in Resources */,
-				604E6BBC2194AEC4005FAF4A /* View.storyboard in Resources */,
 				604E6BC42194AFC6005FAF4A /* SliderView.xib in Resources */,
 				9F066B741FACE10C00AF820A /* Assets.xcassets in Resources */,
 				60EEBCD5205C1D2D00D2EEDA /* teapot.obj in Resources */,
@@ -363,7 +360,6 @@
 				60EEBCDA205DAC9700D2EEDA /* RenderStateProvider.m in Sources */,
 				9F843C0D1FC73DA900A15944 /* OBJGroup.mm in Sources */,
 				604E6BBF2194AFA0005FAF4A /* SliderStackView.m in Sources */,
-				60DD2CF521971E47007B2CBD /* TeapotModel.m in Sources */,
 				604E6BCF2194B9CF005FAF4A /* ViewportPresenter.m in Sources */,
 				9F2D39201FBC8E9D00F7578F /* MetalRenderer.m in Sources */,
 				60DD2CEE21971BE0007B2CBD /* Model.m in Sources */,

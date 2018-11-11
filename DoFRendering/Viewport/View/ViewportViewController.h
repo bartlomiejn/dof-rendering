@@ -9,8 +9,9 @@
 @import UIKit;
 #import "ViewportPresenter.h"
 #import "ViewportViewProtocol.h"
+#import "MetalViewDelegate.h"
 
-@interface ViewportViewController : UIViewController<ViewportViewProtocol>
+@interface ViewportViewController : UIViewController<ViewportViewProtocol, MetalViewDelegate>
 @property (nonatomic, strong) ViewportPresenter *presenter;
 @end
 

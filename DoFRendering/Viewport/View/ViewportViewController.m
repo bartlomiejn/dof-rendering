@@ -34,7 +34,7 @@
     MTLPixelFormat colorPixelFormat = MTLPixelFormatBGRA8Unorm;
     [self setupMetalViewWithDevice:device colorFormat:colorPixelFormat];
     [self setupRendererWithDevice:device colorFormat:colorPixelFormat];
-    _metalView.delegate = _renderer;
+    _metalView.delegate = self;
 }
 
 - (void)setupMetalViewWithDevice:(id<MTLDevice>)device colorFormat:(MTLPixelFormat)format {
@@ -45,21 +45,26 @@
     [NSLayoutConstraint activateConstraints:@[[self.view.topAnchor constraintEqualToAnchor:[view topAnchor]],
                                               [self.view.bottomAnchor constraintEqualToAnchor:[view bottomAnchor]],
                                               [self.view.leadingAnchor constraintEqualToAnchor:[view leadingAnchor]],
-                                              [self.view.trailingAnchor constraintEqualToAnchor:[view trailingAnchor]]]];
+                                              [self.view.trailingAnchor
+                                               constraintEqualToAnchor:[view trailingAnchor]]]];
     _metalView = view;
 }
 
 - (void)setupRendererWithDevice:(id<MTLDevice>)device colorFormat:(MTLPixelFormat)format {
     _renderer = [[MetalRenderer alloc] initWithDevice:device];
     _renderer.colorPixelFormat = format;
-//    [_renderer setupMeshFromOBJGroup:[self loadOBJGroupFromModelNamed:@"teapot" groupNamed:@"teapot"]];
 }
 
-//- (OBJGroup *)loadOBJGroupFromModelNamed:(NSString *)name groupNamed:(NSString *)groupName {
-//    NSURL *modelURL = [[NSBundle mainBundle] URLForResource:name withExtension:@"obj"];
-//    OBJModel *model = [[OBJModel alloc] initWithContentsOfURL:modelURL generateNormals:YES];
-//    return [model groupForName:groupName];
-//}
+
+#pragma mark - MetalViewDelegate
+
+-(void)drawToDrawable:(id<CAMetalDrawable>)drawable ofSize:(CGSize)drawableSize frameDuration:(float)frameDuration {
+    [_presenter willRenderNextFrameTo:drawable ofSize:drawableSize frameDuration:frameDuration];
+}
+
+-(void)adjustedDrawableSize:(CGSize)drawableSize {
+    [_renderer adjustedDrawableSize:drawableSize];
+}
 
 #pragma mark - ViewportViewProtocol
 
@@ -74,11 +79,16 @@
     [self.view addSubview:stackView];
     [NSLayoutConstraint activateConstraints:@[[stackView.bottomAnchor constraintEqualToAnchor:self.view.bottomAnchor],
                                               [stackView.leadingAnchor constraintEqualToAnchor:self.view.leadingAnchor],
-                                              [stackView.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor]]];
+                                              [stackView.trailingAnchor
+                                               constraintEqualToAnchor:self.view.trailingAnchor]]];
 }
 
 - (void)presentModels:(NSArray<TeapotModel*>*)models {
-    _models = models;
+    _renderer.drawedModels = models;
+}
+
+- (void)drawNextFrameTo:(id<CAMetalDrawable>)drawable ofSize:(CGSize)drawableSize {
+    [_renderer drawToDrawable:drawable ofSize:drawableSize];
 }
 
 @end

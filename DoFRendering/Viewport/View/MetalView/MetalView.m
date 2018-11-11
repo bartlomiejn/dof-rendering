@@ -90,11 +90,8 @@
     _currentDrawable = [_metalLayer nextDrawable];
     _frameDuration = displayLink.duration;
     
-    if ([self.delegate respondsToSelector:@selector(drawInView:)]) {
-        [self.delegate drawInView:self
-                  currentDrawable:currentDrawable
-                     drawableSize:_metalLayer.drawableSize
-                    frameDuration:_frameDuration];
+    if ([_delegate respondsToSelector:@selector(drawToDrawable:ofSize:frameDuration:)]) {
+        [_delegate drawToDrawable:_currentDrawable ofSize:_metalLayer.drawableSize frameDuration:_frameDuration];
     }
 }
 
