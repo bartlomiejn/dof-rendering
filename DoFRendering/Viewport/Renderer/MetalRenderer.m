@@ -13,24 +13,16 @@
 #import "MetalRenderer.h"
 #import "RenderStateProvider.h"
 #import "PassDescriptorBuilder.h"
+#import "DrawObjectsRenderPassEncoder.h"
 #import "ModelGroup.h"
+#import "ViewProjectionUniforms.h"
+#import "ModelUniforms.h"
+#import "MetalRendererProperties.h"
 #import "MathFunctions.h"
-
-typedef uint16_t MetalIndex;
-const MTLIndexType MetalIndexType = MTLIndexTypeUInt16;
-static const NSInteger inFlightBufferCount = 3;
 
 typedef struct {
     simd_float4 position, color;
 } MetalVertex;
-
-typedef struct {
-    simd_float4x4 modelMatrix;
-} ModelUniforms;
-
-typedef struct {
-    simd_float4x4 viewMatrix, projectionMatrix;
-} ViewProjectionUniforms;
 
 typedef struct {
     simd_bool isVertical;
@@ -44,14 +36,14 @@ typedef struct {
 
 @interface MetalRenderer ()
 
-// Metal top-level objects
 @property (nonatomic, strong) id<MTLDevice> device;
 @property (nonatomic, strong) id<MTLCommandQueue> commandQueue;
+@property (nonatomic, strong) PassDescriptorBuilder* passDescriptorBuilder;
+@property (nonatomic, strong) RenderStateProvider* renderStateProvider;
+@property (nonatomic, strong) DrawObjectsRenderPassEncoder* drawObjectsEncoder;
 
 // Uniforms
-@property (nonatomic, strong) NSArray<NSArray<id<MTLBuffer>>*> *modelGroupUniforms;
-@property (nonatomic, strong) NSArray<id<MTLBuffer>> *viewProjectionUniforms;
-@property (nonatomic, strong) NSArray<id<MTLBuffer>> *gaussianBlurUniforms;
+@property (nonatomic, strong) NSArray<id<MTLBuffer>>* gaussianBlurUniforms;
 @property (nonatomic, strong) id<MTLBuffer> circleOfConfusionUniforms;
 
 // Textures / Stencil states
@@ -64,23 +56,13 @@ typedef struct {
 @property (nonatomic, strong) id<MTLDepthStencilState> depthStencilState;
 
 // Auxiliary
-@property (nonatomic, strong) PassDescriptorBuilder *passDescriptorBuilder;
-@property (nonatomic, strong) RenderStateProvider *renderStateProvider;
 @property (nonatomic, strong) dispatch_semaphore_t displaySemaphore;
 @property (nonatomic) MTLClearColor clearColor;
-@property (assign) NSInteger currentBufferIndex;
-@property (assign) float rotationX, rotationY, rotationZ, time;
+@property (assign) NSInteger currentTripleBufferingIndex;
+
 @end
 
 @implementation MetalRenderer
-
--(void)setDrawableModelGroup:(ModelGroup *)drawableModelGroup
-{
-    _drawableModelGroup = drawableModelGroup;
-    if (_modelGroupUniforms.count != drawableModelGroup.count) {
-        _modelGroupUniforms = [self makeModelGroupUniforms];
-    }
-}
 
 -(instancetype)initWithDevice:(id<MTLDevice>)device
 {
@@ -88,27 +70,18 @@ typedef struct {
     if (self) {
         self.device = device;
         self.commandQueue = [self.device newCommandQueue];
-        self.modelGroupUniforms = [self makeModelGroupUniforms];
+        self.passDescriptorBuilder = [PassDescriptorBuilder new];
+        self.renderStateProvider = [[RenderStateProvider alloc] initWithDevice:self.device];
+        self.drawObjectsEncoder = [[DrawObjectsRenderPassEncoder alloc] initWithDevice:device
+                                                                           passBuilder:self.passDescriptorBuilder
+                                                                 pipelineStateProvider:self.renderStateProvider
+                                                                            clearColor:self.clearColor];
         self.gaussianBlurUniforms = [self makeGaussianBlurUniforms];
         self.circleOfConfusionUniforms = [self makeCircleOfConfusionUniforms];
-        self.renderStateProvider = [[RenderStateProvider alloc] initWithDevice:self.device];
-        self.passDescriptorBuilder = [PassDescriptorBuilder new];
         self.displaySemaphore = dispatch_semaphore_create(inFlightBufferCount);
         self.clearColor = MTLClearColorMake(0.0, 0.0, 0.0, 1.0);
     }
     return self;
-}
-
--(NSArray<id<MTLBuffer>> *)makeModelGroupUniforms
-{
-    NSMutableArray *drawObjectUniforms = [NSMutableArray new];
-    for (int i = 0; i < _drawableModelGroup.count; i++) {
-        id<MTLBuffer> buffer = [self.device newBufferWithLength:sizeof(ModelUniforms) * inFlightBufferCount
-                                                        options:MTLResourceOptionCPUCacheModeDefault];
-        buffer.label = [[NSString alloc] initWithFormat:@"Model %d Uniforms", i];
-        [drawObjectUniforms addObject:buffer];
-    }
-    return drawObjectUniforms;
 }
 
 -(NSArray<id<MTLBuffer>> *)makeGaussianBlurUniforms
@@ -136,17 +109,19 @@ typedef struct {
 -(void)drawToDrawable:(id<CAMetalDrawable>)drawable ofSize:(CGSize)drawableSize
 {
     dispatch_semaphore_wait(self.displaySemaphore, DISPATCH_TIME_FOREVER);
-    self.currentBufferIndex = (self.currentBufferIndex + 1) % inFlightBufferCount;
-    [self updateUniformsWith:drawableSize];
+    self.currentTripleBufferingIndex = (self.currentTripleBufferingIndex + 1) % inFlightBufferCount;
     id<MTLCommandBuffer> commandBuffer = [self.commandQueue commandBuffer];
-    __weak dispatch_semaphore_t weakSemaphore = self.displaySemaphore;
-    [commandBuffer addCompletedHandler:^(id<MTLCommandBuffer> commandBuffer) {
-        dispatch_semaphore_signal(weakSemaphore);
-    }];
-    id<MTLCaptureScope> scope = [[MTLCaptureManager sharedCaptureManager] newCaptureScopeWithDevice:self.device];
-    scope.label = @"Capture Scope";
+    id<MTLCaptureScope> scope = [self makeCaptureScope];
     [scope beginScope];
-    [self drawObjectsIn:commandBuffer with:drawableSize];
+    [self updateUniformsWith:drawableSize];
+    [self addSignalSemaphoreCompletedHandlerTo:commandBuffer];
+    [self.drawObjectsEncoder encodeDrawModelGroup:_drawableModelGroup
+                                  inCommandBuffer:commandBuffer
+                               tripleBufferingIdx:(int)self.currentTripleBufferingIndex
+                                   outputColorTex:self.colorTexture
+                                   outputDepthTex:self.depthTexture
+                                cameraTranslation:(vector_float3){ 0.0f, 0.0f, -5.0f }
+                                       drawableSz:drawableSize];
     [self maskInFocusToTextureIn:commandBuffer with:drawableSize];
     [self maskOutOfFocusToTextureIn:commandBuffer with:drawableSize];
     [self horizontalBlurOnOutOfFocusTextureIn:commandBuffer with:drawableSize];
@@ -156,7 +131,6 @@ typedef struct {
     [scope endScope];
     [commandBuffer commit];
 }
-
 
 -(void)adjustedDrawableSize:(CGSize)drawableSize
 {
@@ -188,31 +162,46 @@ typedef struct {
     }
 }
 
--(void)drawObjectsIn:(id<MTLCommandBuffer>)commandBuffer with:(CGSize)drawableSize
-{
-    MTLRenderPassDescriptor *descriptor
-    = [self.passDescriptorBuilder renderObjectsPassDescriptorOfSize:drawableSize
-                                                         clearColor:self.clearColor
-                                                 outputColorTexture:self.colorTexture
-                                                 outputDepthTexture:self.depthTexture];
-    id<MTLRenderCommandEncoder> encoder = [commandBuffer renderCommandEncoderWithDescriptor:descriptor];
-    [encoder setLabel:@"Draw Objects Encoder"];
-    [encoder setRenderPipelineState:self.renderStateProvider.drawObjectsPipelineState];
-    [encoder setDepthStencilState:self.renderStateProvider.depthStencilState];
-    [encoder setFrontFacingWinding:MTLWindingCounterClockwise];
-    [encoder setCullMode:MTLCullModeBack];
-    [encoder setVertexBuffer:_drawableModelGroup.mesh.vertexBuffer offset:0 atIndex:0];
-    const NSUInteger uniformBufferOffset = sizeof(ViewProjectionUniforms) * self.currentBufferIndex;
-    for (int i = 0; i < _modelGroupUniforms.count; i++) {
-        [encoder setVertexBuffer:_modelGroupUniforms[i] offset:uniformBufferOffset atIndex:1];
-        [encoder drawIndexedPrimitives:MTLPrimitiveTypeTriangle
-                            indexCount:_drawableModelGroup.mesh.indexBuffer.length / sizeof(MetalIndex)
-                             indexType:MetalIndexType
-                           indexBuffer:_drawableModelGroup.mesh.indexBuffer
-                     indexBufferOffset:0];
-    }
-    [encoder endEncoding];
+-(id<MTLCaptureScope>)makeCaptureScope {
+    id<MTLCaptureScope> scope = [[MTLCaptureManager sharedCaptureManager] newCaptureScopeWithDevice:self.device];
+    scope.label = @"Capture Scope";
+    return scope;
 }
+
+-(void)addSignalSemaphoreCompletedHandlerTo:(id<MTLCommandBuffer>)commandBuffer
+{
+    __weak dispatch_semaphore_t weakSemaphore = self.displaySemaphore;
+    [commandBuffer addCompletedHandler:^(id<MTLCommandBuffer> commandBuffer) {
+        dispatch_semaphore_signal(weakSemaphore);
+    }];
+}
+
+-(void)updateUniformsWith:(CGSize)drawableSize
+{
+    for (int i = 0; i < 2; i++) {
+        GaussianBlurUniforms uniforms;
+        uniforms.isVertical = i == 0 ? true : false;
+        uniforms.imageDimensions = (vector_float2) { drawableSize.width, drawableSize.height };
+        uniforms.blurRadius = 3.0;
+        memcpy(self.gaussianBlurUniforms[i].contents, &uniforms, sizeof(uniforms));
+    }
+    
+    {
+        CoCUniforms uniforms;
+        uniforms.focusDist = 10;
+        uniforms.focusRange = 5;
+        memcpy(self.circleOfConfusionUniforms.contents, &uniforms, sizeof(uniforms));
+    }
+    
+    const NSUInteger uniformBufferOffset = sizeof(ViewProjectionUniforms) * self.currentTripleBufferingIndex;
+    for (int i = 0; i < _viewProjectionUniforms; i++) {
+        ViewProjectionUniforms uniforms;
+        uniforms.viewMatrix = [self viewMatrix];
+        uniforms.projectionMatrix = [self projectionMatrixWith:drawableSize];
+        memcpy([self.drawedModelUniforms[i] contents] + uniformBufferOffset, &uniforms, sizeof(uniforms));
+    }
+}
+
 
 -(void)circleOfConfusionIn:(id<MTLCommandBuffer>)commandBuffer with:(CGSize)drawableSize
 {
@@ -303,49 +292,6 @@ typedef struct {
     [encoder setFragmentTexture:self.blurredOutOfFocusColorTexture2 atIndex:1];
     [encoder drawPrimitives:MTLPrimitiveTypeTriangleStrip vertexStart:0 vertexCount:4];
     [encoder endEncoding];
-}
-
--(void)updateUniformsWith:(CGSize)drawableSize
-{
-    for (int i = 0; i < 2; i++) {
-        GaussianBlurUniforms uniforms;
-        uniforms.isVertical = i == 0 ? true : false;
-        uniforms.imageDimensions = (vector_float2) { drawableSize.width, drawableSize.height };
-        uniforms.blurRadius = 3.0;
-        memcpy(self.gaussianBlurUniforms[i].contents, &uniforms, sizeof(uniforms));
-    }
-    
-    {
-        CoCUniforms uniforms;
-        uniforms.focusDist = 10;
-        uniforms.focusRange = 5;
-        memcpy(self.circleOfConfusionUniforms.contents, &uniforms, sizeof(uniforms));
-    }
-        
-    const NSUInteger uniformBufferOffset = sizeof(ViewProjectionUniforms) * self.currentBufferIndex;
-    for (int i = 0; i < _viewProjectionUniforms; i++) {
-        ViewProjectionUniforms uniforms;
-        uniforms.viewMatrix = [self viewMatrix];
-        uniforms.projectionMatrix = [self projectionMatrixWith:drawableSize];
-        memcpy([self.drawedModelUniforms[i] contents] + uniformBufferOffset, &uniforms, sizeof(uniforms));
-    }
-}
-
--(matrix_float4x4)viewMatrix
-{
-    const vector_float3 cameraTranslation = { 0, 0, -5 };
-    const matrix_float4x4 viewMatrix = matrix_float4x4_translation(cameraTranslation);
-    return viewMatrix;
-}
-
--(matrix_float4x4)projectionMatrixWith:(CGSize)drawableSize
-{
-    const float aspectRatio = drawableSize.width / drawableSize.height;
-    const float fov = (2 * M_PI) / 5;
-    const float near = 1.0;
-    const float far = 100;
-    const matrix_float4x4 projectionMatrix = matrix_float4x4_perspective(aspectRatio, fov, near, far);
-    return projectionMatrix;
 }
 
 -(id<MTLTexture>)readAndRenderTargetTextureOfSize:(CGSize)size format:(MTLPixelFormat)format

@@ -16,7 +16,8 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     ViewportViewController *controller = [ViewportViewController new];
-    controller.presenter = [ViewportPresenter new];
+    controller.presenter = [[ViewportPresenter alloc] initWithMeshLoader:[[OBJMeshLoader alloc] init]
+                                                   transformationBuilder:[[ModelTransformationBuilder alloc] init]];
     controller.presenter.view = controller;
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     self.window.rootViewController = controller;
