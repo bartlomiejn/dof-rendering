@@ -1,14 +1,14 @@
 //
-//  RenderStateProvider.m
-//  MBE
+//  PipelineStateProvider.m
+//  DoFRendering
 //
 //  Created by Bartłomiej Nowak on 17.03.2018.
 //  Copyright © 2018 Bartłomiej Nowak. All rights reserved.
 //
 
-#import "RenderStateProvider.h"
+#import "PipelineStateProvider.h"
 
-@implementation RenderStateProvider
+@implementation PipelineStateProvider
 
 #pragma mark - Public
 

@@ -9,7 +9,7 @@
 @import Foundation;
 @import Metal;
 #import "PassDescriptorBuilder.h"
-#import "RenderStateProvider.h"
+#import "PipelineStateProvider.h"
 #import "ModelGroup.h"
 
 NS_ASSUME_NONNULL_BEGIN
@@ -17,7 +17,7 @@ NS_ASSUME_NONNULL_BEGIN
 @interface DrawObjectsRenderPassEncoder : NSObject
 -(instancetype)initWithDevice:(id<MTLDevice>)device
                   passBuilder:(PassDescriptorBuilder*)passBuilder
-        pipelineStateProvider:(RenderStateProvider*)provider
+        pipelineStateProvider:(PipelineStateProvider*)provider
                    clearColor:(MTLClearColor)clearColor;
 -(void)encodeDrawModelGroup:(ModelGroup*)modelGroup
             inCommandBuffer:(id<MTLCommandBuffer>)commandBuffer

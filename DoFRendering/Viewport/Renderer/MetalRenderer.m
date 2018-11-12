@@ -1,6 +1,6 @@
 //
 //  MetalRenderer.m
-//  MBE
+//  DoFRendering
 //
 //  Created by Bartłomiej Nowak on 15/11/2017.
 //  Copyright © 2017 Bartłomiej Nowak. All rights reserved.
@@ -11,7 +11,7 @@
 @import Metal;
 @import QuartzCore.CAMetalLayer;
 #import "MetalRenderer.h"
-#import "RenderStateProvider.h"
+#import "PipelineStateProvider.h"
 #import "PassDescriptorBuilder.h"
 #import "DrawObjectsRenderPassEncoder.h"
 #import "MetalRendererProperties.h"
@@ -39,7 +39,7 @@ typedef struct {
 @property (nonatomic, strong) id<MTLDevice> device;
 @property (nonatomic, strong) id<MTLCommandQueue> commandQueue;
 @property (nonatomic, strong) PassDescriptorBuilder* passDescriptorBuilder;
-@property (nonatomic, strong) RenderStateProvider* renderStateProvider;
+@property (nonatomic, strong) PipelineStateProvider* renderStateProvider;
 @property (nonatomic, strong) DrawObjectsRenderPassEncoder* drawObjectsEncoder;
 
 // Uniforms
@@ -71,7 +71,7 @@ typedef struct {
         self.device = device;
         self.commandQueue = [self.device newCommandQueue];
         self.passDescriptorBuilder = [PassDescriptorBuilder new];
-        self.renderStateProvider = [[RenderStateProvider alloc] initWithDevice:self.device];
+        self.renderStateProvider = [[PipelineStateProvider alloc] initWithDevice:self.device];
         self.drawObjectsEncoder = [[DrawObjectsRenderPassEncoder alloc] initWithDevice:device
                                                                            passBuilder:self.passDescriptorBuilder
                                                                  pipelineStateProvider:self.renderStateProvider
@@ -192,7 +192,7 @@ typedef struct {
     };
     memcpy(self.gaussianBlurUniforms[1].contents, &blurUniformsHorizontal, sizeof(blurUniformsHorizontal));
     
-    CoCUniforms cocUniforms = (CoCUniforms){ .focusDist = 10, .focusRange = 5 };
+    CoCUniforms cocUniforms = (CoCUniforms) { .focusDist = 10, .focusRange = 5 };
     memcpy(self.circleOfConfusionUniforms.contents, &cocUniforms, sizeof(blurUniformsHorizontal));
 }
 

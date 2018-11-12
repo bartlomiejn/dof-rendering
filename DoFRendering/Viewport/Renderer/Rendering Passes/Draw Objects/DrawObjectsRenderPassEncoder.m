@@ -15,7 +15,7 @@
 @interface DrawObjectsRenderPassEncoder ()
 @property (nonatomic, strong) id<MTLDevice> device;
 @property (nonatomic, strong) PassDescriptorBuilder* passBuilder;
-@property (nonatomic, strong) RenderStateProvider* provider;
+@property (nonatomic, strong) PipelineStateProvider* provider;
 @property (nonatomic, strong) id<MTLBuffer> viewProjectionUniformsBuffer;
 @property (nonatomic, strong) id<MTLBuffer> modelGroupUniformsBuffer;
 @property (nonatomic) int modelGroupUniformsBufferCount;
@@ -26,7 +26,7 @@
 
 -(instancetype)initWithDevice:(id<MTLDevice>)device
                   passBuilder:(PassDescriptorBuilder*)passBuilder
-        pipelineStateProvider:(RenderStateProvider*)provider
+        pipelineStateProvider:(PipelineStateProvider*)provider
                    clearColor:(MTLClearColor)clearColor
 {
     self = [super init];
