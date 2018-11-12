@@ -103,7 +103,7 @@
 
 -(void)updateModelUniformsFor:(ModelGroup*)modelGroup
 {
-    // If our currently rendered modelGroup size is bigger than
+    // If our next modelGroup count is bigger than our uniforms buffer, expand it
     if (modelGroup.count > self.modelGroupUniformsBufferCount) {
         self.modelGroupUniformsBuffer = [self makeModelGroupUniformsBufferOn:self.device uniformCount:modelGroup.count];
     }
