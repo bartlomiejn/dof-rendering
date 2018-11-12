@@ -1,5 +1,5 @@
 //
-//  PipelineStateProvider.h
+//  PipelineStateBuilder.h
 //  DoFRendering
 //
 //  Created by Bartłomiej Nowak on 17.03.2018.
@@ -9,7 +9,7 @@
 #import <Foundation/Foundation.h>
 #import <Metal/Metal.h>
 
-@interface PipelineStateProvider : NSObject
+@interface PipelineStateBuilder : NSObject
 -(instancetype)initWithDevice:(id<MTLDevice>)device;
 @property (strong, nonatomic) id<MTLRenderPipelineState> drawObjectsPipelineState;
 @property (strong, nonatomic) id<MTLDepthStencilState> depthStencilState;

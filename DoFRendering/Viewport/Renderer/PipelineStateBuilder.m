@@ -1,16 +1,14 @@
 //
-//  PipelineStateProvider.m
+//  PipelineStateBuilder.m
 //  DoFRendering
 //
 //  Created by Bartłomiej Nowak on 17.03.2018.
 //  Copyright © 2018 Bartłomiej Nowak. All rights reserved.
 //
 
-#import "PipelineStateProvider.h"
+#import "PipelineStateBuilder.h"
 
-@implementation PipelineStateProvider
-
-#pragma mark - Public
+@implementation PipelineStateBuilder
 
 -(instancetype)initWithDevice:(id<MTLDevice>)device {
     self = [super init];
@@ -61,7 +59,7 @@
 }
 
 -(id<MTLRenderPipelineState>)applyGaussianBlurPipelineStateOnDevice:(id<MTLDevice>)device {
-    return [self BGRA8UNormProjectTexturePipelineStateWithLabel:@"Single Side Gaussian Blur Pipeline State"
+    return [self BGRA8UNormProjectTexturePipelineStateWithLabel:@"Gaussian Blur Pipeline State"
                                                        onDevice:device
                                                fragmentFunction:@"gaussian_blur"];
 }
@@ -78,8 +76,6 @@
     depthStencilDescriptor.depthWriteEnabled = YES;
     return [device newDepthStencilStateWithDescriptor:depthStencilDescriptor];
 }
-
-#pragma mark - Private
 
 -(id<MTLRenderPipelineState>)BGRA8UNormProjectTexturePipelineStateWithLabel:(NSString*)label
                                                                    onDevice:(id<MTLDevice>)device

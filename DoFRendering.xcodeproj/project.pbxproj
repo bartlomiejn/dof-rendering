@@ -19,7 +19,7 @@
 		60DD2CFF219898A6007B2CBD /* ModelTransformationBuilder.m in Sources */ = {isa = PBXBuildFile; fileRef = 60DD2CFE219898A6007B2CBD /* ModelTransformationBuilder.m */; };
 		60DD2D0221989CCA007B2CBD /* ModelGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = 60DD2D0121989CCA007B2CBD /* ModelGroup.m */; };
 		60EEBCD5205C1D2D00D2EEDA /* teapot.obj in Resources */ = {isa = PBXBuildFile; fileRef = 60EEBCD4205C1D2D00D2EEDA /* teapot.obj */; };
-		60EEBCDA205DAC9700D2EEDA /* PipelineStateProvider.m in Sources */ = {isa = PBXBuildFile; fileRef = 60EEBCD9205DAC9700D2EEDA /* PipelineStateProvider.m */; };
+		60EEBCDA205DAC9700D2EEDA /* PipelineStateBuilder.m in Sources */ = {isa = PBXBuildFile; fileRef = 60EEBCD9205DAC9700D2EEDA /* PipelineStateBuilder.m */; };
 		60EEBCE12060142600D2EEDA /* PassDescriptorBuilder.m in Sources */ = {isa = PBXBuildFile; fileRef = 60EEBCE02060142600D2EEDA /* PassDescriptorBuilder.m */; };
 		9F066B6C1FACE10C00AF820A /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 9F066B6B1FACE10C00AF820A /* AppDelegate.m */; };
 		9F066B6F1FACE10C00AF820A /* ViewportViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9F066B6E1FACE10C00AF820A /* ViewportViewController.m */; };
@@ -66,8 +66,8 @@
 		60DD2D0021989CCA007B2CBD /* ModelGroup.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ModelGroup.h; sourceTree = "<group>"; };
 		60DD2D0121989CCA007B2CBD /* ModelGroup.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ModelGroup.m; sourceTree = "<group>"; };
 		60EEBCD4205C1D2D00D2EEDA /* teapot.obj */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = teapot.obj; sourceTree = "<group>"; };
-		60EEBCD8205DAC9700D2EEDA /* PipelineStateProvider.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PipelineStateProvider.h; sourceTree = "<group>"; };
-		60EEBCD9205DAC9700D2EEDA /* PipelineStateProvider.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = PipelineStateProvider.m; sourceTree = "<group>"; };
+		60EEBCD8205DAC9700D2EEDA /* PipelineStateBuilder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PipelineStateBuilder.h; sourceTree = "<group>"; };
+		60EEBCD9205DAC9700D2EEDA /* PipelineStateBuilder.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = PipelineStateBuilder.m; sourceTree = "<group>"; };
 		60EEBCDF2060142600D2EEDA /* PassDescriptorBuilder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PassDescriptorBuilder.h; sourceTree = "<group>"; };
 		60EEBCE02060142600D2EEDA /* PassDescriptorBuilder.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = PassDescriptorBuilder.m; sourceTree = "<group>"; };
 		9F066B671FACE10C00AF820A /* DoFRendering.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DoFRendering.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -259,8 +259,8 @@
 			isa = PBXGroup;
 			children = (
 				60DD2CEF21971D13007B2CBD /* Rendering Passes */,
-				60EEBCD8205DAC9700D2EEDA /* PipelineStateProvider.h */,
-				60EEBCD9205DAC9700D2EEDA /* PipelineStateProvider.m */,
+				60EEBCD8205DAC9700D2EEDA /* PipelineStateBuilder.h */,
+				60EEBCD9205DAC9700D2EEDA /* PipelineStateBuilder.m */,
 				60EEBCDF2060142600D2EEDA /* PassDescriptorBuilder.h */,
 				60EEBCE02060142600D2EEDA /* PassDescriptorBuilder.m */,
 				9F2D391E1FBC8E9D00F7578F /* MetalRenderer.h */,
@@ -384,7 +384,7 @@
 				9F843C0A1FC723DF00A15944 /* OBJModel.mm in Sources */,
 				604E6BC22194AFBC005FAF4A /* SliderView.m in Sources */,
 				604E6BC72194B179005FAF4A /* SliderViewModel.m in Sources */,
-				60EEBCDA205DAC9700D2EEDA /* PipelineStateProvider.m in Sources */,
+				60EEBCDA205DAC9700D2EEDA /* PipelineStateBuilder.m in Sources */,
 				9F843C0D1FC73DA900A15944 /* OBJGroup.mm in Sources */,
 				604E6BBF2194AFA0005FAF4A /* SliderStackView.m in Sources */,
 				604E6BCF2194B9CF005FAF4A /* ViewportPresenter.m in Sources */,

@@ -15,7 +15,7 @@
 @interface DrawObjectsRenderPassEncoder ()
 @property (nonatomic, strong) id<MTLDevice> device;
 @property (nonatomic, strong) PassDescriptorBuilder* passBuilder;
-@property (nonatomic, strong) PipelineStateProvider* provider;
+@property (nonatomic, strong) PipelineStateBuilder* provider;
 @property (nonatomic, strong) id<MTLBuffer> viewProjectionUniformsBuffer;
 @property (nonatomic, strong) id<MTLBuffer> modelGroupUniformsBuffer;
 @property (nonatomic) int modelGroupUniformsBufferCount;
@@ -26,7 +26,7 @@
 
 -(instancetype)initWithDevice:(id<MTLDevice>)device
                   passBuilder:(PassDescriptorBuilder*)passBuilder
-        pipelineStateProvider:(PipelineStateProvider*)provider
+        pipelineStateProvider:(PipelineStateBuilder*)provider
                    clearColor:(MTLClearColor)clearColor
 {
     self = [super init];
@@ -88,7 +88,7 @@
     for (int i = 0; i < modelGroup.count; i++) {
         [encoder setVertexBuffer:self.modelGroupUniformsBuffer offset:sizeof(ModelUniforms)*i atIndex:2];
         [encoder drawIndexedPrimitives:MTLPrimitiveTypeTriangle
-                            indexCount:modelGroup.mesh.indexBuffer.length / sizeof(MetalIndex)
+                            indexCount:modelGroup.mesh.indexBuffer.length / sizeof(MetalIndexType)
                              indexType:MetalIndexType
                            indexBuffer:modelGroup.mesh.indexBuffer
                      indexBufferOffset:0];
@@ -109,7 +109,7 @@
     }
     ModelUniforms modelGroupUniforms[modelGroup.count];
     for (int i = 0; i < modelGroup.count; i++) {
-        modelGroupUniforms[i] = (ModelUniforms){ modelGroup.transformations[i] };
+        modelGroupUniforms[i] = (ModelUniforms) { modelGroup.transformations[i] };
     }
     memcpy([self.modelGroupUniformsBuffer contents], &modelGroupUniforms, sizeof(ModelUniforms)*modelGroup.count);
 }
@@ -132,8 +132,7 @@
     const float fov = (2 * M_PI) / 5;
     const float near = 1.0;
     const float far = 100;
-    const matrix_float4x4 projectionMatrix = matrix_float4x4_perspective(aspectRatio, fov, near, far);
-    return projectionMatrix;
+    return matrix_float4x4_perspective(aspectRatio, fov, near, far);
 }
 
 @end

@@ -11,7 +11,7 @@
 @import Metal;
 @import QuartzCore.CAMetalLayer;
 #import "MetalRenderer.h"
-#import "PipelineStateProvider.h"
+#import "PipelineStateBuilder.h"
 #import "PassDescriptorBuilder.h"
 #import "DrawObjectsRenderPassEncoder.h"
 #import "MetalRendererProperties.h"
@@ -19,6 +19,8 @@
 #import "MathFunctions.h"
 #import "ModelUniforms.h"
 #import "ModelGroup.h"
+
+// TODO: Encapsulate other rendering passes and move uniforms struct definitions to their own files
 
 typedef struct {
     simd_float4 position, color;
@@ -39,7 +41,7 @@ typedef struct {
 @property (nonatomic, strong) id<MTLDevice> device;
 @property (nonatomic, strong) id<MTLCommandQueue> commandQueue;
 @property (nonatomic, strong) PassDescriptorBuilder* passDescriptorBuilder;
-@property (nonatomic, strong) PipelineStateProvider* renderStateProvider;
+@property (nonatomic, strong) PipelineStateBuilder* pipelineStateBuilder;
 @property (nonatomic, strong) DrawObjectsRenderPassEncoder* drawObjectsEncoder;
 
 // Uniforms
@@ -71,10 +73,10 @@ typedef struct {
         self.device = device;
         self.commandQueue = [self.device newCommandQueue];
         self.passDescriptorBuilder = [PassDescriptorBuilder new];
-        self.renderStateProvider = [[PipelineStateProvider alloc] initWithDevice:self.device];
+        self.pipelineStateBuilder = [[PipelineStateBuilder alloc] initWithDevice:self.device];
         self.drawObjectsEncoder = [[DrawObjectsRenderPassEncoder alloc] initWithDevice:device
                                                                            passBuilder:self.passDescriptorBuilder
-                                                                 pipelineStateProvider:self.renderStateProvider
+                                                                 pipelineStateProvider:self.pipelineStateBuilder
                                                                             clearColor:self.clearColor];
         self.gaussianBlurUniforms = [self makeGaussianBlurUniforms];
         self.circleOfConfusionUniforms = [self makeCircleOfConfusionUniforms];
@@ -202,7 +204,7 @@ typedef struct {
                                                                                            toTexture:self.depthTexture];
     id<MTLRenderCommandEncoder> encoder = [commandBuffer renderCommandEncoderWithDescriptor:desc];
     [encoder setLabel:@"Circle Of Confusion Pass Encoder"];
-    [encoder setRenderPipelineState:self.renderStateProvider.circleOfConfusionPipelineState];
+    [encoder setRenderPipelineState:self.pipelineStateBuilder.circleOfConfusionPipelineState];
     [encoder setFragmentBuffer:self.circleOfConfusionUniforms offset:0 atIndex:0];
     [encoder setFragmentTexture:self.colorTexture atIndex:0];
     [encoder setFragmentTexture:self.depthTexture atIndex:1];
@@ -218,7 +220,7 @@ typedef struct {
                                                              toTexture:self.inFocusColorTexture];
     id<MTLRenderCommandEncoder> encoder = [commandBuffer renderCommandEncoderWithDescriptor:descriptor];
     [encoder setLabel:@"Mask In Focus Encoder"];
-    [encoder setRenderPipelineState:self.renderStateProvider.maskFocusFieldPipelineState];
+    [encoder setRenderPipelineState:self.pipelineStateBuilder.maskFocusFieldPipelineState];
     [encoder setFragmentTexture:self.colorTexture atIndex:0];
     [encoder setFragmentTexture:self.depthTexture atIndex:1];
     [encoder drawPrimitives:MTLPrimitiveTypeTriangleStrip vertexStart:0 vertexCount:4];
@@ -233,7 +235,7 @@ typedef struct {
                                                              toTexture:self.outOfFocusColorTexture];
     id<MTLRenderCommandEncoder> encoder = [commandBuffer renderCommandEncoderWithDescriptor:descriptor];
     [encoder setLabel:@"Mask Out Of Focus Encoder"];
-    [encoder setRenderPipelineState:self.renderStateProvider.maskOutOfFocusFieldPipelineState];
+    [encoder setRenderPipelineState:self.pipelineStateBuilder.maskOutOfFocusFieldPipelineState];
     [encoder setFragmentTexture:self.colorTexture atIndex:0];
     [encoder setFragmentTexture:self.depthTexture atIndex:1];
     [encoder drawPrimitives:MTLPrimitiveTypeTriangleStrip vertexStart:0 vertexCount:4];
@@ -248,7 +250,7 @@ typedef struct {
                                                              toTexture:self.blurredOutOfFocusColorTexture];
     id<MTLRenderCommandEncoder> encoder = [commandBuffer renderCommandEncoderWithDescriptor:descriptor];
     [encoder setLabel:[[NSString alloc] initWithFormat:@"Horizontal Blur Out Of Focus Encoder"]];
-    [encoder setRenderPipelineState:self.renderStateProvider.applyGaussianBlurFieldPipelineState];
+    [encoder setRenderPipelineState:self.pipelineStateBuilder.applyGaussianBlurFieldPipelineState];
     [encoder setFragmentBuffer:self.gaussianBlurUniforms[0] offset:0 atIndex:0];
     [encoder setFragmentTexture:self.outOfFocusColorTexture atIndex:0];
     [encoder setFragmentTexture:self.depthTexture atIndex:1];
@@ -264,7 +266,7 @@ typedef struct {
                                                              toTexture:self.blurredOutOfFocusColorTexture2];
     id<MTLRenderCommandEncoder> encoder = [commandBuffer renderCommandEncoderWithDescriptor:descriptor];
     [encoder setLabel:[[NSString alloc] initWithFormat:@"Vertical Blur Out Of Focus Encoder"]];
-    [encoder setRenderPipelineState:self.renderStateProvider.applyGaussianBlurFieldPipelineState];
+    [encoder setRenderPipelineState:self.pipelineStateBuilder.applyGaussianBlurFieldPipelineState];
     [encoder setFragmentBuffer:self.gaussianBlurUniforms[1] offset:0 atIndex:0];
     [encoder setFragmentTexture:self.blurredOutOfFocusColorTexture atIndex:0];
     [encoder setFragmentTexture:self.depthTexture atIndex:1];
@@ -280,7 +282,7 @@ typedef struct {
                                            toTexture:texture];
     id<MTLRenderCommandEncoder> encoder = [commandBuffer renderCommandEncoderWithDescriptor:descriptor];
     [encoder setLabel:[[NSString alloc] initWithFormat:@"Composite Encoder"]];
-    [encoder setRenderPipelineState:self.renderStateProvider.compositePipelineState];
+    [encoder setRenderPipelineState:self.pipelineStateBuilder.compositePipelineState];
     [encoder setFragmentTexture:self.inFocusColorTexture atIndex:0];
     [encoder setFragmentTexture:self.blurredOutOfFocusColorTexture2 atIndex:1];
     [encoder drawPrimitives:MTLPrimitiveTypeTriangleStrip vertexStart:0 vertexCount:4];

@@ -13,7 +13,7 @@
 #import <simd/simd.h>
 
 typedef uint16_t MetalIndex;
-const MTLIndexType MetalIndexType = MTLIndexTypeUInt16;
+static const MTLIndexType MetalIndexType = MTLIndexTypeUInt16;
 static const NSInteger inFlightBufferCount = 3;
 
 typedef struct __attribute((packed))
