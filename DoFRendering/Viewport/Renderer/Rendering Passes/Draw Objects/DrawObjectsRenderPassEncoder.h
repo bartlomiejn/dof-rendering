@@ -10,7 +10,6 @@
 @import Metal;
 #import "PassDescriptorBuilder.h"
 #import "RenderStateProvider.h"
-#import "ViewProjectionUniforms.h"
 #import "ModelGroup.h"
 
 NS_ASSUME_NONNULL_BEGIN

@@ -15,16 +15,20 @@ typedef struct {
 } MetalVertex;
 
 typedef struct {
-    float4x4 modelMatrix;
     float4x4 viewMatrix;
     float4x4 projectionMatrix;
-} RenderObjectUniforms;
+} ViewProjectionUniforms;
+
+typedef struct {
+    float4x4 modelMatrix;
+} ModelUniforms;
 
 vertex MetalVertex
 map_vertices(device MetalVertex *inputVerts [[buffer(0)]],
-             constant RenderObjectUniforms *uniforms [[buffer(1)]],
+             constant ViewProjectionUniforms *vpUniforms [[buffer(1)]],
+             constant ModelUniforms *mUniforms [[buffer(2)]],
              uint vid [[vertex_id]]) {
-    float4x4 mvpMatrix = uniforms->projectionMatrix * (uniforms->viewMatrix * uniforms->modelMatrix);
+    float4x4 mvpMatrix = vpUniforms->projectionMatrix * (vpUniforms->viewMatrix * mUniforms->modelMatrix);
     MetalVertex outputVert;
     outputVert.position = mvpMatrix * inputVerts[vid].position;
     outputVert.color = inputVerts[vid].color;

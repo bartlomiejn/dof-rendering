@@ -1,6 +1,6 @@
 #import "OBJModel.h"
 #import "OBJGroup.h"
-#import "MBETypes.h"
+#import "MetalRendererProperties.h"
 
 #include <map>
 #include <vector>
@@ -38,9 +38,9 @@ static bool operator <(const FaceVertex &v0, const FaceVertex &v1)
     std::vector<vector_float4> vertices;
     std::vector<vector_float4> normals;
     std::vector<vector_float2> texCoords;
-    std::vector<MBEVertex> groupVertices;
-    std::vector<MBEIndex> groupIndices;
-    std::map<FaceVertex, MBEIndex> vertexToGroupIndexMap;
+    std::vector<OBJMeshVertex> groupVertices;
+    std::vector<MetalIndex> groupIndices;
+    std::map<FaceVertex, MetalIndex> vertexToGroupIndexMap;
 }
 
 @property (nonatomic, strong) NSMutableArray *mutableGroups;
@@ -216,10 +216,10 @@ static bool operator <(const FaceVertex &v0, const FaceVertex &v1)
     // into the current group object. Because it's fairly uncommon to have cross-group shared vertices, this
     // essentially divides up the vertices into disjoint sets by group.
     
-    NSData *vertexData = [NSData dataWithBytes:groupVertices.data() length:sizeof(MBEVertex) * groupVertices.size()];
+    NSData *vertexData = [NSData dataWithBytes:groupVertices.data() length:sizeof(OBJMeshVertex) * groupVertices.size()];
     self.currentGroup.vertexData = vertexData;
     
-    NSData *indexData = [NSData dataWithBytes:groupIndices.data() length:sizeof(MBEIndex) * groupIndices.size()];
+    NSData *indexData = [NSData dataWithBytes:groupIndices.data() length:sizeof(OBJMeshVertex) * groupIndices.size()];
     self.currentGroup.indexData = indexData;
     
     groupVertices.clear();
@@ -247,9 +247,9 @@ static bool operator <(const FaceVertex &v0, const FaceVertex &v1)
         uint16_t i1 = groupIndices[i + 1];
         uint16_t i2 = groupIndices[i + 2];
         
-        MBEVertex *v0 = &groupVertices[i0];
-        MBEVertex *v1 = &groupVertices[i1];
-        MBEVertex *v2 = &groupVertices[i2];
+        OBJMeshVertex *v0 = &groupVertices[i0];
+        OBJMeshVertex *v1 = &groupVertices[i1];
+        OBJMeshVertex *v2 = &groupVertices[i2];
         
         vector_float3 p0 = v0->position.xyz;
         vector_float3 p1 = v1->position.xyz;
@@ -295,7 +295,7 @@ static bool operator <(const FaceVertex &v0, const FaceVertex &v1)
     }
     else
     {
-        MBEVertex vertex;
+        OBJMeshVertex vertex;
         vertex.position = vertices[fv.vi];
         vertex.normal = (fv.ni != INVALID_INDEX) ? normals[fv.ni] : UP;
         //        vertex.diffuseColor = RGBA_WHITE;

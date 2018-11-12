@@ -8,6 +8,8 @@
 
 #import "DrawObjectsRenderPassEncoder.h"
 #import "MetalRendererProperties.h"
+#import "ViewProjectionUniforms.h"
+#import "ModelUniforms.h"
 #import "MathFunctions.h"
 
 @interface DrawObjectsRenderPassEncoder ()
@@ -15,7 +17,8 @@
 @property (nonatomic, strong) PassDescriptorBuilder* passBuilder;
 @property (nonatomic, strong) RenderStateProvider* provider;
 @property (nonatomic, strong) id<MTLBuffer> viewProjectionUniformsBuffer;
-@property (nonatomic, strong) NSArray<NSArray<id<MTLBuffer>>*>* modelGroupUniformBuffers;
+@property (nonatomic, strong) id<MTLBuffer> modelGroupUniformsBuffer;
+@property (nonatomic) int modelGroupUniformsBufferCount;
 @property (nonatomic) MTLClearColor clearColor;
 @end
 
@@ -32,7 +35,7 @@
         self.passBuilder = passBuilder;
         self.provider = provider;
         self.viewProjectionUniformsBuffer = [self makeViewProjectionUniformsBufferOn:device];
-        self.modelGroupUniformBuffers = @[];
+        self.modelGroupUniformsBuffer = [self makeModelGroupUniformsBufferOn:device uniformCount:0];
         self.clearColor = clearColor;
     }
     return self;
@@ -46,18 +49,17 @@
     return buffer;
 }
 
-//-(NSArray<id<MTLBuffer>> *)makeModelGroupUniforms
-//{
-//    NSMutableArray *drawObjectUniforms = [NSMutableArray new];
-//    for (int i = 0; i < _drawableModelGroup.count; i++) {
-//        id<MTLBuffer> buffer = [self.device newBufferWithLength:sizeof(ModelUniforms) * inFlightBufferCount
-//                                                        options:MTLResourceOptionCPUCacheModeDefault];
-//        buffer.label = [[NSString alloc] initWithFormat:@"Model %d Uniforms", i];
-//        [drawObjectUniforms addObject:buffer];
-//    }
-//    return drawObjectUniforms;
-//}
-
+-(id<MTLBuffer>)makeModelGroupUniformsBufferOn:(id<MTLDevice>)device uniformCount:(int)count
+{
+    self.modelGroupUniformsBufferCount = count;
+    if (count == 0) {
+        return nil;
+    }
+    id<MTLBuffer> buffer = [self.device newBufferWithLength:sizeof(ModelUniforms) * count
+                                                    options:MTLResourceOptionCPUCacheModeDefault];
+    buffer.label = @"Model Uniforms Buffer";
+    return buffer;
+}
 
 -(void)encodeDrawModelGroup:(ModelGroup*)modelGroup
             inCommandBuffer:(id<MTLCommandBuffer>)commandBuffer
@@ -67,7 +69,8 @@
           cameraTranslation:(vector_float3)translation
                  drawableSz:(CGSize)size
 {
-    [self updateViewProjectionUniformsWith:currentBufferIndex drawableSize:size];
+    [self updateModelUniformsFor:modelGroup];
+    [self updateViewProjectionUniformsAt:currentBufferIndex cameraTranslation:translation drawableSize:size];
     MTLRenderPassDescriptor *descriptor = [self.passBuilder renderObjectsPassDescriptorOfSize:size
                                                                                    clearColor:self.clearColor
                                                                            outputColorTexture:colorTexture
@@ -79,9 +82,11 @@
     [encoder setFrontFacingWinding:MTLWindingCounterClockwise];
     [encoder setCullMode:MTLCullModeBack];
     [encoder setVertexBuffer:modelGroup.mesh.vertexBuffer offset:0 atIndex:0];
-    const NSUInteger uniformBufferOffset = sizeof(ViewProjectionUniforms) * currentBufferIndex;
-    for (int i = 0; i < self.modelGroupUniformBuffers.count; i++) {
-        [encoder setVertexBuffer:self.modelGroupUniformBuffers[i] offset:uniformBufferOffset atIndex:1];
+    [encoder setVertexBuffer:self.viewProjectionUniformsBuffer
+                      offset:[self currentViewProjectionBufferOffsetFrom:currentBufferIndex]
+                     atIndex:1];
+    for (int i = 0; i < modelGroup.count; i++) {
+        [encoder setVertexBuffer:self.modelGroupUniformsBuffer offset:sizeof(ModelUniforms)*i atIndex:2];
         [encoder drawIndexedPrimitives:MTLPrimitiveTypeTriangle
                             indexCount:modelGroup.mesh.indexBuffer.length / sizeof(MetalIndex)
                              indexType:MetalIndexType
@@ -91,22 +96,34 @@
     [encoder endEncoding];
 }
 
--(void)updateViewProjectionUniformsWith:(int)currentTripleBufferingIdx drawableSize:(CGSize)size
+-(const NSUInteger)currentViewProjectionBufferOffsetFrom:(int)currentTripleBufferingIndex
 {
-    const NSUInteger uniformBufferOffset = sizeof(ViewProjectionUniforms) * currentTripleBufferingIdx;
-    for (int i = 0; i < inFlightBufferCount; i++) {
-        ViewProjectionUniforms uniforms;
-        uniforms.viewMatrix = [self viewMatrix];
-        uniforms.projectionMatrix = [self projectionMatrixWith:size];
-        memcpy([self.drawedModelUniforms[i] contents] + uniformBufferOffset, &uniforms, sizeof(uniforms));
-    }
+    return sizeof(ViewProjectionUniforms) * currentTripleBufferingIndex;
 }
 
--(matrix_float4x4)viewMatrix
+-(void)updateModelUniformsFor:(ModelGroup*)modelGroup
 {
-    const vector_float3 cameraTranslation = { 0, 0, -5 };
-    const matrix_float4x4 viewMatrix = matrix_float4x4_translation(cameraTranslation);
-    return viewMatrix;
+    // If our currently rendered modelGroup size is bigger than
+    if (modelGroup.count > self.modelGroupUniformsBufferCount) {
+        self.modelGroupUniformsBuffer = [self makeModelGroupUniformsBufferOn:self.device uniformCount:modelGroup.count];
+    }
+    ModelUniforms modelGroupUniforms[modelGroup.count];
+    for (int i = 0; i < modelGroup.count; i++) {
+        modelGroupUniforms[i] = (ModelUniforms){ modelGroup.transformations[i] };
+    }
+    memcpy([self.modelGroupUniformsBuffer contents], &modelGroupUniforms, sizeof(ModelUniforms)*modelGroup.count);
+}
+
+-(void)updateViewProjectionUniformsAt:(int)currentTripleBufferingIdx
+                    cameraTranslation:(vector_float3)translation
+                         drawableSize:(CGSize)size
+{
+    const NSUInteger uniformBufferOffset = sizeof(ViewProjectionUniforms) * currentTripleBufferingIdx;
+    ViewProjectionUniforms uniforms = (ViewProjectionUniforms) {
+        .viewMatrix = matrix_float4x4_translation(translation),
+        .projectionMatrix = [self projectionMatrixWith:size]
+    };
+    memcpy([self.viewProjectionUniformsBuffer contents] + uniformBufferOffset, &uniforms, sizeof(uniforms));
 }
 
 -(matrix_float4x4)projectionMatrixWith:(CGSize)drawableSize

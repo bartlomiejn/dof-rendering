@@ -14,11 +14,11 @@
 #import "RenderStateProvider.h"
 #import "PassDescriptorBuilder.h"
 #import "DrawObjectsRenderPassEncoder.h"
-#import "ModelGroup.h"
-#import "ViewProjectionUniforms.h"
-#import "ModelUniforms.h"
 #import "MetalRendererProperties.h"
+#import "ViewProjectionUniforms.h"
 #import "MathFunctions.h"
+#import "ModelUniforms.h"
+#import "ModelGroup.h"
 
 typedef struct {
     simd_float4 position, color;
@@ -178,30 +178,23 @@ typedef struct {
 
 -(void)updateUniformsWith:(CGSize)drawableSize
 {
-    for (int i = 0; i < 2; i++) {
-        GaussianBlurUniforms uniforms;
-        uniforms.isVertical = i == 0 ? true : false;
-        uniforms.imageDimensions = (vector_float2) { drawableSize.width, drawableSize.height };
-        uniforms.blurRadius = 3.0;
-        memcpy(self.gaussianBlurUniforms[i].contents, &uniforms, sizeof(uniforms));
-    }
+    GaussianBlurUniforms blurUniformsVertical = (GaussianBlurUniforms) {
+        .isVertical = true,
+        .imageDimensions = (vector_float2) { drawableSize.width, drawableSize.height },
+        .blurRadius = 3.0
+    };
+    memcpy(self.gaussianBlurUniforms[0].contents, &blurUniformsVertical, sizeof(blurUniformsVertical));
     
-    {
-        CoCUniforms uniforms;
-        uniforms.focusDist = 10;
-        uniforms.focusRange = 5;
-        memcpy(self.circleOfConfusionUniforms.contents, &uniforms, sizeof(uniforms));
-    }
+    GaussianBlurUniforms blurUniformsHorizontal = (GaussianBlurUniforms) {
+        .isVertical = false,
+        .imageDimensions = (vector_float2) { drawableSize.width, drawableSize.height },
+        .blurRadius = 3.0
+    };
+    memcpy(self.gaussianBlurUniforms[1].contents, &blurUniformsHorizontal, sizeof(blurUniformsHorizontal));
     
-    const NSUInteger uniformBufferOffset = sizeof(ViewProjectionUniforms) * self.currentTripleBufferingIndex;
-    for (int i = 0; i < _viewProjectionUniforms; i++) {
-        ViewProjectionUniforms uniforms;
-        uniforms.viewMatrix = [self viewMatrix];
-        uniforms.projectionMatrix = [self projectionMatrixWith:drawableSize];
-        memcpy([self.drawedModelUniforms[i] contents] + uniformBufferOffset, &uniforms, sizeof(uniforms));
-    }
+    CoCUniforms cocUniforms = (CoCUniforms){ .focusDist = 10, .focusRange = 5 };
+    memcpy(self.circleOfConfusionUniforms.contents, &cocUniforms, sizeof(blurUniformsHorizontal));
 }
-
 
 -(void)circleOfConfusionIn:(id<MTLCommandBuffer>)commandBuffer with:(CGSize)drawableSize
 {

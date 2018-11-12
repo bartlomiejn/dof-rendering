@@ -8,6 +8,7 @@
 
 #import "OBJGroup.h"
 #import "MBETypes.h"
+#import "MetalRendererProperties.h"
 
 @implementation OBJGroup
 
@@ -22,8 +23,8 @@
 
 - (NSString *)description
 {
-    size_t vertCount = self.vertexData.length / sizeof(MBEVertex);
-    size_t indexCount = self.indexData.length / sizeof(MBEIndex);
+    size_t vertCount = self.vertexData.length / sizeof(OBJMeshVertex);
+    size_t indexCount = self.indexData.length / sizeof(MetalIndexType);
     return [NSString stringWithFormat:@"<MBEOBJMesh %p> (\"%@\", %d vertices, %d indices)",
             self, self.name, (int)vertCount, (int)indexCount];
 }

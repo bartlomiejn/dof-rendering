@@ -55,6 +55,7 @@
 		6079222C2199E248004F3B7F /* ViewProjectionUniforms.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewProjectionUniforms.h; sourceTree = "<group>"; };
 		6079222D2199E274004F3B7F /* ModelUniforms.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ModelUniforms.h; sourceTree = "<group>"; };
 		6079222E2199E803004F3B7F /* MetalRendererProperties.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MetalRendererProperties.h; sourceTree = "<group>"; };
+		60792230219A0F92004F3B7F /* MBETypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MBETypes.h; sourceTree = "<group>"; };
 		60DD2CE521971A5F007B2CBD /* DrawObjectsRenderPassEncoder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DrawObjectsRenderPassEncoder.h; sourceTree = "<group>"; };
 		60DD2CE621971A5F007B2CBD /* DrawObjectsRenderPassEncoder.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DrawObjectsRenderPassEncoder.m; sourceTree = "<group>"; };
 		60DD2CF121971D41007B2CBD /* DrawObjects.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = DrawObjects.metal; sourceTree = "<group>"; };
@@ -143,6 +144,8 @@
 				60DD2CE521971A5F007B2CBD /* DrawObjectsRenderPassEncoder.h */,
 				60DD2CE621971A5F007B2CBD /* DrawObjectsRenderPassEncoder.m */,
 				60DD2CF121971D41007B2CBD /* DrawObjects.metal */,
+				6079222C2199E248004F3B7F /* ViewProjectionUniforms.h */,
+				6079222D2199E274004F3B7F /* ModelUniforms.h */,
 			);
 			path = "Draw Objects";
 			sourceTree = "<group>";
@@ -248,6 +251,7 @@
 			children = (
 				9F2D391A1FBC8BF400F7578F /* MathFunctions.h */,
 				9F2D391B1FBC8C2400F7578F /* MathFunctions.m */,
+				60792230219A0F92004F3B7F /* MBETypes.h */,
 				604E6BD12194BFE9005FAF4A /* WeakSelf.h */,
 			);
 			path = Auxiliary;
@@ -263,10 +267,8 @@
 				60EEBCE02060142600D2EEDA /* PassDescriptorBuilder.m */,
 				9F2D391E1FBC8E9D00F7578F /* MetalRenderer.h */,
 				9F2D391F1FBC8E9D00F7578F /* MetalRenderer.m */,
-				9F066B881FACF56800AF820A /* Shaders.metal */,
-				6079222C2199E248004F3B7F /* ViewProjectionUniforms.h */,
-				6079222D2199E274004F3B7F /* ModelUniforms.h */,
 				6079222E2199E803004F3B7F /* MetalRendererProperties.h */,
+				9F066B881FACF56800AF820A /* Shaders.metal */,
 			);
 			path = Renderer;
 			sourceTree = "<group>";
