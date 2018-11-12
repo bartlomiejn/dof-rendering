@@ -15,7 +15,7 @@
 @interface DrawObjectsRenderPassEncoder ()
 @property (nonatomic, strong) id<MTLDevice> device;
 @property (nonatomic, strong) PassDescriptorBuilder* passBuilder;
-@property (nonatomic, strong) PipelineStateBuilder* provider;
+@property (nonatomic, strong) PipelineStateBuilder* pipelineBuilder;
 @property (nonatomic, strong) id<MTLBuffer> viewProjectionUniformsBuffer;
 @property (nonatomic, strong) id<MTLBuffer> modelGroupUniformsBuffer;
 @property (nonatomic) int modelGroupUniformsBufferCount;
@@ -26,14 +26,14 @@
 
 -(instancetype)initWithDevice:(id<MTLDevice>)device
                   passBuilder:(PassDescriptorBuilder*)passBuilder
-        pipelineStateProvider:(PipelineStateBuilder*)provider
+         pipelineStateBuilder:(PipelineStateBuilder*)pipelineBuilder
                    clearColor:(MTLClearColor)clearColor
 {
     self = [super init];
     if (self) {
         self.device = device;
         self.passBuilder = passBuilder;
-        self.provider = provider;
+        self.pipelineBuilder = pipelineBuilder;
         self.viewProjectionUniformsBuffer = [self makeViewProjectionUniformsBufferOn:device];
         self.modelGroupUniformsBuffer = [self makeModelGroupUniformsBufferOn:device uniformCount:0];
         self.clearColor = clearColor;
@@ -77,8 +77,8 @@
                                                                            outputDepthTexture:depthTexture];
     id<MTLRenderCommandEncoder> encoder = [commandBuffer renderCommandEncoderWithDescriptor:descriptor];
     [encoder setLabel:@"Draw Objects Encoder"];
-    [encoder setRenderPipelineState:self.provider.drawObjectsPipelineState];
-    [encoder setDepthStencilState:self.provider.depthStencilState];
+    [encoder setRenderPipelineState:self.pipelineBuilder.drawObjectsPipelineState];
+    [encoder setDepthStencilState:self.pipelineBuilder.depthStencilState];
     [encoder setFrontFacingWinding:MTLWindingCounterClockwise];
     [encoder setCullMode:MTLCullModeBack];
     [encoder setVertexBuffer:modelGroup.mesh.vertexBuffer offset:0 atIndex:0];

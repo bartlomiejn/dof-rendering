@@ -76,7 +76,7 @@ typedef struct {
         self.pipelineStateBuilder = [[PipelineStateBuilder alloc] initWithDevice:self.device];
         self.drawObjectsEncoder = [[DrawObjectsRenderPassEncoder alloc] initWithDevice:device
                                                                            passBuilder:self.passDescriptorBuilder
-                                                                 pipelineStateProvider:self.pipelineStateBuilder
+                                                                 pipelineStateBuilder:self.pipelineStateBuilder
                                                                             clearColor:self.clearColor];
         self.gaussianBlurUniforms = [self makeGaussianBlurUniforms];
         self.circleOfConfusionUniforms = [self makeCircleOfConfusionUniforms];

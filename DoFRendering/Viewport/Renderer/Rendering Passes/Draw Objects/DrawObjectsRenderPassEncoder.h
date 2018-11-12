@@ -17,7 +17,7 @@ NS_ASSUME_NONNULL_BEGIN
 @interface DrawObjectsRenderPassEncoder : NSObject
 -(instancetype)initWithDevice:(id<MTLDevice>)device
                   passBuilder:(PassDescriptorBuilder*)passBuilder
-        pipelineStateProvider:(PipelineStateBuilder*)provider
+         pipelineStateBuilder:(PipelineStateBuilder*)pipelineBuilder
                    clearColor:(MTLClearColor)clearColor;
 -(void)encodeDrawModelGroup:(ModelGroup*)modelGroup
             inCommandBuffer:(id<MTLCommandBuffer>)commandBuffer
