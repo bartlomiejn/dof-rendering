@@ -10,4 +10,4 @@
 
 # In progress
 - Refactoring of the rendering engine for more flexibility
-- Configurable focus view through circle of confusion and bokeh effect implementation
+- Configurable focus range / distance through circle of confusion and bokeh effect implementation
