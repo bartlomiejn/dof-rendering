@@ -9,6 +9,5 @@
   - Composition of both elements into end image
 
 # In progress
-- Complete rendering engine refactoring for more flexibility
 - Configurable focus range / distance
 - Bokeh effect
