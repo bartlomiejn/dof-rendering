@@ -10,5 +10,5 @@
 
 # In progress
 - Complete rendering engine refactoring for more flexibility
-- Configurable focus range / distance through implementing circle of confusion calculations
+- Configurable focus range / distance
 - Bokeh effect
