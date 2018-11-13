@@ -28,12 +28,12 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    [_presenter viewDidLoad];
     id<MTLDevice> device = MTLCreateSystemDefaultDevice();
     MTLPixelFormat colorPixelFormat = MTLPixelFormatBGRA8Unorm;
     [self setupMetalViewWithDevice:device colorFormat:colorPixelFormat];
     [self setupRendererWithDevice:device colorFormat:colorPixelFormat];
     _metalView.delegate = self;
+    [_presenter viewDidLoad];
 }
 
 - (void)setupMetalViewWithDevice:(id<MTLDevice>)device colorFormat:(MTLPixelFormat)format {
