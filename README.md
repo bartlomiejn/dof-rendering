@@ -1,14 +1,13 @@
-# DoF rendering
-
-- Loading of OBJ model files
-- Rendering of OBJ model files
-- Translation, rotation and scale animation of models
-- Masking of out of / in focus parts of image
-- Gaussian blur with approximated constant coefficients of out of focus parts of image
-- Composition of both elements into end image
-
-# TODO
-- Rendering passes optimization
-- Sampling issues that give the grid effect
-
 ![Example image](https://raw.githubusercontent.com/bartlomiejn/dof-rendering-metal/master/dof_rendering.gif)
+
+# DoF rendering
+- Loading and rendering OBJ model files
+- Transformation animation of models
+- Depth of field rendering:
+  - Masking of out of / in focus parts of image
+  - Gaussian blur with approximated constant coefficients of out of focus parts of image
+  - Composition of both elements into end image
+
+# In progress
+- Refactoring of the rendering engine for more flexibility
+- Circle of confusion and bokeh implementation
