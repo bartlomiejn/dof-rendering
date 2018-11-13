@@ -23,7 +23,7 @@
 - (NSString *)description
 {
     size_t vertCount = self.vertexData.length / sizeof(OBJMeshVertex);
-    size_t indexCount = self.indexData.length / sizeof(MetalIndexType);
+    size_t indexCount = self.indexData.length / sizeof(MetalIndex);
     return [NSString stringWithFormat:@"<OBJMesh %p> (\"%@\", %d vertices, %d indices)",
             self, self.name, (int)vertCount, (int)indexCount];
 }

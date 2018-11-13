@@ -219,7 +219,7 @@ static bool operator <(const FaceVertex &v0, const FaceVertex &v1)
     NSData *vertexData = [NSData dataWithBytes:groupVertices.data() length:sizeof(OBJMeshVertex) * groupVertices.size()];
     self.currentGroup.vertexData = vertexData;
     
-    NSData *indexData = [NSData dataWithBytes:groupIndices.data() length:sizeof(OBJMeshVertex) * groupIndices.size()];
+    NSData *indexData = [NSData dataWithBytes:groupIndices.data() length:sizeof(MetalIndex) * groupIndices.size()];
     self.currentGroup.indexData = indexData;
     
     groupVertices.clear();

@@ -76,7 +76,7 @@ typedef struct {
         self.pipelineStateBuilder = [[PipelineStateBuilder alloc] initWithDevice:self.device];
         self.drawObjectsEncoder = [[DrawObjectsRenderPassEncoder alloc] initWithDevice:device
                                                                            passBuilder:self.passDescriptorBuilder
-                                                                 pipelineStateBuilder:self.pipelineStateBuilder
+                                                                  pipelineStateBuilder:self.pipelineStateBuilder
                                                                             clearColor:self.clearColor];
         self.gaussianBlurUniforms = [self makeGaussianBlurUniforms];
         self.circleOfConfusionUniforms = [self makeCircleOfConfusionUniforms];
@@ -175,6 +175,9 @@ typedef struct {
     __weak dispatch_semaphore_t weakSemaphore = self.displaySemaphore;
     [commandBuffer addCompletedHandler:^(id<MTLCommandBuffer> commandBuffer) {
         dispatch_semaphore_signal(weakSemaphore);
+        if (commandBuffer.error) {
+            NSLog(@"Frame finished with error: %@", commandBuffer.error);
+        }
     }];
 }
 

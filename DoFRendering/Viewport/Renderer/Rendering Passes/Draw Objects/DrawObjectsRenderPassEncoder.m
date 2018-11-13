@@ -88,7 +88,7 @@
     for (int i = 0; i < modelGroup.count; i++) {
         [encoder setVertexBuffer:self.modelGroupUniformsBuffer offset:sizeof(ModelUniforms)*i atIndex:2];
         [encoder drawIndexedPrimitives:MTLPrimitiveTypeTriangle
-                            indexCount:modelGroup.mesh.indexBuffer.length / sizeof(MetalIndexType)
+                            indexCount:modelGroup.mesh.indexBuffer.length / sizeof(MetalIndex)
                              indexType:MetalIndexType
                            indexBuffer:modelGroup.mesh.indexBuffer
                      indexBufferOffset:0];

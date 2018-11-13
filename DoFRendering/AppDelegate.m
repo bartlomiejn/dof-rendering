@@ -15,8 +15,9 @@
 @implementation AppDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
+    id<MTLDevice> device = MTLCreateSystemDefaultDevice();
     ViewportViewController *controller = [ViewportViewController new];
-    controller.presenter = [[ViewportPresenter alloc] initWithMeshLoader:[[OBJMeshLoader alloc] init]
+    controller.presenter = [[ViewportPresenter alloc] initWithMeshLoader:[[OBJMeshLoader alloc] initWithDevice:device]
                                                    transformationBuilder:[[ModelTransformationBuilder alloc] init]];
     controller.presenter.view = controller;
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];

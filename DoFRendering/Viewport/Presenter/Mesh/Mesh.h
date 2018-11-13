@@ -12,4 +12,5 @@
 @interface Mesh : NSObject
 @property (nonatomic, readonly) id<MTLBuffer> vertexBuffer;
 @property (nonatomic, readonly) id<MTLBuffer> indexBuffer;
+-(instancetype)initWithVertexBuffer:(id<MTLBuffer>)vertexBuffer indexBuffer:(id<MTLBuffer>)indexBuffer;
 @end
