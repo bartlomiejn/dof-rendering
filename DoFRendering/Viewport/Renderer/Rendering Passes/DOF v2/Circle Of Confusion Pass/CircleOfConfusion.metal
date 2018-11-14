@@ -16,12 +16,12 @@ typedef struct {
 
 constexpr sampler texSampler(address::clamp_to_zero, filter::linear, coord::normalized);
 
-fragment half4
+fragment half
 circle_of_confusion_pass(TextureMappingVertex vert [[stage_in]],
                          constant CoCUniforms *uni [[buffer(0)]],
                          depth2d<float, access::sample> depthTex [[texture(0)]])
 {
     half depth = depthTex.sample(texSampler, vert.textureCoordinate);
     float coc = (depth - uni->focusDist) / uni->focusRange;
-    return half4(coc);
+    return clamp(coc, -1, 1);
 }

@@ -9,10 +9,7 @@
 #import "CircleOfConfusionPassEncoder.h"
 #import "PassDescriptorBuilder.h"
 #import "PipelineStateBuilder.h"
-
-typedef struct {
-    simd_float1 focusDist, focusRange;
-} CoCUniforms;
+#import "CoCUniforms.h"
 
 @interface CircleOfConfusionPassEncoder ()
 @property (nonatomic, strong) id<MTLDevice> device;
@@ -55,7 +52,6 @@ typedef struct {
 
 -(void)updateUniformsWithFocusDistance:(float)focusDistance focusRange:(float)focusRange
 {
-    // TODO: Make this configurable from the sliders
     CoCUniforms cocUniforms = (CoCUniforms) { .focusDist = focusDistance, .focusRange = focusRange };
     memcpy(self.uniforms.contents, &cocUniforms, sizeof(CoCUniforms));
 }
@@ -69,7 +65,7 @@ typedef struct {
     descriptor.label = @"Circle Of Confusion Pipeline State";
     descriptor.vertexFunction = [library newFunctionWithName:@"project_texture"];
     descriptor.fragmentFunction = [library newFunctionWithName:@"circle_of_confusion_pass"];
-    descriptor.colorAttachments[0].pixelFormat = MTLPixelFormatBGRA8Unorm;
+    descriptor.colorAttachments[0].pixelFormat = MTLPixelFormatR8Snorm;
     descriptor.depthAttachmentPixelFormat = MTLPixelFormatInvalid;
     NSError *error = nil;
     id<MTLRenderPipelineState> pipelineState = [device newRenderPipelineStateWithDescriptor:descriptor error:&error];

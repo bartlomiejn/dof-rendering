@@ -69,6 +69,7 @@
 		6079224F219C1D6E004F3B7F /* GaussianBlur.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = GaussianBlur.metal; sourceTree = "<group>"; };
 		60792253219C22A7004F3B7F /* CircleOfConfusionPassEncoder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CircleOfConfusionPassEncoder.h; sourceTree = "<group>"; };
 		60792254219C22A7004F3B7F /* CircleOfConfusionPassEncoder.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CircleOfConfusionPassEncoder.m; sourceTree = "<group>"; };
+		60792256219C3ACE004F3B7F /* CoCUniforms.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CoCUniforms.h; sourceTree = "<group>"; };
 		60DD2CE521971A5F007B2CBD /* DrawObjectsRenderPassEncoder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DrawObjectsRenderPassEncoder.h; sourceTree = "<group>"; };
 		60DD2CE621971A5F007B2CBD /* DrawObjectsRenderPassEncoder.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DrawObjectsRenderPassEncoder.m; sourceTree = "<group>"; };
 		60DD2CF121971D41007B2CBD /* DrawObjects.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = DrawObjects.metal; sourceTree = "<group>"; };
@@ -188,6 +189,7 @@
 				60792253219C22A7004F3B7F /* CircleOfConfusionPassEncoder.h */,
 				60792254219C22A7004F3B7F /* CircleOfConfusionPassEncoder.m */,
 				60792247219C1C70004F3B7F /* CircleOfConfusion.metal */,
+				60792256219C3ACE004F3B7F /* CoCUniforms.h */,
 			);
 			path = "Circle Of Confusion Pass";
 			sourceTree = "<group>";
@@ -573,6 +575,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = B6NDM93MJT;
 				INFOPLIST_FILE = DoFRendering/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.1;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				PRODUCT_BUNDLE_IDENTIFIER = io.bartlomiejnowak.dof;
@@ -588,6 +591,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = B6NDM93MJT;
 				INFOPLIST_FILE = DoFRendering/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.1;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = io.bartlomiejnowak.dof;
 				PRODUCT_NAME = "$(TARGET_NAME)";
