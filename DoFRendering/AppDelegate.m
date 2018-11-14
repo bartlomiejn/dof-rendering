@@ -32,7 +32,6 @@
                                                                                         passBuilder:passBuilder];
     BokehPassEncoder* bokehEncoder = [[BokehPassEncoder alloc] initWithDevice:device passBuilder:passBuilder];
     MetalRenderer* renderer = [[MetalRenderer alloc] initWithDevice:device
-                                              passDescriptorBuilder:passBuilder
                                                  drawObjectsEncoder:drawObjectsEncoder
                                                          cocEncoder:cocEncoder
                                                        bokehEncoder:bokehEncoder];

@@ -18,7 +18,6 @@
 @property (nonatomic) MTLPixelFormat colorPixelFormat;
 @property (nonatomic, strong) ModelGroup *drawableModelGroup;
 -(instancetype)initWithDevice:(id<MTLDevice>)device
-        passDescriptorBuilder:(PassDescriptorBuilder*)passDescriptorBuilder
            drawObjectsEncoder:(DrawObjectsRenderPassEncoder*)drawObjectsEncoder
                    cocEncoder:(CircleOfConfusionPassEncoder*)cocEncoder
                  bokehEncoder:(BokehPassEncoder*)bokehEncoder;
