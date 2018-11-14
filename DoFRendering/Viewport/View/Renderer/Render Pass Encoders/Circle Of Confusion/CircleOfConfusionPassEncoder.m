@@ -11,7 +11,6 @@
 #import "CoCUniforms.h"
 
 @interface CircleOfConfusionPassEncoder ()
-@property (nonatomic, strong) PassDescriptorBuilder* passBuilder;
 @property (nonatomic, strong) id<MTLDevice> device;
 @property (nonatomic, strong) id<MTLRenderPipelineState> pipelineState;
 @property (nonatomic, strong) id<MTLBuffer> uniforms;
@@ -19,11 +18,10 @@
 
 @implementation CircleOfConfusionPassEncoder
 
--(instancetype)initWithDevice:(id<MTLDevice>)device passBuilder:(PassDescriptorBuilder*)passBuilder
+-(instancetype)initWithDevice:(id<MTLDevice>)device
 {
     self = [super init];
     if (self) {
-        self.passBuilder = passBuilder;
         self.device = device;
         self.pipelineState = [self circleOfConfusionPipelineStateOnDevice:device];
         self.uniforms = [self makeUniforms];
@@ -64,7 +62,7 @@
                         drawableSize:(CGSize)drawableSize
                           clearColor:(MTLClearColor)clearColor
 {
-    MTLRenderPassDescriptor* descriptor = [self.passBuilder outputToColorTextureDescriptorOfSize:drawableSize
+    MTLRenderPassDescriptor* descriptor = [self outputToColorTextureDescriptorOfSize:drawableSize
                                                                                       clearColor:clearColor
                                                                                        toTexture:outputTexture];
     id<MTLRenderCommandEncoder> encoder = [commandBuffer renderCommandEncoderWithDescriptor:descriptor];
@@ -80,6 +78,20 @@
 {
     CoCUniforms cocUniforms = (CoCUniforms) { .focusDist = focusDistance, .focusRange = focusRange };
     memcpy(self.uniforms.contents, &cocUniforms, sizeof(CoCUniforms));
+}
+
+-(MTLRenderPassDescriptor *)outputToColorTextureDescriptorOfSize:(CGSize)size
+                                                      clearColor:(MTLClearColor)clearColor
+                                                       toTexture:(id<MTLTexture>)colorTexture
+{
+    MTLRenderPassDescriptor *descriptor = [MTLRenderPassDescriptor renderPassDescriptor];
+    descriptor.colorAttachments[0].texture = colorTexture;
+    descriptor.colorAttachments[0].clearColor = clearColor;
+    descriptor.colorAttachments[0].loadAction = MTLLoadActionLoad;
+    descriptor.colorAttachments[0].storeAction = MTLStoreActionStore;
+    descriptor.renderTargetWidth = size.width;
+    descriptor.renderTargetHeight = size.height;
+    return descriptor;
 }
 
 @end

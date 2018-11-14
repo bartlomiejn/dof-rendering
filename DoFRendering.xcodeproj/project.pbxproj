@@ -28,7 +28,6 @@
 		60DD2CFF219898A6007B2CBD /* ModelTransformationBuilder.m in Sources */ = {isa = PBXBuildFile; fileRef = 60DD2CFE219898A6007B2CBD /* ModelTransformationBuilder.m */; };
 		60DD2D0221989CCA007B2CBD /* ModelGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = 60DD2D0121989CCA007B2CBD /* ModelGroup.m */; };
 		60EEBCD5205C1D2D00D2EEDA /* teapot.obj in Resources */ = {isa = PBXBuildFile; fileRef = 60EEBCD4205C1D2D00D2EEDA /* teapot.obj */; };
-		60EEBCE12060142600D2EEDA /* PassDescriptorBuilder.m in Sources */ = {isa = PBXBuildFile; fileRef = 60EEBCE02060142600D2EEDA /* PassDescriptorBuilder.m */; };
 		9F066B6C1FACE10C00AF820A /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 9F066B6B1FACE10C00AF820A /* AppDelegate.m */; };
 		9F066B6F1FACE10C00AF820A /* ViewportViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9F066B6E1FACE10C00AF820A /* ViewportViewController.m */; };
 		9F066B741FACE10C00AF820A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9F066B731FACE10C00AF820A /* Assets.xcassets */; };
@@ -88,8 +87,6 @@
 		60DD2D0021989CCA007B2CBD /* ModelGroup.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ModelGroup.h; sourceTree = "<group>"; };
 		60DD2D0121989CCA007B2CBD /* ModelGroup.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ModelGroup.m; sourceTree = "<group>"; };
 		60EEBCD4205C1D2D00D2EEDA /* teapot.obj */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = teapot.obj; sourceTree = "<group>"; };
-		60EEBCDF2060142600D2EEDA /* PassDescriptorBuilder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PassDescriptorBuilder.h; sourceTree = "<group>"; };
-		60EEBCE02060142600D2EEDA /* PassDescriptorBuilder.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = PassDescriptorBuilder.m; sourceTree = "<group>"; };
 		9F066B671FACE10C00AF820A /* DoFRendering.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DoFRendering.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9F066B6A1FACE10C00AF820A /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		9F066B6B1FACE10C00AF820A /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -325,8 +322,6 @@
 			isa = PBXGroup;
 			children = (
 				60DD2CEF21971D13007B2CBD /* Render Pass Encoders */,
-				60EEBCDF2060142600D2EEDA /* PassDescriptorBuilder.h */,
-				60EEBCE02060142600D2EEDA /* PassDescriptorBuilder.m */,
 				6079222E2199E803004F3B7F /* MetalRendererProperties.h */,
 				9F2D391E1FBC8E9D00F7578F /* MetalRenderer.h */,
 				9F2D391F1FBC8E9D00F7578F /* MetalRenderer.m */,
@@ -439,7 +434,6 @@
 				60DD2D0221989CCA007B2CBD /* ModelGroup.m in Sources */,
 				60068326219C41CA00AA729F /* BokehPassEncoder.m in Sources */,
 				9F843C101FC74D9E00A15944 /* OBJMesh.m in Sources */,
-				60EEBCE12060142600D2EEDA /* PassDescriptorBuilder.m in Sources */,
 				9F2D391C1FBC8C2400F7578F /* MathFunctions.m in Sources */,
 				60DD2CF221971D41007B2CBD /* DrawObjects.metal in Sources */,
 				60DD2CE721971A5F007B2CBD /* DrawObjectsPassEncoder.m in Sources */,

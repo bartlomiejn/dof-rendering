@@ -41,12 +41,8 @@
 
 -(MetalRenderer*)metalRendererForDevice:(id<MTLDevice>)device
 {
-    PassDescriptorBuilder* passBuilder = [[PassDescriptorBuilder alloc] init];
-    DrawObjectsPassEncoder* drawObjectsEncoder = [[DrawObjectsPassEncoder alloc]
-                                                        initWithDevice:device
-                                                        passBuilder:passBuilder];
-    CircleOfConfusionPassEncoder* cocEncoder = [[CircleOfConfusionPassEncoder alloc] initWithDevice:device
-                                                                                        passBuilder:passBuilder];
+    DrawObjectsPassEncoder* drawObjectsEncoder = [[DrawObjectsPassEncoder alloc] initWithDevice:device];
+    CircleOfConfusionPassEncoder* cocEncoder = [[CircleOfConfusionPassEncoder alloc] initWithDevice:device];
     PreFilterPassEncoder* preFilterEncoder = [[PreFilterPassEncoder alloc] initWithDevice:device];
     BokehPassEncoder* bokehEncoder = [[BokehPassEncoder alloc] initWithDevice:device];
     PostFilterPassEncoder* postFilterEncoder = [[PostFilterPassEncoder alloc] initWithDevice:device];

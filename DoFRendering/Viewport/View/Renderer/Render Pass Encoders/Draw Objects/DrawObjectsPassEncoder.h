@@ -8,13 +8,12 @@
 
 @import Foundation;
 @import Metal;
-#import "PassDescriptorBuilder.h"
 #import "ModelGroup.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
 @interface DrawObjectsPassEncoder : NSObject
--(instancetype)initWithDevice:(id<MTLDevice>)device passBuilder:(PassDescriptorBuilder*)passBuilder;
+-(instancetype)initWithDevice:(id<MTLDevice>)device;
 -(void)encodeDrawModelGroup:(ModelGroup*)modelGroup
             inCommandBuffer:(id<MTLCommandBuffer>)commandBuffer
          tripleBufferingIdx:(int)currentBufferIndex

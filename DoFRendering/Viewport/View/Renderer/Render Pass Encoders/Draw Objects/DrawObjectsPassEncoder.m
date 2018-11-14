@@ -13,7 +13,6 @@
 #import "MathFunctions.h"
 
 @interface DrawObjectsPassEncoder ()
-@property (nonatomic, strong) PassDescriptorBuilder* passBuilder;
 @property (nonatomic, strong) id<MTLDevice> device;
 @property (nonatomic, strong) id<MTLRenderPipelineState> pipelineState;
 @property (nonatomic, strong) id<MTLDepthStencilState> depthStencilState;
@@ -24,11 +23,10 @@
 
 @implementation DrawObjectsPassEncoder
 
--(instancetype)initWithDevice:(id<MTLDevice>)device passBuilder:(PassDescriptorBuilder*)passBuilder
+-(instancetype)initWithDevice:(id<MTLDevice>)device
 {
     self = [super init];
     if (self) {
-        self.passBuilder = passBuilder;
         self.device = device;
         self.pipelineState = [self drawObjectsPipelineStateOnDevice:device];
         self.depthStencilState = [self depthStencilStateOnDevice:device];
@@ -92,10 +90,10 @@
 {
     [self updateModelUniformsFor:modelGroup];
     [self updateViewProjectionUniformsAt:currentBufferIndex cameraTranslation:translation drawableSize:size];
-    MTLRenderPassDescriptor *descriptor = [self.passBuilder renderObjectsPassDescriptorOfSize:size
-                                                                                   clearColor:clearColor
-                                                                           outputColorTexture:colorTexture
-                                                                           outputDepthTexture:depthTexture];
+    MTLRenderPassDescriptor *descriptor = [self renderObjectsPassDescriptorOfSize:size
+                                                                       clearColor:clearColor
+                                                               outputColorTexture:colorTexture
+                                                               outputDepthTexture:depthTexture];
     id<MTLRenderCommandEncoder> encoder = [commandBuffer renderCommandEncoderWithDescriptor:descriptor];
     [encoder setLabel:@"Draw Objects Encoder"];
     [encoder setRenderPipelineState:self.pipelineState];
@@ -145,6 +143,26 @@
         .projectionMatrix = [self projectionMatrixWith:size]
     };
     memcpy([self.viewProjectionUniformsBuffer contents] + uniformBufferOffset, &uniforms, sizeof(uniforms));
+}
+
+
+-(MTLRenderPassDescriptor *)renderObjectsPassDescriptorOfSize:(CGSize)size
+                                                   clearColor:(MTLClearColor)clearColor
+                                           outputColorTexture:(id<MTLTexture>)colorTexture
+                                           outputDepthTexture:(id<MTLTexture>)depthTexture
+{
+    MTLRenderPassDescriptor *descriptor = [MTLRenderPassDescriptor renderPassDescriptor];
+    descriptor.colorAttachments[0].texture = colorTexture;
+    descriptor.colorAttachments[0].clearColor = clearColor;
+    descriptor.colorAttachments[0].loadAction = MTLLoadActionClear;
+    descriptor.colorAttachments[0].storeAction = MTLStoreActionStore;
+    descriptor.depthAttachment.texture = depthTexture;
+    descriptor.depthAttachment.clearDepth = 1.0;
+    descriptor.depthAttachment.loadAction = MTLLoadActionClear;
+    descriptor.depthAttachment.storeAction = MTLStoreActionStore;
+    descriptor.renderTargetWidth = size.width;
+    descriptor.renderTargetHeight = size.height;
+    return descriptor;
 }
 
 -(matrix_float4x4)projectionMatrixWith:(CGSize)drawableSize
