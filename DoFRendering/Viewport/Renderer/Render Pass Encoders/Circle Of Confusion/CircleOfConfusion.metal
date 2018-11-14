@@ -8,7 +8,7 @@
 
 #include <metal_stdlib>
 using namespace metal;
-#include "../../TextureMappingVertex.h"
+#include "../TextureMappingVertex.h"
 
 typedef struct {
     float focusDist, focusRange;

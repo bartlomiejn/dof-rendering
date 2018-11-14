@@ -133,14 +133,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		60068323219C41B400AA729F /* Bokeh Pass */ = {
+		60068323219C41B400AA729F /* Bokeh */ = {
 			isa = PBXGroup;
 			children = (
 				60068324219C41CA00AA729F /* BokehPassEncoder.h */,
 				60068325219C41CA00AA729F /* BokehPassEncoder.m */,
 				60068328219C435B00AA729F /* Bokeh.metal */,
 			);
-			path = "Bokeh Pass";
+			path = Bokeh;
 			sourceTree = "<group>";
 		};
 		604E6BC82194B2A2005FAF4A /* SliderStackView */ = {
@@ -181,7 +181,7 @@
 			path = "Draw Objects";
 			sourceTree = "<group>";
 		};
-		60792242219C1BCB004F3B7F /* DOF v1 */ = {
+		60792242219C1BCB004F3B7F /* DOF v1 (unused) */ = {
 			isa = PBXGroup;
 			children = (
 				6079224B219C1D15004F3B7F /* MaskFocusField.metal */,
@@ -189,20 +189,10 @@
 				6079224F219C1D6E004F3B7F /* GaussianBlur.metal */,
 				9F066B881FACF56800AF820A /* ComposeTextures.metal */,
 			);
-			path = "DOF v1";
+			path = "DOF v1 (unused)";
 			sourceTree = "<group>";
 		};
-		60792243219C1BD4004F3B7F /* DOF v2 */ = {
-			isa = PBXGroup;
-			children = (
-				60792246219C1C60004F3B7F /* Circle Of Confusion Pass */,
-				60068323219C41B400AA729F /* Bokeh Pass */,
-				609ED940219C6D32003ADC49 /* Post Filter Pass */,
-			);
-			path = "DOF v2";
-			sourceTree = "<group>";
-		};
-		60792246219C1C60004F3B7F /* Circle Of Confusion Pass */ = {
+		60792246219C1C60004F3B7F /* Circle Of Confusion */ = {
 			isa = PBXGroup;
 			children = (
 				60792253219C22A7004F3B7F /* CircleOfConfusionPassEncoder.h */,
@@ -210,29 +200,31 @@
 				60792247219C1C70004F3B7F /* CircleOfConfusion.metal */,
 				60792256219C3ACE004F3B7F /* CoCUniforms.h */,
 			);
-			path = "Circle Of Confusion Pass";
+			path = "Circle Of Confusion";
 			sourceTree = "<group>";
 		};
-		609ED940219C6D32003ADC49 /* Post Filter Pass */ = {
+		609ED940219C6D32003ADC49 /* Post Filter */ = {
 			isa = PBXGroup;
 			children = (
 				609ED941219C6DE3003ADC49 /* PostFilterPassEncoder.h */,
 				609ED942219C6DE3003ADC49 /* PostFilterPassEncoder.m */,
 				609ED944219C6DF3003ADC49 /* PostFilter.metal */,
 			);
-			path = "Post Filter Pass";
+			path = "Post Filter";
 			sourceTree = "<group>";
 		};
-		60DD2CEF21971D13007B2CBD /* Rendering Passes */ = {
+		60DD2CEF21971D13007B2CBD /* Render Pass Encoders */ = {
 			isa = PBXGroup;
 			children = (
+				60792242219C1BCB004F3B7F /* DOF v1 (unused) */,
 				6079222F2199E8F1004F3B7F /* Draw Objects */,
-				60792242219C1BCB004F3B7F /* DOF v1 */,
-				60792243219C1BD4004F3B7F /* DOF v2 */,
+				60792246219C1C60004F3B7F /* Circle Of Confusion */,
+				60068323219C41B400AA729F /* Bokeh */,
+				609ED940219C6D32003ADC49 /* Post Filter */,
 				60792245219C1C3B004F3B7F /* TextureMappingVertex.h */,
 				60792249219C1CE3004F3B7F /* ProjectTexture.metal */,
 			);
-			path = "Rendering Passes";
+			path = "Render Pass Encoders";
 			sourceTree = "<group>";
 		};
 		60DD2CF721989583007B2CBD /* Presenter */ = {
@@ -336,7 +328,7 @@
 		9F2D391D1FBC8E7F00F7578F /* Renderer */ = {
 			isa = PBXGroup;
 			children = (
-				60DD2CEF21971D13007B2CBD /* Rendering Passes */,
+				60DD2CEF21971D13007B2CBD /* Render Pass Encoders */,
 				60EEBCDF2060142600D2EEDA /* PassDescriptorBuilder.h */,
 				60EEBCE02060142600D2EEDA /* PassDescriptorBuilder.m */,
 				6079222E2199E803004F3B7F /* MetalRendererProperties.h */,

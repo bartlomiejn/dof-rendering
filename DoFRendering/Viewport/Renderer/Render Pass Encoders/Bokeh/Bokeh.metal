@@ -8,7 +8,7 @@
 
 #include <metal_stdlib>
 using namespace metal;
-#include "../../TextureMappingVertex.h"
+#include "../TextureMappingVertex.h"
 
 // From https://github.com/Unity-Technologies/PostProcessing/blob/v2/PostProcessing/Shaders/Builtins/DiskKernels.hlsl
 static constant int diskKernelSampleCount = 16;

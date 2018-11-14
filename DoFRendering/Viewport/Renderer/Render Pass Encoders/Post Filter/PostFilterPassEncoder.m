@@ -46,7 +46,29 @@ inputColorTexture:(id<MTLTexture>)colorTexture
     outputTexture:(id<MTLTexture>)outputTexture
      drawableSize:(CGSize)drawableSize
        clearColor:(MTLClearColor)clearColor {
-    
+    MTLRenderPassDescriptor* descriptor = [self outputToColorTextureDescriptorOfSize:drawableSize
+                                                                          clearColor:clearColor
+                                                                           toTexture:outputTexture];
+    id<MTLRenderCommandEncoder> encoder = [commandBuffer renderCommandEncoderWithDescriptor:descriptor];
+    [encoder setLabel:@"Post-filter Pass Encoder"];
+    [encoder setRenderPipelineState:self.pipelineState];
+    [encoder setFragmentTexture:colorTexture atIndex:0];
+    [encoder drawPrimitives:MTLPrimitiveTypeTriangleStrip vertexStart:0 vertexCount:4];
+    [encoder endEncoding];
+}
+
+-(MTLRenderPassDescriptor *)outputToColorTextureDescriptorOfSize:(CGSize)size
+                                                      clearColor:(MTLClearColor)clearColor
+                                                       toTexture:(id<MTLTexture>)colorTexture
+{
+    MTLRenderPassDescriptor *descriptor = [MTLRenderPassDescriptor renderPassDescriptor];
+    descriptor.colorAttachments[0].texture = colorTexture;
+    descriptor.colorAttachments[0].clearColor = clearColor;
+    descriptor.colorAttachments[0].loadAction = MTLLoadActionLoad;
+    descriptor.colorAttachments[0].storeAction = MTLStoreActionStore;
+    descriptor.renderTargetWidth = size.width;
+    descriptor.renderTargetHeight = size.height;
+    return descriptor;
 }
 
 @end

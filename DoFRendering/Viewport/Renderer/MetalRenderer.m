@@ -87,6 +87,11 @@
                   outputTexture:self.bokehTexture
                    drawableSize:drawableSize
                      clearColor:self.clearColor];
+    [self.postFilterEncoder encodeIn:commandBuffer
+                   inputColorTexture:self.bokehTexture
+                       outputTexture:drawable.texture
+                        drawableSize:drawableSize
+                          clearColor:self.clearColor];
     [commandBuffer presentDrawable:drawable];
     [scope endScope];
     [commandBuffer commit];
