@@ -15,6 +15,7 @@
 #import "PassDescriptorBuilder.h"
 #import "DrawObjectsRenderPassEncoder.h"
 #import "CircleOfConfusionPassEncoder.h"
+#import "BokehPassEncoder.h"
 #import "MetalRendererProperties.h"
 #import "ViewProjectionUniforms.h"
 #import "MathFunctions.h"
@@ -36,19 +37,12 @@ typedef struct {
 @interface MetalRenderer ()
 @property (nonatomic, strong) id<MTLDevice> device;
 @property (nonatomic, strong) id<MTLCommandQueue> commandQueue;
-@property (nonatomic, strong) PassDescriptorBuilder* passDescriptorBuilder;
-@property (nonatomic, strong) PipelineStateBuilder* pipelineStateBuilder;
 @property (nonatomic, strong) DrawObjectsRenderPassEncoder* drawObjectsEncoder;
 @property (nonatomic, strong) CircleOfConfusionPassEncoder* cocEncoder;
-@property (nonatomic, strong) NSArray<id<MTLBuffer>>* gaussianBlurUniforms;
+@property (nonatomic, strong) BokehPassEncoder* bokehEncoder;
 @property (nonatomic, strong) id<MTLTexture> colorTexture;
 @property (nonatomic, strong) id<MTLTexture> depthTexture;
 @property (nonatomic, strong) id<MTLTexture> cocTexture;
-//@property (nonatomic, strong) id<MTLTexture> inFocusColorTexture;
-//@property (nonatomic, strong) id<MTLTexture> outOfFocusColorTexture;
-//@property (nonatomic, strong) id<MTLTexture> blurredOutOfFocusColorTexture;
-//@property (nonatomic, strong) id<MTLTexture> blurredOutOfFocusColorTexture2;
-@property (nonatomic, strong) id<MTLDepthStencilState> depthStencilState;
 @property (nonatomic, strong) dispatch_semaphore_t displaySemaphore;
 @property (nonatomic) MTLClearColor clearColor;
 @property (assign) NSInteger currentTripleBufferingIndex;
@@ -57,36 +51,21 @@ typedef struct {
 @implementation MetalRenderer
 
 -(instancetype)initWithDevice:(id<MTLDevice>)device
-        passDescriptorBuilder:(PassDescriptorBuilder*)passDescriptorBuilder
-         pipelineStateBuilder:(PipelineStateBuilder*)pipelineStateBuilder
            drawObjectsEncoder:(DrawObjectsRenderPassEncoder*)drawObjectsEncoder
                    cocEncoder:(CircleOfConfusionPassEncoder*)cocEncoder
+                 bokehEncoder:(BokehPassEncoder*)bokehEncoder
 {
     self = [super init];
     if (self) {
         self.device = device;
         self.commandQueue = [self.device newCommandQueue];
-        self.passDescriptorBuilder = passDescriptorBuilder;
-        self.pipelineStateBuilder = pipelineStateBuilder;
         self.drawObjectsEncoder = drawObjectsEncoder;
         self.cocEncoder = cocEncoder;
-        self.gaussianBlurUniforms = [self makeGaussianBlurUniforms];
+        self.bokehEncoder = bokehEncoder;
         self.displaySemaphore = dispatch_semaphore_create(inFlightBufferCount);
         self.clearColor = MTLClearColorMake(0.0, 0.0, 0.0, 1.0);
     }
     return self;
-}
-
--(NSArray<id<MTLBuffer>> *)makeGaussianBlurUniforms
-{
-    NSMutableArray *uniforms = [NSMutableArray new];
-    for (int i = 0; i < 2; i++) {
-        id<MTLBuffer> buffer = [self.device newBufferWithLength:sizeof(GaussianBlurUniforms)
-                                                        options:MTLResourceOptionCPUCacheModeDefault];
-        buffer.label = [[NSString alloc] initWithFormat:@"Gaussian Blur Pass %d Uniforms", i];
-        [uniforms addObject:buffer];
-    }
-    return uniforms;
 }
 
 -(void)setFocusDistance:(float)focusDistance focusRange:(float)focusRange {
@@ -100,7 +79,6 @@ typedef struct {
     id<MTLCommandBuffer> commandBuffer = [self.commandQueue commandBuffer];
     id<MTLCaptureScope> scope = [self makeCaptureScope];
     [scope beginScope];
-    [self updateUniformsWith:drawableSize];
     [self addSignalSemaphoreCompletedHandlerTo:commandBuffer];
     [self.drawObjectsEncoder encodeDrawModelGroup:_drawableModelGroup
                                   inCommandBuffer:commandBuffer
@@ -110,16 +88,16 @@ typedef struct {
                                 cameraTranslation:(vector_float3){ 0.0f, 0.0f, -5.0f }
                                        drawableSz:drawableSize
                                        clearColor:self.clearColor];
-    [self.cocEncoder encodeCircleOfConfusionPassIn:commandBuffer
-                                 inputDepthTexture:self.depthTexture
-                                     outputTexture:self.cocTexture
-                                      drawableSize:drawableSize
-                                        clearColor:self.clearColor];
-//    [self maskInFocusToTextureIn:commandBuffer with:drawableSize];
-//    [self maskOutOfFocusToTextureIn:commandBuffer with:drawableSize];
-//    [self horizontalBlurOnOutOfFocusTextureIn:commandBuffer with:drawableSize];
-//    [self verticalBlurOnOutOfFocusTextureIn:commandBuffer with:drawableSize];
-//    [self compositeTexturesIn:commandBuffer to:drawable.texture with:drawableSize];
+    [self.cocEncoder encodeIn:commandBuffer
+            inputDepthTexture:self.depthTexture
+                outputTexture:self.cocTexture
+                 drawableSize:drawableSize
+                   clearColor:self.clearColor];
+    [self.bokehEncoder encodeIn:commandBuffer
+                inputCoCTexture:self.cocTexture
+                  outputTexture:drawable.texture
+                   drawableSize:drawableSize
+                     clearColor:self.clearColor];
     [commandBuffer presentDrawable:drawable];
     [scope endScope];
     [commandBuffer commit];
@@ -136,26 +114,6 @@ typedef struct {
     if (self.cocTexture.width != drawableSize.width || self.cocTexture.width != drawableSize.width) {
         self.cocTexture = [self readAndRenderTargetTextureOfSize:drawableSize format:MTLPixelFormatR8Snorm];
     }
-//    if (self.inFocusColorTexture.width != drawableSize.width
-//    || self.inFocusColorTexture.height != drawableSize.height) {
-//        self.inFocusColorTexture = [self readAndRenderTargetTextureOfSize:drawableSize format:MTLPixelFormatBGRA8Unorm];
-//    }
-//    if (self.outOfFocusColorTexture.width != drawableSize.width
-//    || self.outOfFocusColorTexture.height != drawableSize.height) {
-//        self.outOfFocusColorTexture = [self readAndRenderTargetTextureOfSize:drawableSize
-//                                                                      format:MTLPixelFormatBGRA8Unorm];
-//    }
-//    if (self.blurredOutOfFocusColorTexture.width != drawableSize.width
-//    || self.blurredOutOfFocusColorTexture.height != drawableSize.height) {
-//        self.blurredOutOfFocusColorTexture = [self readAndRenderTargetTextureOfSize:drawableSize
-//                                                                             format:MTLPixelFormatBGRA8Unorm];
-//    }
-//
-//    if (self.blurredOutOfFocusColorTexture2.width != drawableSize.width
-//    || self.blurredOutOfFocusColorTexture2.height != drawableSize.height) {
-//        self.blurredOutOfFocusColorTexture2 = [self readAndRenderTargetTextureOfSize:drawableSize
-//                                                                              format:MTLPixelFormatBGRA8Unorm];
-//    }
 }
 
 -(id<MTLCaptureScope>)makeCaptureScope {
@@ -174,100 +132,6 @@ typedef struct {
         }
     }];
 }
-
--(void)updateUniformsWith:(CGSize)drawableSize
-{
-    GaussianBlurUniforms blurUniformsVertical = (GaussianBlurUniforms) {
-        .isVertical = true,
-        .imageDimensions = (vector_float2) { drawableSize.width, drawableSize.height },
-        .blurRadius = 3.0
-    };
-    memcpy(self.gaussianBlurUniforms[0].contents, &blurUniformsVertical, sizeof(blurUniformsVertical));
-    
-    GaussianBlurUniforms blurUniformsHorizontal = (GaussianBlurUniforms) {
-        .isVertical = false,
-        .imageDimensions = (vector_float2) { drawableSize.width, drawableSize.height },
-        .blurRadius = 3.0
-    };
-    memcpy(self.gaussianBlurUniforms[1].contents, &blurUniformsHorizontal, sizeof(blurUniformsHorizontal));
-}
-
-//-(void)maskInFocusToTextureIn:(id<MTLCommandBuffer>)commandBuffer with:(CGSize)drawableSize
-//{
-//    MTLRenderPassDescriptor *descriptor
-//    = [self.passDescriptorBuilder outputToColorTextureDescriptorOfSize:drawableSize
-//                                                            clearColor:self.clearColor
-//                                                             toTexture:self.inFocusColorTexture];
-//    id<MTLRenderCommandEncoder> encoder = [commandBuffer renderCommandEncoderWithDescriptor:descriptor];
-//    [encoder setLabel:@"Mask In Focus Encoder"];
-//    [encoder setRenderPipelineState:self.pipelineStateBuilder.maskFocusFieldPipelineState];
-//    [encoder setFragmentTexture:self.colorTexture atIndex:0];
-//    [encoder setFragmentTexture:self.depthTexture atIndex:1];
-//    [encoder drawPrimitives:MTLPrimitiveTypeTriangleStrip vertexStart:0 vertexCount:4];
-//    [encoder endEncoding];
-//}
-//
-//-(void)maskOutOfFocusToTextureIn:(id<MTLCommandBuffer>)commandBuffer with:(CGSize)drawableSize
-//{
-//    MTLRenderPassDescriptor *descriptor
-//    = [self.passDescriptorBuilder outputToColorTextureDescriptorOfSize:drawableSize
-//                                                             clearColor:self.clearColor
-//                                                             toTexture:self.outOfFocusColorTexture];
-//    id<MTLRenderCommandEncoder> encoder = [commandBuffer renderCommandEncoderWithDescriptor:descriptor];
-//    [encoder setLabel:@"Mask Out Of Focus Encoder"];
-//    [encoder setRenderPipelineState:self.pipelineStateBuilder.maskOutOfFocusFieldPipelineState];
-//    [encoder setFragmentTexture:self.colorTexture atIndex:0];
-//    [encoder setFragmentTexture:self.depthTexture atIndex:1];
-//    [encoder drawPrimitives:MTLPrimitiveTypeTriangleStrip vertexStart:0 vertexCount:4];
-//    [encoder endEncoding];
-//}
-//
-//-(void)horizontalBlurOnOutOfFocusTextureIn:(id<MTLCommandBuffer>)commandBuffer with:(CGSize)drawableSize
-//{
-//    MTLRenderPassDescriptor *descriptor
-//    = [self.passDescriptorBuilder outputToColorTextureDescriptorOfSize:drawableSize
-//                                                            clearColor:self.clearColor
-//                                                             toTexture:self.blurredOutOfFocusColorTexture];
-//    id<MTLRenderCommandEncoder> encoder = [commandBuffer renderCommandEncoderWithDescriptor:descriptor];
-//    [encoder setLabel:[[NSString alloc] initWithFormat:@"Horizontal Blur Out Of Focus Encoder"]];
-//    [encoder setRenderPipelineState:self.pipelineStateBuilder.applyGaussianBlurFieldPipelineState];
-//    [encoder setFragmentBuffer:self.gaussianBlurUniforms[0] offset:0 atIndex:0];
-//    [encoder setFragmentTexture:self.outOfFocusColorTexture atIndex:0];
-//    [encoder setFragmentTexture:self.depthTexture atIndex:1];
-//    [encoder drawPrimitives:MTLPrimitiveTypeTriangleStrip vertexStart:0 vertexCount:4];
-//    [encoder endEncoding];
-//}
-//
-//-(void)verticalBlurOnOutOfFocusTextureIn:(id<MTLCommandBuffer>)commandBuffer with:(CGSize)drawableSize
-//{
-//    MTLRenderPassDescriptor *descriptor
-//    = [self.passDescriptorBuilder outputToColorTextureDescriptorOfSize:drawableSize
-//                                                            clearColor:self.clearColor
-//                                                             toTexture:self.blurredOutOfFocusColorTexture2];
-//    id<MTLRenderCommandEncoder> encoder = [commandBuffer renderCommandEncoderWithDescriptor:descriptor];
-//    [encoder setLabel:[[NSString alloc] initWithFormat:@"Vertical Blur Out Of Focus Encoder"]];
-//    [encoder setRenderPipelineState:self.pipelineStateBuilder.applyGaussianBlurFieldPipelineState];
-//    [encoder setFragmentBuffer:self.gaussianBlurUniforms[1] offset:0 atIndex:0];
-//    [encoder setFragmentTexture:self.blurredOutOfFocusColorTexture atIndex:0];
-//    [encoder setFragmentTexture:self.depthTexture atIndex:1];
-//    [encoder drawPrimitives:MTLPrimitiveTypeTriangleStrip vertexStart:0 vertexCount:4];
-//    [encoder endEncoding];
-//}
-//
-//-(void)compositeTexturesIn:(id<MTLCommandBuffer>)commandBuffer to:(id<MTLTexture>)texture with:(CGSize)drawableSize
-//{
-//    MTLRenderPassDescriptor *descriptor = [self.passDescriptorBuilder
-//                                           outputToColorTextureDescriptorOfSize:drawableSize
-//                                           clearColor:self.clearColor
-//                                           toTexture:texture];
-//    id<MTLRenderCommandEncoder> encoder = [commandBuffer renderCommandEncoderWithDescriptor:descriptor];
-//    [encoder setLabel:[[NSString alloc] initWithFormat:@"Composite Encoder"]];
-//    [encoder setRenderPipelineState:self.pipelineStateBuilder.compositePipelineState];
-//    [encoder setFragmentTexture:self.inFocusColorTexture atIndex:0];
-//    [encoder setFragmentTexture:self.blurredOutOfFocusColorTexture2 atIndex:1];
-//    [encoder drawPrimitives:MTLPrimitiveTypeTriangleStrip vertexStart:0 vertexCount:4];
-//    [encoder endEncoding];
-//}
 
 -(id<MTLTexture>)readAndRenderTargetTextureOfSize:(CGSize)size format:(MTLPixelFormat)format
 {

@@ -13,6 +13,7 @@
 #import "PipelineStateBuilder.h"
 #import "DrawObjectsRenderPassEncoder.h"
 #import "CircleOfConfusionPassEncoder.h"
+#import "BokehPassEncoder.h"
 
 @interface AppDelegate ()
 @end
@@ -29,11 +30,12 @@
                                                         pipelineStateBuilder:pipelineStateBuilder];
     CircleOfConfusionPassEncoder* cocEncoder = [[CircleOfConfusionPassEncoder alloc] initWithDevice:device
                                                                                         passBuilder:passBuilder];
+    BokehPassEncoder* bokehEncoder = [[BokehPassEncoder alloc] initWithDevice:device passBuilder:passBuilder];
     MetalRenderer* renderer = [[MetalRenderer alloc] initWithDevice:device
                                               passDescriptorBuilder:passBuilder
-                                               pipelineStateBuilder:pipelineStateBuilder
                                                  drawObjectsEncoder:drawObjectsEncoder
-                                                         cocEncoder:cocEncoder];
+                                                         cocEncoder:cocEncoder
+                                                       bokehEncoder:bokehEncoder];
     renderer.colorPixelFormat = MTLPixelFormatBGRA8Unorm;
     ViewportViewController *controller = [[ViewportViewController alloc] initWithDevice:device renderer:renderer];
     controller.presenter = [[ViewportPresenter alloc] initWithMeshLoader:[[OBJMeshLoader alloc] initWithDevice:device]

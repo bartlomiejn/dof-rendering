@@ -14,7 +14,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface CircleOfConfusionPassEncoder : NSObject
 -(instancetype)initWithDevice:(id<MTLDevice>)device passBuilder:(PassDescriptorBuilder*)passBuilder;
--(void)encodeCircleOfConfusionPassIn:(id<MTLCommandBuffer>)commandBuffer
+-(void)encodeIn:(id<MTLCommandBuffer>)commandBuffer
                    inputDepthTexture:(id<MTLTexture>)depthTexture
                        outputTexture:(id<MTLTexture>)outputTexture
                         drawableSize:(CGSize)drawableSize

@@ -32,7 +32,7 @@
 
 #pragma mark - CircleOfConfusionPassEncoder
 
--(void)encodeCircleOfConfusionPassIn:(id<MTLCommandBuffer>)commandBuffer
+-(void)encodeIn:(id<MTLCommandBuffer>)commandBuffer
                    inputDepthTexture:(id<MTLTexture>)depthTexture
                        outputTexture:(id<MTLTexture>)outputTexture
                         drawableSize:(CGSize)drawableSize
