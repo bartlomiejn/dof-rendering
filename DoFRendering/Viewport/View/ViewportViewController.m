@@ -14,6 +14,7 @@
 #import "WeakSelf.h"
 
 @interface ViewportViewController ()
+@property (nonatomic, strong) id<MTLDevice> device;
 @property (nonatomic, strong) MetalRenderer* renderer;
 @property (nonatomic, strong) MetalView* metalView;
 @end
@@ -22,23 +23,32 @@
 
 #pragma mark - UIViewController
 
-- (BOOL)prefersStatusBarHidden {
-    return YES;
+-(instancetype)initWithDevice:(id<MTLDevice>)device renderer:(MetalRenderer*)renderer
+{
+    self = [super init];
+    if (self) {
+        self.device = device;
+        self.renderer = renderer;
+    }
+    return self;
 }
 
-- (void)viewDidLoad {
+- (BOOL)prefersStatusBarHidden
+{
+    return true;
+}
+
+- (void)viewDidLoad
+{
     [super viewDidLoad];
-    id<MTLDevice> device = MTLCreateSystemDefaultDevice();
-    MTLPixelFormat colorPixelFormat = MTLPixelFormatBGRA8Unorm;
-    [self setupMetalViewWithDevice:device colorFormat:colorPixelFormat];
-    [self setupRendererWithDevice:device colorFormat:colorPixelFormat];
-    _metalView.delegate = self;
-    [_presenter viewDidLoad];
+    [self setupMetalView];
+    [self.presenter viewDidLoad];
 }
 
-- (void)setupMetalViewWithDevice:(id<MTLDevice>)device colorFormat:(MTLPixelFormat)format {
-    MetalView *view = [[MetalView alloc] initWithDevice:device];
-    view.colorPixelFormat = format;
+- (void)setupMetalView
+{
+    MetalView *view = [[MetalView alloc] initWithDevice:self.device];
+    view.colorPixelFormat = [self.renderer colorPixelFormat];
     [self.view addSubview:view];
     view.translatesAutoresizingMaskIntoConstraints = false;
     [NSLayoutConstraint activateConstraints:@[[self.view.topAnchor constraintEqualToAnchor:[view topAnchor]],
@@ -46,28 +56,27 @@
                                               [self.view.leadingAnchor constraintEqualToAnchor:[view leadingAnchor]],
                                               [self.view.trailingAnchor
                                                constraintEqualToAnchor:[view trailingAnchor]]]];
-    _metalView = view;
-}
-
-- (void)setupRendererWithDevice:(id<MTLDevice>)device colorFormat:(MTLPixelFormat)format {
-    _renderer = [[MetalRenderer alloc] initWithDevice:device];
-    _renderer.colorPixelFormat = format;
+    self.metalView = view;
+    self.metalView.delegate = self;
 }
 
 
 #pragma mark - MetalViewDelegate
 
--(void)drawToDrawable:(id<CAMetalDrawable>)drawable ofSize:(CGSize)drawableSize frameDuration:(float)frameDuration {
-    [_presenter willRenderNextFrameTo:drawable ofSize:drawableSize frameDuration:frameDuration];
+-(void)drawToDrawable:(id<CAMetalDrawable>)drawable ofSize:(CGSize)drawableSize frameDuration:(float)frameDuration
+{
+    [self.presenter willRenderNextFrameTo:drawable ofSize:drawableSize frameDuration:frameDuration];
 }
 
--(void)adjustedDrawableSize:(CGSize)drawableSize {
-    [_renderer adjustedDrawableSize:drawableSize];
+-(void)adjustedDrawableSize:(CGSize)drawableSize
+{
+    [self.renderer adjustedDrawableSize:drawableSize];
 }
 
 #pragma mark - ViewportViewProtocol
 
-- (void)presentSliders:(SliderStackViewModel*)viewModel {
+- (void)presentSliders:(SliderStackViewModel*)viewModel
+{
     SliderStackView *stackView = [[SliderStackView alloc] init];
     [stackView setupWith:viewModel];
     WEAK_SELF weakSelf = self;
@@ -82,12 +91,14 @@
                                                constraintEqualToAnchor:self.view.trailingAnchor]]];
 }
 
-- (void)presentModelGroup:(ModelGroup*)modelGroup {
-    _renderer.drawableModelGroup = modelGroup;
+- (void)presentModelGroup:(ModelGroup*)modelGroup
+{
+    self.renderer.drawableModelGroup = modelGroup;
 }
 
-- (void)drawNextFrameTo:(id<CAMetalDrawable>)drawable ofSize:(CGSize)drawableSize {
-    [_renderer drawToDrawable:drawable ofSize:drawableSize];
+- (void)drawNextFrameTo:(id<CAMetalDrawable>)drawable ofSize:(CGSize)drawableSize
+{
+    [self.renderer drawToDrawable:drawable ofSize:drawableSize];
 }
 
 @end

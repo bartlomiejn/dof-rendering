@@ -7,11 +7,14 @@
 //
 
 @import UIKit;
+@import Metal;
 #import "ViewportPresenter.h"
 #import "ViewportViewProtocol.h"
 #import "MetalViewDelegate.h"
+#import "MetalRenderer.h"
 
 @interface ViewportViewController : UIViewController<ViewportViewProtocol, MetalViewDelegate>
 @property (nonatomic, strong) ViewportPresenter *presenter;
+-(instancetype)initWithDevice:(id<MTLDevice>)device renderer:(MetalRenderer*)renderer;
 @end
 

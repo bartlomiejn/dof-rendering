@@ -18,6 +18,7 @@
 		6079224C219C1D15004F3B7F /* MaskFocusField.metal in Sources */ = {isa = PBXBuildFile; fileRef = 6079224B219C1D15004F3B7F /* MaskFocusField.metal */; };
 		6079224E219C1D42004F3B7F /* MaskOutOfFocusField.metal in Sources */ = {isa = PBXBuildFile; fileRef = 6079224D219C1D42004F3B7F /* MaskOutOfFocusField.metal */; };
 		60792250219C1D6E004F3B7F /* GaussianBlur.metal in Sources */ = {isa = PBXBuildFile; fileRef = 6079224F219C1D6E004F3B7F /* GaussianBlur.metal */; };
+		60792255219C22A7004F3B7F /* CircleOfConfusionPassEncoder.m in Sources */ = {isa = PBXBuildFile; fileRef = 60792254219C22A7004F3B7F /* CircleOfConfusionPassEncoder.m */; };
 		60DD2CE721971A5F007B2CBD /* DrawObjectsRenderPassEncoder.m in Sources */ = {isa = PBXBuildFile; fileRef = 60DD2CE621971A5F007B2CBD /* DrawObjectsRenderPassEncoder.m */; };
 		60DD2CF221971D41007B2CBD /* DrawObjects.metal in Sources */ = {isa = PBXBuildFile; fileRef = 60DD2CF121971D41007B2CBD /* DrawObjects.metal */; };
 		60DD2CFC2198969F007B2CBD /* OBJMeshLoader.m in Sources */ = {isa = PBXBuildFile; fileRef = 60DD2CFB2198969F007B2CBD /* OBJMeshLoader.m */; };
@@ -66,6 +67,8 @@
 		6079224B219C1D15004F3B7F /* MaskFocusField.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = MaskFocusField.metal; sourceTree = "<group>"; };
 		6079224D219C1D42004F3B7F /* MaskOutOfFocusField.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = MaskOutOfFocusField.metal; sourceTree = "<group>"; };
 		6079224F219C1D6E004F3B7F /* GaussianBlur.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = GaussianBlur.metal; sourceTree = "<group>"; };
+		60792253219C22A7004F3B7F /* CircleOfConfusionPassEncoder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CircleOfConfusionPassEncoder.h; sourceTree = "<group>"; };
+		60792254219C22A7004F3B7F /* CircleOfConfusionPassEncoder.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CircleOfConfusionPassEncoder.m; sourceTree = "<group>"; };
 		60DD2CE521971A5F007B2CBD /* DrawObjectsRenderPassEncoder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DrawObjectsRenderPassEncoder.h; sourceTree = "<group>"; };
 		60DD2CE621971A5F007B2CBD /* DrawObjectsRenderPassEncoder.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DrawObjectsRenderPassEncoder.m; sourceTree = "<group>"; };
 		60DD2CF121971D41007B2CBD /* DrawObjects.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = DrawObjects.metal; sourceTree = "<group>"; };
@@ -182,6 +185,8 @@
 		60792246219C1C60004F3B7F /* Circle Of Confusion Pass */ = {
 			isa = PBXGroup;
 			children = (
+				60792253219C22A7004F3B7F /* CircleOfConfusionPassEncoder.h */,
+				60792254219C22A7004F3B7F /* CircleOfConfusionPassEncoder.m */,
 				60792247219C1C70004F3B7F /* CircleOfConfusion.metal */,
 			);
 			path = "Circle Of Confusion Pass";
@@ -305,9 +310,9 @@
 				60EEBCD9205DAC9700D2EEDA /* PipelineStateBuilder.m */,
 				60EEBCDF2060142600D2EEDA /* PassDescriptorBuilder.h */,
 				60EEBCE02060142600D2EEDA /* PassDescriptorBuilder.m */,
+				6079222E2199E803004F3B7F /* MetalRendererProperties.h */,
 				9F2D391E1FBC8E9D00F7578F /* MetalRenderer.h */,
 				9F2D391F1FBC8E9D00F7578F /* MetalRenderer.m */,
-				6079222E2199E803004F3B7F /* MetalRendererProperties.h */,
 			);
 			path = Renderer;
 			sourceTree = "<group>";
@@ -421,6 +426,7 @@
 				9F066B891FACF56800AF820A /* ComposeTextures.metal in Sources */,
 				60DD2CE721971A5F007B2CBD /* DrawObjectsRenderPassEncoder.m in Sources */,
 				9F066B8A1FB39F2F00AF820A /* MetalView.m in Sources */,
+				60792255219C22A7004F3B7F /* CircleOfConfusionPassEncoder.m in Sources */,
 				60DD2CFF219898A6007B2CBD /* ModelTransformationBuilder.m in Sources */,
 				6079224C219C1D15004F3B7F /* MaskFocusField.metal in Sources */,
 				9F843C071FC7212200A15944 /* Mesh.m in Sources */,

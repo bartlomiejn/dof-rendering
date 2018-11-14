@@ -17,15 +17,15 @@ NS_ASSUME_NONNULL_BEGIN
 @interface DrawObjectsRenderPassEncoder : NSObject
 -(instancetype)initWithDevice:(id<MTLDevice>)device
                   passBuilder:(PassDescriptorBuilder*)passBuilder
-         pipelineStateBuilder:(PipelineStateBuilder*)pipelineBuilder
-                   clearColor:(MTLClearColor)clearColor;
+         pipelineStateBuilder:(PipelineStateBuilder*)pipelineBuilder;
 -(void)encodeDrawModelGroup:(ModelGroup*)modelGroup
             inCommandBuffer:(id<MTLCommandBuffer>)commandBuffer
          tripleBufferingIdx:(int)currentBufferIndex
              outputColorTex:(id<MTLTexture>)colorTexture
              outputDepthTex:(id<MTLTexture>)depthTexture
           cameraTranslation:(vector_float3)translation
-                 drawableSz:(CGSize)size;
+                 drawableSz:(CGSize)size
+                 clearColor:(MTLClearColor)clearColor;
 @end
 
 NS_ASSUME_NONNULL_END

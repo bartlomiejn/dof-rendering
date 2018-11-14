@@ -8,6 +8,11 @@
 
 #import "AppDelegate.h"
 #import "ViewportViewController.h"
+#import "MetalRenderer.h"
+#import "PassDescriptorBuilder.h"
+#import "PipelineStateBuilder.h"
+#import "DrawObjectsRenderPassEncoder.h"
+#import "CircleOfConfusionPassEncoder.h"
 
 @interface AppDelegate ()
 @end
@@ -16,7 +21,21 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     id<MTLDevice> device = MTLCreateSystemDefaultDevice();
-    ViewportViewController *controller = [ViewportViewController new];
+    PassDescriptorBuilder* passBuilder = [[PassDescriptorBuilder alloc] init];
+    PipelineStateBuilder* pipelineStateBuilder = [[PipelineStateBuilder alloc] initWithDevice:device];
+    DrawObjectsRenderPassEncoder* drawObjectsEncoder = [[DrawObjectsRenderPassEncoder alloc]
+                                                        initWithDevice:device
+                                                        passBuilder:passBuilder
+                                                        pipelineStateBuilder:pipelineStateBuilder];
+    CircleOfConfusionPassEncoder* cocEncoder = [[CircleOfConfusionPassEncoder alloc] initWithDevice:device
+                                                                                        passBuilder:passBuilder];
+    MetalRenderer* renderer = [[MetalRenderer alloc] initWithDevice:device
+                                              passDescriptorBuilder:passBuilder
+                                               pipelineStateBuilder:pipelineStateBuilder
+                                                 drawObjectsEncoder:drawObjectsEncoder
+                                                         cocEncoder:cocEncoder];
+    renderer.colorPixelFormat = MTLPixelFormatBGRA8Unorm;
+    ViewportViewController *controller = [[ViewportViewController alloc] initWithDevice:device renderer:renderer];
     controller.presenter = [[ViewportPresenter alloc] initWithMeshLoader:[[OBJMeshLoader alloc] initWithDevice:device]
                                                    transformationBuilder:[[ModelTransformationBuilder alloc] init]];
     controller.presenter.view = controller;

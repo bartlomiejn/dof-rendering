@@ -19,7 +19,6 @@
 @property (nonatomic, strong) id<MTLBuffer> viewProjectionUniformsBuffer;
 @property (nonatomic, strong) id<MTLBuffer> modelGroupUniformsBuffer;
 @property (nonatomic) int modelGroupUniformsBufferCount;
-@property (nonatomic) MTLClearColor clearColor;
 @end
 
 @implementation DrawObjectsRenderPassEncoder
@@ -27,7 +26,6 @@
 -(instancetype)initWithDevice:(id<MTLDevice>)device
                   passBuilder:(PassDescriptorBuilder*)passBuilder
          pipelineStateBuilder:(PipelineStateBuilder*)pipelineBuilder
-                   clearColor:(MTLClearColor)clearColor
 {
     self = [super init];
     if (self) {
@@ -36,7 +34,6 @@
         self.pipelineBuilder = pipelineBuilder;
         self.viewProjectionUniformsBuffer = [self makeViewProjectionUniformsBufferOn:device];
         self.modelGroupUniformsBuffer = [self makeModelGroupUniformsBufferOn:device uniformCount:0];
-        self.clearColor = clearColor;
     }
     return self;
 }
@@ -68,11 +65,12 @@
              outputDepthTex:(id<MTLTexture>)depthTexture
           cameraTranslation:(vector_float3)translation
                  drawableSz:(CGSize)size
+                 clearColor:(MTLClearColor)clearColor
 {
     [self updateModelUniformsFor:modelGroup];
     [self updateViewProjectionUniformsAt:currentBufferIndex cameraTranslation:translation drawableSize:size];
     MTLRenderPassDescriptor *descriptor = [self.passBuilder renderObjectsPassDescriptorOfSize:size
-                                                                                   clearColor:self.clearColor
+                                                                                   clearColor:clearColor
                                                                            outputColorTexture:colorTexture
                                                                            outputDepthTexture:depthTexture];
     id<MTLRenderCommandEncoder> encoder = [commandBuffer renderCommandEncoderWithDescriptor:descriptor];

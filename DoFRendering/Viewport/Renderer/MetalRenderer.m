@@ -14,6 +14,7 @@
 #import "PipelineStateBuilder.h"
 #import "PassDescriptorBuilder.h"
 #import "DrawObjectsRenderPassEncoder.h"
+#import "CircleOfConfusionPassEncoder.h"
 #import "MetalRendererProperties.h"
 #import "ViewProjectionUniforms.h"
 #import "MathFunctions.h"
@@ -43,6 +44,7 @@ typedef struct {
 @property (nonatomic, strong) PassDescriptorBuilder* passDescriptorBuilder;
 @property (nonatomic, strong) PipelineStateBuilder* pipelineStateBuilder;
 @property (nonatomic, strong) DrawObjectsRenderPassEncoder* drawObjectsEncoder;
+@property (nonatomic, strong) CircleOfConfusionPassEncoder* cocEncoder;
 
 // Uniforms
 @property (nonatomic, strong) NSArray<id<MTLBuffer>>* gaussianBlurUniforms;
@@ -67,17 +69,19 @@ typedef struct {
 @implementation MetalRenderer
 
 -(instancetype)initWithDevice:(id<MTLDevice>)device
+        passDescriptorBuilder:(PassDescriptorBuilder*)passDescriptorBuilder
+         pipelineStateBuilder:(PipelineStateBuilder*)pipelineStateBuilder
+           drawObjectsEncoder:(DrawObjectsRenderPassEncoder*)drawObjectsEncoder
+                   cocEncoder:(CircleOfConfusionPassEncoder*)cocEncoder
 {
     self = [super init];
     if (self) {
         self.device = device;
         self.commandQueue = [self.device newCommandQueue];
-        self.passDescriptorBuilder = [PassDescriptorBuilder new];
-        self.pipelineStateBuilder = [[PipelineStateBuilder alloc] initWithDevice:self.device];
-        self.drawObjectsEncoder = [[DrawObjectsRenderPassEncoder alloc] initWithDevice:device
-                                                                           passBuilder:self.passDescriptorBuilder
-                                                                  pipelineStateBuilder:self.pipelineStateBuilder
-                                                                            clearColor:self.clearColor];
+        self.passDescriptorBuilder = passDescriptorBuilder;
+        self.pipelineStateBuilder = pipelineStateBuilder;
+        self.drawObjectsEncoder = drawObjectsEncoder;
+        self.cocEncoder = cocEncoder;
         self.gaussianBlurUniforms = [self makeGaussianBlurUniforms];
         self.circleOfConfusionUniforms = [self makeCircleOfConfusionUniforms];
         self.displaySemaphore = dispatch_semaphore_create(inFlightBufferCount);
@@ -123,7 +127,8 @@ typedef struct {
                                    outputColorTex:self.colorTexture
                                    outputDepthTex:self.depthTexture
                                 cameraTranslation:(vector_float3){ 0.0f, 0.0f, -5.0f }
-                                       drawableSz:drawableSize];
+                                       drawableSz:drawableSize
+                                       clearColor:self.clearColor];
     [self maskInFocusToTextureIn:commandBuffer with:drawableSize];
     [self maskOutOfFocusToTextureIn:commandBuffer with:drawableSize];
     [self horizontalBlurOnOutOfFocusTextureIn:commandBuffer with:drawableSize];
