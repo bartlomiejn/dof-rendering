@@ -31,14 +31,22 @@ inputCoCTexture:(id<MTLTexture>)cocTexture
    drawableSize:(CGSize)drawableSize
      clearColor:(MTLClearColor)clearColor
 {
-
+    MTLRenderPassDescriptor* descriptor = [self.passBuilder outputToColorTextureDescriptorOfSize:drawableSize
+                                                                                      clearColor:clearColor
+                                                                                       toTexture:outputTexture];
+    id<MTLRenderCommandEncoder> encoder = [commandBuffer renderCommandEncoderWithDescriptor:descriptor];
+    [encoder setLabel:@"Circle Of Confusion Pass Encoder"];
+    [encoder setRenderPipelineState:[self bokehPipelineStateOnDevice:self.device]];
+    [encoder setFragmentTexture:cocTexture atIndex:0];
+    [encoder drawPrimitives:MTLPrimitiveTypeTriangleStrip vertexStart:0 vertexCount:4];
+    [encoder endEncoding];
 }
 
 -(id<MTLRenderPipelineState>)bokehPipelineStateOnDevice:(id<MTLDevice>)device
 {
     id<MTLLibrary> library = [device newDefaultLibrary];
     MTLRenderPipelineDescriptor *descriptor = [MTLRenderPipelineDescriptor new];
-    descriptor.label = @"Circle Of Confusion Pipeline State";
+    descriptor.label = @"Bokeh Pipeline State";
     descriptor.vertexFunction = [library newFunctionWithName:@"project_texture"];
     descriptor.fragmentFunction = [library newFunctionWithName:@"bokeh"];
     descriptor.colorAttachments[0].pixelFormat = MTLPixelFormatBGRA8Unorm;

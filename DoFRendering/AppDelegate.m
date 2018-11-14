@@ -20,8 +20,27 @@
 
 @implementation AppDelegate
 
-- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
+-(BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
+{
     id<MTLDevice> device = MTLCreateSystemDefaultDevice();
+    self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
+    self.window.rootViewController = [self viewControllerWithDevice:device
+                                                           renderer:[self metalRendererForDevice:device]];
+    [self.window makeKeyAndVisible];
+    return true;
+}
+
+-(ViewportViewController*)viewControllerWithDevice:(id<MTLDevice>)device renderer:(MetalRenderer*)renderer
+{
+    ViewportViewController *controller = [[ViewportViewController alloc] initWithDevice:device renderer:renderer];
+    controller.presenter = [[ViewportPresenter alloc] initWithMeshLoader:[[OBJMeshLoader alloc] initWithDevice:device]
+                                                   transformationBuilder:[[ModelTransformationBuilder alloc] init]];
+    controller.presenter.view = controller;
+    return controller;
+}
+
+-(MetalRenderer*)metalRendererForDevice:(id<MTLDevice>)device
+{
     PassDescriptorBuilder* passBuilder = [[PassDescriptorBuilder alloc] init];
     PipelineStateBuilder* pipelineStateBuilder = [[PipelineStateBuilder alloc] initWithDevice:device];
     DrawObjectsRenderPassEncoder* drawObjectsEncoder = [[DrawObjectsRenderPassEncoder alloc]
@@ -36,14 +55,7 @@
                                                          cocEncoder:cocEncoder
                                                        bokehEncoder:bokehEncoder];
     renderer.colorPixelFormat = MTLPixelFormatBGRA8Unorm;
-    ViewportViewController *controller = [[ViewportViewController alloc] initWithDevice:device renderer:renderer];
-    controller.presenter = [[ViewportPresenter alloc] initWithMeshLoader:[[OBJMeshLoader alloc] initWithDevice:device]
-                                                   transformationBuilder:[[ModelTransformationBuilder alloc] init]];
-    controller.presenter.view = controller;
-    self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
-    self.window.rootViewController = controller;
-    [self.window makeKeyAndVisible];
-    return true;
+    return renderer;
 }
 
 @end
