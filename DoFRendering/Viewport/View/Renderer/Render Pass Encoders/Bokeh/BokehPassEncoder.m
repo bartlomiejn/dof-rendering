@@ -30,11 +30,9 @@
 
 -(id<MTLBuffer>)makeTexelSizeUniformBuffer
 {
-    simd_float2 texelSize = { 0.005f, 0.005f };
     id<MTLBuffer> buffer = [self.device newBufferWithLength:sizeof(simd_float2)
                                                     options:MTLResourceOptionCPUCacheModeDefault];
     buffer.label = @"Texel Size Uniform";
-    memcpy(buffer.contents, &texelSize, sizeof(simd_float2));
     return buffer;
 }
 

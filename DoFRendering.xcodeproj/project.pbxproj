@@ -256,7 +256,6 @@
 			isa = PBXGroup;
 			children = (
 				60DD2CF721989583007B2CBD /* Presenter */,
-				9F2D391D1FBC8E7F00F7578F /* Renderer */,
 				9F2D39181FBC8BD000F7578F /* View */,
 			);
 			path = Viewport;
@@ -306,6 +305,7 @@
 		9F2D39181FBC8BD000F7578F /* View */ = {
 			isa = PBXGroup;
 			children = (
+				9F2D391D1FBC8E7F00F7578F /* Renderer */,
 				604E6BCC2194B80F005FAF4A /* MetalView */,
 				604E6BC82194B2A2005FAF4A /* SliderStackView */,
 				9F066B6D1FACE10C00AF820A /* ViewportViewController.h */,

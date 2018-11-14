@@ -40,7 +40,7 @@ fragment half4 bokeh(TextureMappingVertex vert [[stage_in]],
     half3 color = 0;
     for (int k=0; k<diskKernelSampleCount; k++) {
         float2 o = diskKernel[k];
-        o *= texelSize.xy;
+        o *= texelSize.xy * 8;
         color += (half3)colorTex.sample(texSampler, vert.textureCoordinate + o).rgb;
     }
     color *= 1.0 / diskKernelSampleCount;

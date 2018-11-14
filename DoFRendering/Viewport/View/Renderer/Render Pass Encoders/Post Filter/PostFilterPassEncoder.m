@@ -7,10 +7,12 @@
 //
 
 #import "PostFilterPassEncoder.h"
+#import <simd/simd.h>
 
 @interface PostFilterPassEncoder ()
 @property (nonatomic, strong) id<MTLDevice> device;
 @property (nonatomic, strong) id<MTLRenderPipelineState> pipelineState;
+@property (nonatomic, strong) id<MTLBuffer> texelSizeUniformBuffer;
 @end
 
 @implementation PostFilterPassEncoder
@@ -20,8 +22,17 @@
     if (self) {
         self.device = device;
         self.pipelineState = [self postFilterPipelineStateOnDevice:device];
+        self.texelSizeUniformBuffer = [self makeTexelSizeUniformBuffer];
     }
     return self;
+}
+
+-(id<MTLBuffer>)makeTexelSizeUniformBuffer
+{
+    id<MTLBuffer> buffer = [self.device newBufferWithLength:sizeof(simd_float2)
+                                                    options:MTLResourceOptionCPUCacheModeDefault];
+    buffer.label = @"Texel Size Uniform";
+    return buffer;
 }
 
 -(id<MTLRenderPipelineState>)postFilterPipelineStateOnDevice:(id<MTLDevice>)device
@@ -46,6 +57,7 @@ inputColorTexture:(id<MTLTexture>)colorTexture
     outputTexture:(id<MTLTexture>)outputTexture
      drawableSize:(CGSize)drawableSize
        clearColor:(MTLClearColor)clearColor {
+    [self updateTexelSizeUniformWith:drawableSize];
     MTLRenderPassDescriptor* descriptor = [self outputToColorTextureDescriptorOfSize:drawableSize
                                                                           clearColor:clearColor
                                                                            toTexture:outputTexture];
@@ -53,8 +65,15 @@ inputColorTexture:(id<MTLTexture>)colorTexture
     [encoder setLabel:@"Post-filter Pass Encoder"];
     [encoder setRenderPipelineState:self.pipelineState];
     [encoder setFragmentTexture:colorTexture atIndex:0];
+    [encoder setFragmentBuffer:self.texelSizeUniformBuffer offset:0 atIndex:0];
     [encoder drawPrimitives:MTLPrimitiveTypeTriangleStrip vertexStart:0 vertexCount:4];
     [encoder endEncoding];
+}
+
+-(void)updateTexelSizeUniformWith:(CGSize)drawableSize
+{
+    simd_float2 texelSize = { 1.0f / drawableSize.width, 1.0f / drawableSize.height };
+    memcpy(self.texelSizeUniformBuffer.contents, &texelSize, sizeof(simd_float2));
 }
 
 -(MTLRenderPassDescriptor *)outputToColorTextureDescriptorOfSize:(CGSize)size
