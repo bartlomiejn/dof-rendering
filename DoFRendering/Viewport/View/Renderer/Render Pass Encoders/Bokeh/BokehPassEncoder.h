@@ -18,6 +18,7 @@ inputColorTexture:(id<MTLTexture>)colorTexture
     outputTexture:(id<MTLTexture>)outputTexture
      drawableSize:(CGSize)drawableSize
        clearColor:(MTLClearColor)clearColor;
+-(void)updateBokehRadius:(float)bokehSize;
 @end
 
 NS_ASSUME_NONNULL_END

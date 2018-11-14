@@ -57,6 +57,11 @@
     return self;
 }
 
+-(void)setBokehRadius:(float)bokehRadius
+{
+    [self.bokehEncoder updateBokehRadius:bokehRadius];
+}
+
 -(void)setFocusDistance:(float)focusDistance focusRange:(float)focusRange {
     [self.cocEncoder updateUniformsWithFocusDistance:focusDistance focusRange:focusRange];
 }

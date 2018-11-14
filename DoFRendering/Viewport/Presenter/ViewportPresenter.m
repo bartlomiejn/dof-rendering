@@ -44,7 +44,11 @@
                                                     [[SliderViewModel alloc] initWithName:@"Focus Range"
                                                                                  maxValue:2.0f
                                                                              currentValue:0.22f
-                                                                                 minValue:0.005f]]];
+                                                                                 minValue:0.005f],
+                                                    [[SliderViewModel alloc] initWithName:@"Bokeh Radius"
+                                                                                 maxValue:20.0f
+                                                                             currentValue:3.0f
+                                                                                 minValue:1.0f]]];
 }
 
 -(ModelGroup*)makeTeapotGroupWith:(OBJMesh*)mesh
@@ -66,8 +70,9 @@
 {
     [self.view presentSliders:_sliderViewModels];
     [self.view drawModelGroup:_teapotGroup];
-    [self.view drawFocusDistance:self.sliderViewModels.sliders[0].currentValue
-                      focusRange:self.sliderViewModels.sliders[1].currentValue];
+    [self.view setDrawFocusDistance:self.sliderViewModels.sliders[0].currentValue
+                         focusRange:self.sliderViewModels.sliders[1].currentValue];
+    [self.view setDrawBokehRadius:self.sliderViewModels.sliders[2].currentValue];
 }
 
 - (void)sliderValueChangedFor:(int)idx with:(float)value
@@ -76,8 +81,16 @@
         return;
     }
     self.sliderViewModels.sliders[idx].currentValue = value;
-    [self.view drawFocusDistance:self.sliderViewModels.sliders[0].currentValue
-                      focusRange:self.sliderViewModels.sliders[1].currentValue];
+    switch (idx) {
+        case 0:
+        case 1:
+            [self.view setDrawFocusDistance:self.sliderViewModels.sliders[0].currentValue
+                                 focusRange:self.sliderViewModels.sliders[1].currentValue];
+            break;
+        case 2:
+            [self.view setDrawBokehRadius:self.sliderViewModels.sliders[2].currentValue];
+            break;
+    }
 }
 
 -(void)willRenderNextFrameTo:(id<CAMetalDrawable>)drawable

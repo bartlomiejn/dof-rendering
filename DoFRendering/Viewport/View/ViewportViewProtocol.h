@@ -15,7 +15,8 @@
 @protocol ViewportViewProtocol <NSObject>
 - (void)presentSliders:(SliderStackViewModel*)viewModel;
 - (void)drawModelGroup:(ModelGroup*)modelGroup;
-- (void)drawFocusDistance:(float)focusDistance focusRange:(float)focusRange;
+- (void)setDrawBokehRadius:(float)bokehRadius;
+- (void)setDrawFocusDistance:(float)focusDistance focusRange:(float)focusRange;
 - (void)drawNextFrameTo:(id<CAMetalDrawable>)drawable ofSize:(CGSize)drawableSize;
 @end
 

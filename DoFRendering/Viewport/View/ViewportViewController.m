@@ -96,7 +96,12 @@
     self.renderer.drawableModelGroup = modelGroup;
 }
 
-- (void)drawFocusDistance:(float)focusDistance focusRange:(float)focusRange
+- (void)setDrawBokehRadius:(float)bokehRadius
+{
+    [self.renderer setBokehRadius:bokehRadius];
+}
+
+- (void)setDrawFocusDistance:(float)focusDistance focusRange:(float)focusRange
 {
     [self.renderer setFocusDistance:focusDistance focusRange:focusRange];
 }

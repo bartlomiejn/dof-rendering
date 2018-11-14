@@ -23,6 +23,7 @@
                    cocEncoder:(CircleOfConfusionPassEncoder*)cocEncoder
                  bokehEncoder:(BokehPassEncoder*)bokehEncoder
             postFilterEncoder:(PostFilterPassEncoder*)postFilterEncoder;
+-(void)setBokehRadius:(float)bokehRadius;
 -(void)setFocusDistance:(float)focusDistance focusRange:(float)focusRange;
 -(void)drawToDrawable:(id<CAMetalDrawable>)drawable ofSize:(CGSize)drawableSize;
 -(void)adjustedDrawableSize:(CGSize)drawableSize;

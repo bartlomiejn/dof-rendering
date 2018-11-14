@@ -9,10 +9,16 @@
 #import "BokehPassEncoder.h"
 #import <simd/simd.h>
 
+typedef struct {
+    simd_float2 texelSize;
+    simd_float1 bokehSize;
+} BokehUniforms;
+
 @interface BokehPassEncoder ()
 @property (nonatomic, strong) id<MTLDevice> device;
 @property (nonatomic, strong) id<MTLRenderPipelineState> pipelineState;
-@property (nonatomic, strong) id<MTLBuffer> texelSizeUniformBuffer;
+@property (nonatomic, strong) id<MTLBuffer> bokehUniformsBuffer;
+@property (nonatomic) float bokehSize;
 @end
 
 @implementation BokehPassEncoder
@@ -23,16 +29,17 @@
     if (self) {
         self.device = device;
         self.pipelineState = [self bokehPipelineStateOnDevice:device];
-        self.texelSizeUniformBuffer = [self makeTexelSizeUniformBuffer];
+        self.bokehUniformsBuffer = [self makeBokehUniformsBuffer];
+        self.bokehSize = 0.0f;
     }
     return self;
 }
 
--(id<MTLBuffer>)makeTexelSizeUniformBuffer
+-(id<MTLBuffer>)makeBokehUniformsBuffer
 {
-    id<MTLBuffer> buffer = [self.device newBufferWithLength:sizeof(simd_float2)
+    id<MTLBuffer> buffer = [self.device newBufferWithLength:sizeof(BokehUniforms)
                                                     options:MTLResourceOptionCPUCacheModeDefault];
-    buffer.label = @"Texel Size Uniform";
+    buffer.label = @"Bokeh Uniforms";
     return buffer;
 }
 
@@ -59,7 +66,7 @@ inputColorTexture:(id<MTLTexture>)colorTexture
      drawableSize:(CGSize)drawableSize
        clearColor:(MTLClearColor)clearColor
 {
-    [self updateTexelSizeUniformWith:drawableSize];
+    [self updateBokehUniformsWith:drawableSize];
     MTLRenderPassDescriptor* descriptor = [self outputToColorTextureDescriptorOfSize:drawableSize
                                                                           clearColor:clearColor
                                                                            toTexture:outputTexture];
@@ -67,15 +74,23 @@ inputColorTexture:(id<MTLTexture>)colorTexture
     [encoder setLabel:@"Bokeh Pass Encoder"];
     [encoder setRenderPipelineState:self.pipelineState];
     [encoder setFragmentTexture:colorTexture atIndex:0];
-    [encoder setFragmentBuffer:self.texelSizeUniformBuffer offset:0 atIndex:0];
+    [encoder setFragmentBuffer:self.bokehUniformsBuffer offset:0 atIndex:0];
     [encoder drawPrimitives:MTLPrimitiveTypeTriangleStrip vertexStart:0 vertexCount:4];
     [encoder endEncoding];
 }
 
--(void)updateTexelSizeUniformWith:(CGSize)drawableSize
+-(void)updateBokehRadius:(float)bokehSize
 {
-    simd_float2 texelSize = { 1.0f / drawableSize.width, 1.0f / drawableSize.height };
-    memcpy(self.texelSizeUniformBuffer.contents, &texelSize, sizeof(simd_float2));
+    self.bokehSize = bokehSize;
+}
+
+-(void)updateBokehUniformsWith:(CGSize)drawableSize
+{
+    BokehUniforms uniforms = (BokehUniforms) {
+        .texelSize = { 1.0f / drawableSize.width, 1.0f / drawableSize.height },
+        .bokehSize = self.bokehSize
+    };
+    memcpy(self.bokehUniformsBuffer.contents, &uniforms, sizeof(BokehUniforms));
 }
 
 -(MTLRenderPassDescriptor *)outputToColorTextureDescriptorOfSize:(CGSize)size

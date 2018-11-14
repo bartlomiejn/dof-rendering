@@ -10,6 +10,11 @@
 using namespace metal;
 #include "../TextureMappingVertex.h"
 
+typedef struct {
+    float2 texelSize;
+    float bokehSize;
+} BokehUniforms;
+
 // From https://github.com/Unity-Technologies/PostProcessing/blob/v2/PostProcessing/Shaders/Builtins/DiskKernels.hlsl
 static constant int diskKernelSampleCount = 16;
 static constant float2 diskKernel[diskKernelSampleCount] = {
@@ -34,13 +39,13 @@ static constant float2 diskKernel[diskKernelSampleCount] = {
 constexpr sampler texSampler(address::clamp_to_zero, filter::linear, coord::normalized);
 
 fragment half4 bokeh(TextureMappingVertex vert [[stage_in]],
-                     constant float2& texelSize [[buffer(0)]],
+                     constant BokehUniforms *uniforms [[buffer(0)]],
                      texture2d<float, access::sample> colorTex [[texture(0)]])
 {
     half3 color = 0;
     for (int k=0; k<diskKernelSampleCount; k++) {
         float2 o = diskKernel[k];
-        o *= texelSize.xy * 8;
+        o *= uniforms->texelSize.xy * uniforms->bokehSize;
         color += (half3)colorTex.sample(texSampler, vert.textureCoordinate + o).rgb;
     }
     color *= 1.0 / diskKernelSampleCount;
