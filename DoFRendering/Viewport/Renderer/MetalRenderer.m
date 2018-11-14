@@ -11,34 +11,20 @@
 @import Metal;
 @import QuartzCore.CAMetalLayer;
 #import "MetalRenderer.h"
-#import "PassDescriptorBuilder.h"
-#import "DrawObjectsRenderPassEncoder.h"
+#import "MetalRendererProperties.h"
+#import "DrawObjectsPassEncoder.h"
 #import "CircleOfConfusionPassEncoder.h"
 #import "BokehPassEncoder.h"
-#import "MetalRendererProperties.h"
-#import "ViewProjectionUniforms.h"
-#import "MathFunctions.h"
-#import "ModelUniforms.h"
+#import "PostFilterPassEncoder.h"
 #import "ModelGroup.h"
-
-// TODO: Encapsulate other rendering passes and move uniforms struct definitions to their own files
-
-typedef struct {
-    simd_float4 position, color;
-} MetalVertex;
-
-typedef struct {
-    simd_bool isVertical;
-    simd_float1 blurRadius;
-    simd_float2 imageDimensions;
-} GaussianBlurUniforms;
 
 @interface MetalRenderer ()
 @property (nonatomic, strong) id<MTLDevice> device;
 @property (nonatomic, strong) id<MTLCommandQueue> commandQueue;
-@property (nonatomic, strong) DrawObjectsRenderPassEncoder* drawObjectsEncoder;
+@property (nonatomic, strong) DrawObjectsPassEncoder* drawObjectsEncoder;
 @property (nonatomic, strong) CircleOfConfusionPassEncoder* cocEncoder;
 @property (nonatomic, strong) BokehPassEncoder* bokehEncoder;
+@property (nonatomic, strong) PostFilterPassEncoder* postFilterEncoder;
 @property (nonatomic, strong) id<MTLTexture> colorTexture;
 @property (nonatomic, strong) id<MTLTexture> depthTexture;
 @property (nonatomic, strong) id<MTLTexture> cocTexture;
@@ -52,9 +38,10 @@ typedef struct {
 @implementation MetalRenderer
 
 -(instancetype)initWithDevice:(id<MTLDevice>)device
-           drawObjectsEncoder:(DrawObjectsRenderPassEncoder*)drawObjectsEncoder
+           drawObjectsEncoder:(DrawObjectsPassEncoder*)drawObjectsEncoder
                    cocEncoder:(CircleOfConfusionPassEncoder*)cocEncoder
                  bokehEncoder:(BokehPassEncoder*)bokehEncoder
+            postFilterEncoder:(PostFilterPassEncoder*)postFilterEncoder
 {
     self = [super init];
     if (self) {
@@ -63,6 +50,7 @@ typedef struct {
         self.drawObjectsEncoder = drawObjectsEncoder;
         self.cocEncoder = cocEncoder;
         self.bokehEncoder = bokehEncoder;
+        self.postFilterEncoder = postFilterEncoder;
         self.tripleBufferSemaphore = dispatch_semaphore_create(inFlightBufferCount);
         self.clearColor = MTLClearColorMake(0.0, 0.0, 0.0, 1.0);
     }

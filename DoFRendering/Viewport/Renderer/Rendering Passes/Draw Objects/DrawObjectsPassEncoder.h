@@ -1,5 +1,5 @@
 //
-//  DrawObjectsRenderPassEncoder.h
+//  DrawObjectsPassEncoder.h
 //  DoFRendering
 //
 //  Created by Bartłomiej Nowak on 10/11/2018.
@@ -13,7 +13,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface DrawObjectsRenderPassEncoder : NSObject
+@interface DrawObjectsPassEncoder : NSObject
 -(instancetype)initWithDevice:(id<MTLDevice>)device passBuilder:(PassDescriptorBuilder*)passBuilder;
 -(void)encodeDrawModelGroup:(ModelGroup*)modelGroup
             inCommandBuffer:(id<MTLCommandBuffer>)commandBuffer

@@ -10,9 +10,10 @@
 #import "ViewportViewController.h"
 #import "MetalRenderer.h"
 #import "PassDescriptorBuilder.h"
-#import "DrawObjectsRenderPassEncoder.h"
+#import "DrawObjectsPassEncoder.h"
 #import "CircleOfConfusionPassEncoder.h"
 #import "BokehPassEncoder.h"
+#import "PostFilterPassEncoder.h"
 
 @interface AppDelegate ()
 @end
@@ -41,16 +42,18 @@
 -(MetalRenderer*)metalRendererForDevice:(id<MTLDevice>)device
 {
     PassDescriptorBuilder* passBuilder = [[PassDescriptorBuilder alloc] init];
-    DrawObjectsRenderPassEncoder* drawObjectsEncoder = [[DrawObjectsRenderPassEncoder alloc]
+    DrawObjectsPassEncoder* drawObjectsEncoder = [[DrawObjectsPassEncoder alloc]
                                                         initWithDevice:device
                                                         passBuilder:passBuilder];
     CircleOfConfusionPassEncoder* cocEncoder = [[CircleOfConfusionPassEncoder alloc] initWithDevice:device
                                                                                         passBuilder:passBuilder];
     BokehPassEncoder* bokehEncoder = [[BokehPassEncoder alloc] initWithDevice:device];
+    PostFilterPassEncoder* postFilterEncoder = [[PostFilterPassEncoder alloc] initWithDevice:device];
     MetalRenderer* renderer = [[MetalRenderer alloc] initWithDevice:device
                                                  drawObjectsEncoder:drawObjectsEncoder
                                                          cocEncoder:cocEncoder
-                                                       bokehEncoder:bokehEncoder];
+                                                       bokehEncoder:bokehEncoder
+                                                  postFilterEncoder:postFilterEncoder];
     renderer.colorPixelFormat = MTLPixelFormatBGRA8Unorm;
     return renderer;
 }

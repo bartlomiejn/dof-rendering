@@ -61,6 +61,7 @@ inputColorTexture:(id<MTLTexture>)colorTexture
      drawableSize:(CGSize)drawableSize
        clearColor:(MTLClearColor)clearColor
 {
+    [self updateTexelSizeUniformWith:drawableSize];
     MTLRenderPassDescriptor* descriptor = [self outputToColorTextureDescriptorOfSize:drawableSize
                                                                           clearColor:clearColor
                                                                            toTexture:outputTexture];
@@ -71,6 +72,12 @@ inputColorTexture:(id<MTLTexture>)colorTexture
     [encoder setFragmentBuffer:self.texelSizeUniformBuffer offset:0 atIndex:0];
     [encoder drawPrimitives:MTLPrimitiveTypeTriangleStrip vertexStart:0 vertexCount:4];
     [encoder endEncoding];
+}
+
+-(void)updateTexelSizeUniformWith:(CGSize)drawableSize
+{
+    simd_float2 texelSize = { 1.0f / drawableSize.width, 1.0f / drawableSize.height };
+    memcpy(self.texelSizeUniformBuffer.contents, &texelSize, sizeof(simd_float2));
 }
 
 -(MTLRenderPassDescriptor *)outputToColorTextureDescriptorOfSize:(CGSize)size

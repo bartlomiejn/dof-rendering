@@ -1,5 +1,5 @@
 //
-//  BokehPassEncoder.h
+//  PostFilterPassEncoder.h
 //  DoFRendering
 //
 //  Created by Bartłomiej Nowak on 14/11/2018.
@@ -11,7 +11,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface BokehPassEncoder : NSObject
+@interface PostFilterPassEncoder : NSObject
 -(instancetype)initWithDevice:(id<MTLDevice>)device;
 -(void)  encodeIn:(id<MTLCommandBuffer>)commandBuffer
 inputColorTexture:(id<MTLTexture>)colorTexture

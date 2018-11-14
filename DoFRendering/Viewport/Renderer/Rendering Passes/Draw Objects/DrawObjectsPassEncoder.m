@@ -1,18 +1,18 @@
 //
-//  DrawObjectsRenderPassEncoder.m
+//  DrawObjectsPassEncoder.m
 //  DoFRendering
 //
 //  Created by Bartłomiej Nowak on 10/11/2018.
 //  Copyright © 2018 Bartłomiej Nowak. All rights reserved.
 //
 
-#import "DrawObjectsRenderPassEncoder.h"
+#import "DrawObjectsPassEncoder.h"
 #import "MetalRendererProperties.h"
 #import "ViewProjectionUniforms.h"
 #import "ModelUniforms.h"
 #import "MathFunctions.h"
 
-@interface DrawObjectsRenderPassEncoder ()
+@interface DrawObjectsPassEncoder ()
 @property (nonatomic, strong) PassDescriptorBuilder* passBuilder;
 @property (nonatomic, strong) id<MTLDevice> device;
 @property (nonatomic, strong) id<MTLRenderPipelineState> pipelineState;
@@ -22,7 +22,7 @@
 @property (nonatomic) int modelGroupUniformsBufferCount;
 @end
 
-@implementation DrawObjectsRenderPassEncoder
+@implementation DrawObjectsPassEncoder
 
 -(instancetype)initWithDevice:(id<MTLDevice>)device passBuilder:(PassDescriptorBuilder*)passBuilder
 {
