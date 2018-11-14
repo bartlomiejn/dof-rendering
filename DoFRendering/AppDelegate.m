@@ -47,11 +47,13 @@
                                                         passBuilder:passBuilder];
     CircleOfConfusionPassEncoder* cocEncoder = [[CircleOfConfusionPassEncoder alloc] initWithDevice:device
                                                                                         passBuilder:passBuilder];
+    PreFilterPassEncoder* preFilterEncoder = [[PreFilterPassEncoder alloc] initWithDevice:device];
     BokehPassEncoder* bokehEncoder = [[BokehPassEncoder alloc] initWithDevice:device];
     PostFilterPassEncoder* postFilterEncoder = [[PostFilterPassEncoder alloc] initWithDevice:device];
     MetalRenderer* renderer = [[MetalRenderer alloc] initWithDevice:device
                                                  drawObjectsEncoder:drawObjectsEncoder
                                                          cocEncoder:cocEncoder
+                                                   preFilterEncoder:preFilterEncoder
                                                        bokehEncoder:bokehEncoder
                                                   postFilterEncoder:postFilterEncoder];
     renderer.colorPixelFormat = MTLPixelFormatBGRA8Unorm;

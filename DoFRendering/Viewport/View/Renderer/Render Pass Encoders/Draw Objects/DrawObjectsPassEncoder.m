@@ -63,7 +63,7 @@
 
 -(id<MTLBuffer>)makeViewProjectionUniformsBufferOn:(id<MTLDevice>)device
 {
-    id<MTLBuffer> buffer = [self.device newBufferWithLength:sizeof(ViewProjectionUniforms) * inFlightBufferCount
+    id<MTLBuffer> buffer = [self.device newBufferWithLength:sizeof(ViewProjectionUniforms) * tripleBufferCount
                                                     options:MTLResourceOptionCPUCacheModeDefault];
     buffer.label = @"View Projection Uniforms Buffer";
     return buffer;

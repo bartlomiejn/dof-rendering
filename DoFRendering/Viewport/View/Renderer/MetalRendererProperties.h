@@ -14,7 +14,7 @@
 
 typedef uint16_t MetalIndex;
 static const MTLIndexType MetalIndexType = MTLIndexTypeUInt16;
-static const NSInteger inFlightBufferCount = 3;
+static const NSInteger tripleBufferCount = 3;
 
 typedef struct __attribute((packed))
 {

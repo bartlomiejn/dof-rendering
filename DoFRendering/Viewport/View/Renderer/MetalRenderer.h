@@ -8,9 +8,9 @@
 
 @import Foundation;
 #import "MetalView.h"
-#import "PassDescriptorBuilder.h"
 #import "DrawObjectsPassEncoder.h"
 #import "CircleOfConfusionPassEncoder.h"
+#import "PreFilterPassEncoder.h"
 #import "BokehPassEncoder.h"
 #import "PostFilterPassEncoder.h"
 #import "ModelGroup.h"
@@ -21,6 +21,7 @@
 -(instancetype)initWithDevice:(id<MTLDevice>)device
            drawObjectsEncoder:(DrawObjectsPassEncoder*)drawObjectsEncoder
                    cocEncoder:(CircleOfConfusionPassEncoder*)cocEncoder
+             preFilterEncoder:(PreFilterPassEncoder*)preFilterEncoder
                  bokehEncoder:(BokehPassEncoder*)bokehEncoder
             postFilterEncoder:(PostFilterPassEncoder*)postFilterEncoder;
 -(void)setBokehRadius:(float)bokehRadius;

@@ -14,6 +14,7 @@
 #import "MetalRendererProperties.h"
 #import "DrawObjectsPassEncoder.h"
 #import "CircleOfConfusionPassEncoder.h"
+#import "PreFilterPassEncoder.h"
 #import "BokehPassEncoder.h"
 #import "PostFilterPassEncoder.h"
 #import "ModelGroup.h"
@@ -23,11 +24,13 @@
 @property (nonatomic, strong) id<MTLCommandQueue> commandQueue;
 @property (nonatomic, strong) DrawObjectsPassEncoder* drawObjectsEncoder;
 @property (nonatomic, strong) CircleOfConfusionPassEncoder* cocEncoder;
+@property (nonatomic, strong) PreFilterPassEncoder* preFilterEncoder;
 @property (nonatomic, strong) BokehPassEncoder* bokehEncoder;
 @property (nonatomic, strong) PostFilterPassEncoder* postFilterEncoder;
 @property (nonatomic, strong) id<MTLTexture> colorTexture;
 @property (nonatomic, strong) id<MTLTexture> depthTexture;
 @property (nonatomic, strong) id<MTLTexture> cocTexture;
+@property (nonatomic, strong) id<MTLTexture> prefilteredCocTexture;
 @property (nonatomic, strong) id<MTLTexture> bokehTexture;
 @property (nonatomic, strong) dispatch_semaphore_t tripleBufferSemaphore;
 @property (assign) NSInteger currentTripleBufferIndex;
@@ -40,6 +43,7 @@
 -(instancetype)initWithDevice:(id<MTLDevice>)device
            drawObjectsEncoder:(DrawObjectsPassEncoder*)drawObjectsEncoder
                    cocEncoder:(CircleOfConfusionPassEncoder*)cocEncoder
+             preFilterEncoder:(PreFilterPassEncoder*)preFilterEncoder
                  bokehEncoder:(BokehPassEncoder*)bokehEncoder
             postFilterEncoder:(PostFilterPassEncoder*)postFilterEncoder
 {
@@ -49,9 +53,10 @@
         self.commandQueue = [self.device newCommandQueue];
         self.drawObjectsEncoder = drawObjectsEncoder;
         self.cocEncoder = cocEncoder;
+        self.preFilterEncoder = preFilterEncoder;
         self.bokehEncoder = bokehEncoder;
         self.postFilterEncoder = postFilterEncoder;
-        self.tripleBufferSemaphore = dispatch_semaphore_create(inFlightBufferCount);
+        self.tripleBufferSemaphore = dispatch_semaphore_create(tripleBufferCount);
         self.clearColor = MTLClearColorMake(0.0, 0.0, 0.0, 1.0);
     }
     return self;
@@ -69,7 +74,7 @@
 -(void)drawToDrawable:(id<CAMetalDrawable>)drawable ofSize:(CGSize)drawableSize
 {
     dispatch_semaphore_wait(self.tripleBufferSemaphore, DISPATCH_TIME_FOREVER);
-    self.currentTripleBufferIndex = (self.currentTripleBufferIndex + 1) % inFlightBufferCount;
+    self.currentTripleBufferIndex = (self.currentTripleBufferIndex + 1) % tripleBufferCount;
     id<MTLCommandBuffer> commandBuffer = [self.commandQueue commandBuffer];
     id<MTLCaptureScope> scope = [self makeCaptureScope];
     [scope beginScope];
@@ -87,13 +92,17 @@
                 outputTexture:self.cocTexture
                  drawableSize:drawableSize
                    clearColor:self.clearColor];
+    [self.preFilterEncoder encodeIn:commandBuffer
+                  inputColorTexture:self.cocTexture
+                      outputTexture:self.prefilteredCocTexture
+                       drawableSize:drawableSize
+                         clearColor:self.clearColor];
     [self.bokehEncoder encodeIn:commandBuffer
               inputColorTexture:self.colorTexture
                   outputTexture:self.bokehTexture
                    drawableSize:drawableSize
                      clearColor:self.clearColor];
-    [self.postFilterEncoder encodeIn:commandBuffer
-                   inputColorTexture:self.bokehTexture
+    [self.postFilterEncoder encodeIn:commandBuffer inputColorTexture:self.bokehTexture
                        outputTexture:drawable.texture
                         drawableSize:drawableSize
                           clearColor:self.clearColor];
@@ -108,6 +117,9 @@
         self.colorTexture = [self readAndRenderTargetTextureOfSize:drawableSize format:MTLPixelFormatBGRA8Unorm];
         self.depthTexture = [self readAndRenderTargetTextureOfSize:drawableSize format:MTLPixelFormatDepth32Float];
         self.cocTexture = [self readAndRenderTargetTextureOfSize:drawableSize format:MTLPixelFormatR8Snorm];
+        self.prefilteredCocTexture = [self readAndRenderTargetTextureOfSize:CGSizeMake(drawableSize.width / 2.0,
+                                                                                       drawableSize.height / 2.0)
+                                                                     format:MTLPixelFormatBGRA8Unorm];
         self.bokehTexture = [self readAndRenderTargetTextureOfSize:CGSizeMake(drawableSize.width / 2.0,
                                                                               drawableSize.height / 2.0)
                                                             format:MTLPixelFormatBGRA8Unorm];

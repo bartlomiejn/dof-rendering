@@ -17,7 +17,8 @@
 
 @implementation PostFilterPassEncoder
 
--(instancetype)initWithDevice:(id<MTLDevice>)device {
+-(instancetype)initWithDevice:(id<MTLDevice>)device
+{
     self = [super init];
     if (self) {
         self.device = device;
@@ -56,7 +57,8 @@
 inputColorTexture:(id<MTLTexture>)colorTexture
     outputTexture:(id<MTLTexture>)outputTexture
      drawableSize:(CGSize)drawableSize
-       clearColor:(MTLClearColor)clearColor {
+       clearColor:(MTLClearColor)clearColor
+{
     [self updateTexelSizeUniformWith:drawableSize];
     MTLRenderPassDescriptor* descriptor = [self outputToColorTextureDescriptorOfSize:drawableSize
                                                                           clearColor:clearColor
