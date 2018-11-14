@@ -10,6 +10,27 @@
 using namespace metal;
 #include "../../TextureMappingVertex.h"
 
+// From https://github.com/Unity-Technologies/PostProcessing/blob/v2/PostProcessing/Shaders/Builtins/DiskKernels.hlsl
+static constant int diskKernelSampleCount = 16;
+static constant float2 diskKernel[diskKernelSampleCount] = {
+    float2(0, 0),
+    float2(0.54545456, 0),
+    float2(0.16855472, 0.5187581),
+    float2(-0.44128203, 0.3206101),
+    float2(-0.44128197, -0.3206102),
+    float2(0.1685548, -0.5187581),
+    float2(1, 0),
+    float2(0.809017, 0.58778524),
+    float2(0.30901697, 0.95105654),
+    float2(-0.30901703, 0.9510565),
+    float2(-0.80901706, 0.5877852),
+    float2(-1, 0),
+    float2(-0.80901694, -0.58778536),
+    float2(-0.30901664, -0.9510566),
+    float2(0.30901712, -0.9510565),
+    float2(0.80901694, -0.5877853),
+};
+
 constexpr sampler texSampler(address::clamp_to_zero, filter::linear, coord::normalized);
 
 fragment half4 bokeh(TextureMappingVertex vert [[stage_in]],
@@ -17,12 +38,11 @@ fragment half4 bokeh(TextureMappingVertex vert [[stage_in]],
                      texture2d<float, access::sample> colorTex [[texture(0)]])
 {
     half3 color = 0;
-    for (int u=-4; u<=4; u++) {
-        for (int v=-4; v<=4; v++) {
-            float2 o = float2(u, v) * texelSize.xy;
-            color += (half3)colorTex.sample(texSampler, vert.textureCoordinate + o).rgb;
-        }
+    for (int k=0; k<diskKernelSampleCount; k++) {
+        float2 o = diskKernel[k];
+        o *= texelSize.xy;
+        color += (half3)colorTex.sample(texSampler, vert.textureCoordinate + o).rgb;
     }
-//    color *= 1.0 / 9;
+    color *= 1.0 / diskKernelSampleCount;
     return half4(color, 1);
 }

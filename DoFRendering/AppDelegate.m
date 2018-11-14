@@ -46,7 +46,7 @@
                                                         passBuilder:passBuilder];
     CircleOfConfusionPassEncoder* cocEncoder = [[CircleOfConfusionPassEncoder alloc] initWithDevice:device
                                                                                         passBuilder:passBuilder];
-    BokehPassEncoder* bokehEncoder = [[BokehPassEncoder alloc] initWithDevice:device passBuilder:passBuilder];
+    BokehPassEncoder* bokehEncoder = [[BokehPassEncoder alloc] initWithDevice:device];
     MetalRenderer* renderer = [[MetalRenderer alloc] initWithDevice:device
                                                  drawObjectsEncoder:drawObjectsEncoder
                                                          cocEncoder:cocEncoder

@@ -13,7 +13,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface BokehPassEncoder : NSObject
--(instancetype)initWithDevice:(id<MTLDevice>)device passBuilder:(PassDescriptorBuilder*)passBuilder;
+-(instancetype)initWithDevice:(id<MTLDevice>)device;
 -(void)  encodeIn:(id<MTLCommandBuffer>)commandBuffer
 inputColorTexture:(id<MTLTexture>)colorTexture
     outputTexture:(id<MTLTexture>)outputTexture
