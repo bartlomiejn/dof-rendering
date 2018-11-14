@@ -42,9 +42,11 @@ typedef struct {
 @property (nonatomic, strong) id<MTLTexture> colorTexture;
 @property (nonatomic, strong) id<MTLTexture> depthTexture;
 @property (nonatomic, strong) id<MTLTexture> cocTexture;
-@property (nonatomic, strong) dispatch_semaphore_t displaySemaphore;
+@property (nonatomic, strong) id<MTLTexture> bokehTexture;
+@property (nonatomic, strong) dispatch_semaphore_t tripleBufferSemaphore;
+@property (assign) NSInteger currentTripleBufferIndex;
 @property (nonatomic) MTLClearColor clearColor;
-@property (assign) NSInteger currentTripleBufferingIndex;
+@property (nonatomic) CGSize lastDrawableSize;
 @end
 
 @implementation MetalRenderer
@@ -61,7 +63,7 @@ typedef struct {
         self.drawObjectsEncoder = drawObjectsEncoder;
         self.cocEncoder = cocEncoder;
         self.bokehEncoder = bokehEncoder;
-        self.displaySemaphore = dispatch_semaphore_create(inFlightBufferCount);
+        self.tripleBufferSemaphore = dispatch_semaphore_create(inFlightBufferCount);
         self.clearColor = MTLClearColorMake(0.0, 0.0, 0.0, 1.0);
     }
     return self;
@@ -73,15 +75,15 @@ typedef struct {
 
 -(void)drawToDrawable:(id<CAMetalDrawable>)drawable ofSize:(CGSize)drawableSize
 {
-    dispatch_semaphore_wait(self.displaySemaphore, DISPATCH_TIME_FOREVER);
-    self.currentTripleBufferingIndex = (self.currentTripleBufferingIndex + 1) % inFlightBufferCount;
+    dispatch_semaphore_wait(self.tripleBufferSemaphore, DISPATCH_TIME_FOREVER);
+    self.currentTripleBufferIndex = (self.currentTripleBufferIndex + 1) % inFlightBufferCount;
     id<MTLCommandBuffer> commandBuffer = [self.commandQueue commandBuffer];
     id<MTLCaptureScope> scope = [self makeCaptureScope];
     [scope beginScope];
     [self addSignalSemaphoreCompletedHandlerTo:commandBuffer];
     [self.drawObjectsEncoder encodeDrawModelGroup:_drawableModelGroup
                                   inCommandBuffer:commandBuffer
-                               tripleBufferingIdx:(int)self.currentTripleBufferingIndex
+                               tripleBufferingIdx:(int)self.currentTripleBufferIndex
                                    outputColorTex:self.colorTexture
                                    outputDepthTex:self.depthTexture
                                 cameraTranslation:(vector_float3){ 0.0f, 0.0f, -5.0f }
@@ -94,7 +96,7 @@ typedef struct {
                    clearColor:self.clearColor];
     [self.bokehEncoder encodeIn:commandBuffer
               inputColorTexture:self.colorTexture
-                  outputTexture:drawable.texture
+                  outputTexture:self.bokehTexture
                    drawableSize:drawableSize
                      clearColor:self.clearColor];
     [commandBuffer presentDrawable:drawable];
@@ -104,18 +106,19 @@ typedef struct {
 
 -(void)adjustedDrawableSize:(CGSize)drawableSize
 {
-    if (self.colorTexture.width != drawableSize.width || self.colorTexture.height != drawableSize.height) {
+    if (self.lastDrawableSize.width != drawableSize.width || self.lastDrawableSize.height != drawableSize.height) {
         self.colorTexture = [self readAndRenderTargetTextureOfSize:drawableSize format:MTLPixelFormatBGRA8Unorm];
-    }
-    if (self.depthTexture.width != drawableSize.width || self.depthTexture.height != drawableSize.height) {
         self.depthTexture = [self readAndRenderTargetTextureOfSize:drawableSize format:MTLPixelFormatDepth32Float];
-    }
-    if (self.cocTexture.width != drawableSize.width || self.cocTexture.width != drawableSize.width) {
         self.cocTexture = [self readAndRenderTargetTextureOfSize:drawableSize format:MTLPixelFormatR8Snorm];
+        self.bokehTexture = [self readAndRenderTargetTextureOfSize:CGSizeMake(drawableSize.width / 2.0,
+                                                                              drawableSize.height / 2.0)
+                                                            format:MTLPixelFormatBGRA8Unorm];
     }
+    self.lastDrawableSize = drawableSize;
 }
 
--(id<MTLCaptureScope>)makeCaptureScope {
+-(id<MTLCaptureScope>)makeCaptureScope
+{
     id<MTLCaptureScope> scope = [[MTLCaptureManager sharedCaptureManager] newCaptureScopeWithDevice:self.device];
     scope.label = @"Capture Scope";
     return scope;
@@ -123,7 +126,7 @@ typedef struct {
 
 -(void)addSignalSemaphoreCompletedHandlerTo:(id<MTLCommandBuffer>)commandBuffer
 {
-    __weak dispatch_semaphore_t weakSemaphore = self.displaySemaphore;
+    __weak dispatch_semaphore_t weakSemaphore = self.tripleBufferSemaphore;
     [commandBuffer addCompletedHandler:^(id<MTLCommandBuffer> commandBuffer) {
         dispatch_semaphore_signal(weakSemaphore);
         if (commandBuffer.error) {

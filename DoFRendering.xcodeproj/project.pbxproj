@@ -192,6 +192,7 @@
 			children = (
 				60792246219C1C60004F3B7F /* Circle Of Confusion Pass */,
 				60068323219C41B400AA729F /* Bokeh Pass */,
+				609ED940219C6D32003ADC49 /* Post Filter Pass */,
 			);
 			path = "DOF v2";
 			sourceTree = "<group>";
@@ -205,6 +206,13 @@
 				60792256219C3ACE004F3B7F /* CoCUniforms.h */,
 			);
 			path = "Circle Of Confusion Pass";
+			sourceTree = "<group>";
+		};
+		609ED940219C6D32003ADC49 /* Post Filter Pass */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = "Post Filter Pass";
 			sourceTree = "<group>";
 		};
 		60DD2CEF21971D13007B2CBD /* Rendering Passes */ = {
