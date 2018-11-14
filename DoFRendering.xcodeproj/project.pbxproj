@@ -13,6 +13,11 @@
 		604E6BC72194B179005FAF4A /* SliderViewModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 604E6BC62194B179005FAF4A /* SliderViewModel.m */; };
 		604E6BCB2194B3D3005FAF4A /* SliderStackViewModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 604E6BCA2194B3D3005FAF4A /* SliderStackViewModel.m */; };
 		604E6BCF2194B9CF005FAF4A /* ViewportPresenter.m in Sources */ = {isa = PBXBuildFile; fileRef = 604E6BCE2194B9CF005FAF4A /* ViewportPresenter.m */; };
+		60792248219C1C70004F3B7F /* CircleOfConfusion.metal in Sources */ = {isa = PBXBuildFile; fileRef = 60792247219C1C70004F3B7F /* CircleOfConfusion.metal */; };
+		6079224A219C1CE3004F3B7F /* ProjectTexture.metal in Sources */ = {isa = PBXBuildFile; fileRef = 60792249219C1CE3004F3B7F /* ProjectTexture.metal */; };
+		6079224C219C1D15004F3B7F /* MaskFocusField.metal in Sources */ = {isa = PBXBuildFile; fileRef = 6079224B219C1D15004F3B7F /* MaskFocusField.metal */; };
+		6079224E219C1D42004F3B7F /* MaskOutOfFocusField.metal in Sources */ = {isa = PBXBuildFile; fileRef = 6079224D219C1D42004F3B7F /* MaskOutOfFocusField.metal */; };
+		60792250219C1D6E004F3B7F /* GaussianBlur.metal in Sources */ = {isa = PBXBuildFile; fileRef = 6079224F219C1D6E004F3B7F /* GaussianBlur.metal */; };
 		60DD2CE721971A5F007B2CBD /* DrawObjectsRenderPassEncoder.m in Sources */ = {isa = PBXBuildFile; fileRef = 60DD2CE621971A5F007B2CBD /* DrawObjectsRenderPassEncoder.m */; };
 		60DD2CF221971D41007B2CBD /* DrawObjects.metal in Sources */ = {isa = PBXBuildFile; fileRef = 60DD2CF121971D41007B2CBD /* DrawObjects.metal */; };
 		60DD2CFC2198969F007B2CBD /* OBJMeshLoader.m in Sources */ = {isa = PBXBuildFile; fileRef = 60DD2CFB2198969F007B2CBD /* OBJMeshLoader.m */; };
@@ -28,7 +33,7 @@
 		9F066B7A1FACE10C00AF820A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 9F066B791FACE10C00AF820A /* main.m */; };
 		9F066B851FACF38500AF820A /* Metal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9F066B841FACF38500AF820A /* Metal.framework */; };
 		9F066B871FACF38900AF820A /* MetalKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9F066B861FACF38900AF820A /* MetalKit.framework */; };
-		9F066B891FACF56800AF820A /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 9F066B881FACF56800AF820A /* Shaders.metal */; };
+		9F066B891FACF56800AF820A /* ComposeTextures.metal in Sources */ = {isa = PBXBuildFile; fileRef = 9F066B881FACF56800AF820A /* ComposeTextures.metal */; };
 		9F066B8A1FB39F2F00AF820A /* MetalView.m in Sources */ = {isa = PBXBuildFile; fileRef = 9F066B811FACE19700AF820A /* MetalView.m */; };
 		9F2D391C1FBC8C2400F7578F /* MathFunctions.m in Sources */ = {isa = PBXBuildFile; fileRef = 9F2D391B1FBC8C2400F7578F /* MathFunctions.m */; };
 		9F2D39201FBC8E9D00F7578F /* MetalRenderer.m in Sources */ = {isa = PBXBuildFile; fileRef = 9F2D391F1FBC8E9D00F7578F /* MetalRenderer.m */; };
@@ -55,6 +60,12 @@
 		6079222C2199E248004F3B7F /* ViewProjectionUniforms.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewProjectionUniforms.h; sourceTree = "<group>"; };
 		6079222D2199E274004F3B7F /* ModelUniforms.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ModelUniforms.h; sourceTree = "<group>"; };
 		6079222E2199E803004F3B7F /* MetalRendererProperties.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MetalRendererProperties.h; sourceTree = "<group>"; };
+		60792245219C1C3B004F3B7F /* TextureMappingVertex.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TextureMappingVertex.h; sourceTree = "<group>"; };
+		60792247219C1C70004F3B7F /* CircleOfConfusion.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = CircleOfConfusion.metal; sourceTree = "<group>"; };
+		60792249219C1CE3004F3B7F /* ProjectTexture.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = ProjectTexture.metal; sourceTree = "<group>"; };
+		6079224B219C1D15004F3B7F /* MaskFocusField.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = MaskFocusField.metal; sourceTree = "<group>"; };
+		6079224D219C1D42004F3B7F /* MaskOutOfFocusField.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = MaskOutOfFocusField.metal; sourceTree = "<group>"; };
+		6079224F219C1D6E004F3B7F /* GaussianBlur.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = GaussianBlur.metal; sourceTree = "<group>"; };
 		60DD2CE521971A5F007B2CBD /* DrawObjectsRenderPassEncoder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DrawObjectsRenderPassEncoder.h; sourceTree = "<group>"; };
 		60DD2CE621971A5F007B2CBD /* DrawObjectsRenderPassEncoder.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DrawObjectsRenderPassEncoder.m; sourceTree = "<group>"; };
 		60DD2CF121971D41007B2CBD /* DrawObjects.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = DrawObjects.metal; sourceTree = "<group>"; };
@@ -83,7 +94,7 @@
 		9F066B811FACE19700AF820A /* MetalView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MetalView.m; sourceTree = "<group>"; };
 		9F066B841FACF38500AF820A /* Metal.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Metal.framework; path = System/Library/Frameworks/Metal.framework; sourceTree = SDKROOT; };
 		9F066B861FACF38900AF820A /* MetalKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MetalKit.framework; path = System/Library/Frameworks/MetalKit.framework; sourceTree = SDKROOT; };
-		9F066B881FACF56800AF820A /* Shaders.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Shaders.metal; sourceTree = "<group>"; };
+		9F066B881FACF56800AF820A /* ComposeTextures.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = ComposeTextures.metal; sourceTree = "<group>"; };
 		9F2D391A1FBC8BF400F7578F /* MathFunctions.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MathFunctions.h; sourceTree = "<group>"; };
 		9F2D391B1FBC8C2400F7578F /* MathFunctions.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MathFunctions.m; sourceTree = "<group>"; };
 		9F2D391E1FBC8E9D00F7578F /* MetalRenderer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MetalRenderer.h; sourceTree = "<group>"; };
@@ -149,10 +160,41 @@
 			path = "Draw Objects";
 			sourceTree = "<group>";
 		};
+		60792242219C1BCB004F3B7F /* DOF v1 */ = {
+			isa = PBXGroup;
+			children = (
+				6079224B219C1D15004F3B7F /* MaskFocusField.metal */,
+				6079224D219C1D42004F3B7F /* MaskOutOfFocusField.metal */,
+				6079224F219C1D6E004F3B7F /* GaussianBlur.metal */,
+				9F066B881FACF56800AF820A /* ComposeTextures.metal */,
+			);
+			path = "DOF v1";
+			sourceTree = "<group>";
+		};
+		60792243219C1BD4004F3B7F /* DOF v2 */ = {
+			isa = PBXGroup;
+			children = (
+				60792246219C1C60004F3B7F /* Circle Of Confusion Pass */,
+			);
+			path = "DOF v2";
+			sourceTree = "<group>";
+		};
+		60792246219C1C60004F3B7F /* Circle Of Confusion Pass */ = {
+			isa = PBXGroup;
+			children = (
+				60792247219C1C70004F3B7F /* CircleOfConfusion.metal */,
+			);
+			path = "Circle Of Confusion Pass";
+			sourceTree = "<group>";
+		};
 		60DD2CEF21971D13007B2CBD /* Rendering Passes */ = {
 			isa = PBXGroup;
 			children = (
 				6079222F2199E8F1004F3B7F /* Draw Objects */,
+				60792242219C1BCB004F3B7F /* DOF v1 */,
+				60792243219C1BD4004F3B7F /* DOF v2 */,
+				60792245219C1C3B004F3B7F /* TextureMappingVertex.h */,
+				60792249219C1CE3004F3B7F /* ProjectTexture.metal */,
 			);
 			path = "Rendering Passes";
 			sourceTree = "<group>";
@@ -266,7 +308,6 @@
 				9F2D391E1FBC8E9D00F7578F /* MetalRenderer.h */,
 				9F2D391F1FBC8E9D00F7578F /* MetalRenderer.m */,
 				6079222E2199E803004F3B7F /* MetalRendererProperties.h */,
-				9F066B881FACF56800AF820A /* Shaders.metal */,
 			);
 			path = Renderer;
 			sourceTree = "<group>";
@@ -371,24 +412,29 @@
 				9F066B7A1FACE10C00AF820A /* main.m in Sources */,
 				604E6BCB2194B3D3005FAF4A /* SliderStackViewModel.m in Sources */,
 				9F066B6C1FACE10C00AF820A /* AppDelegate.m in Sources */,
+				6079224A219C1CE3004F3B7F /* ProjectTexture.metal in Sources */,
 				60DD2D0221989CCA007B2CBD /* ModelGroup.m in Sources */,
 				9F843C101FC74D9E00A15944 /* OBJMesh.m in Sources */,
 				60EEBCE12060142600D2EEDA /* PassDescriptorBuilder.m in Sources */,
 				9F2D391C1FBC8C2400F7578F /* MathFunctions.m in Sources */,
 				60DD2CF221971D41007B2CBD /* DrawObjects.metal in Sources */,
-				9F066B891FACF56800AF820A /* Shaders.metal in Sources */,
+				9F066B891FACF56800AF820A /* ComposeTextures.metal in Sources */,
 				60DD2CE721971A5F007B2CBD /* DrawObjectsRenderPassEncoder.m in Sources */,
 				9F066B8A1FB39F2F00AF820A /* MetalView.m in Sources */,
 				60DD2CFF219898A6007B2CBD /* ModelTransformationBuilder.m in Sources */,
+				6079224C219C1D15004F3B7F /* MaskFocusField.metal in Sources */,
 				9F843C071FC7212200A15944 /* Mesh.m in Sources */,
 				9F843C0A1FC723DF00A15944 /* OBJModel.mm in Sources */,
 				604E6BC22194AFBC005FAF4A /* SliderView.m in Sources */,
+				60792250219C1D6E004F3B7F /* GaussianBlur.metal in Sources */,
 				604E6BC72194B179005FAF4A /* SliderViewModel.m in Sources */,
 				60EEBCDA205DAC9700D2EEDA /* PipelineStateBuilder.m in Sources */,
+				60792248219C1C70004F3B7F /* CircleOfConfusion.metal in Sources */,
 				9F843C0D1FC73DA900A15944 /* OBJGroup.mm in Sources */,
 				604E6BBF2194AFA0005FAF4A /* SliderStackView.m in Sources */,
 				604E6BCF2194B9CF005FAF4A /* ViewportPresenter.m in Sources */,
 				9F2D39201FBC8E9D00F7578F /* MetalRenderer.m in Sources */,
+				6079224E219C1D42004F3B7F /* MaskOutOfFocusField.metal in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
