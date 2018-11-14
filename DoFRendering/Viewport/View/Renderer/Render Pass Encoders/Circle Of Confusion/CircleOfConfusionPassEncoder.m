@@ -7,7 +7,6 @@
 //
 
 #import "CircleOfConfusionPassEncoder.h"
-#import "PassDescriptorBuilder.h"
 #import "CoCUniforms.h"
 
 @interface CircleOfConfusionPassEncoder ()
@@ -63,8 +62,8 @@
                           clearColor:(MTLClearColor)clearColor
 {
     MTLRenderPassDescriptor* descriptor = [self outputToColorTextureDescriptorOfSize:drawableSize
-                                                                                      clearColor:clearColor
-                                                                                       toTexture:outputTexture];
+                                                                          clearColor:clearColor
+                                                                           toTexture:outputTexture];
     id<MTLRenderCommandEncoder> encoder = [commandBuffer renderCommandEncoderWithDescriptor:descriptor];
     [encoder setLabel:@"Circle Of Confusion Pass Encoder"];
     [encoder setRenderPipelineState:self.pipelineState];
@@ -80,7 +79,7 @@
     memcpy(self.uniforms.contents, &cocUniforms, sizeof(CoCUniforms));
 }
 
--(MTLRenderPassDescriptor *)outputToColorTextureDescriptorOfSize:(CGSize)size
+- (MTLRenderPassDescriptor *)outputToColorTextureDescriptorOfSize:(CGSize)size
                                                       clearColor:(MTLClearColor)clearColor
                                                        toTexture:(id<MTLTexture>)colorTexture
 {

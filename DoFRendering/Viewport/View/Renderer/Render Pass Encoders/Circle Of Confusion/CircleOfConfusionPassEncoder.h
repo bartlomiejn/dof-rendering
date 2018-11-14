@@ -6,9 +6,8 @@
 //  Copyright © 2018 Bartłomiej Nowak. All rights reserved.
 //
 
-@import Foundation;
+@import CoreGraphics;
 @import Metal;
-#import "PassDescriptorBuilder.h"
 
 NS_ASSUME_NONNULL_BEGIN
 

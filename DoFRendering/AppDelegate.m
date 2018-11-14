@@ -9,9 +9,9 @@
 #import "AppDelegate.h"
 #import "ViewportViewController.h"
 #import "MetalRenderer.h"
-#import "PassDescriptorBuilder.h"
 #import "DrawObjectsPassEncoder.h"
 #import "CircleOfConfusionPassEncoder.h"
+#import "PreFilterPassEncoder.h"
 #import "BokehPassEncoder.h"
 #import "PostFilterPassEncoder.h"
 
