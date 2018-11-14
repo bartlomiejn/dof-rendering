@@ -48,6 +48,7 @@ typedef struct {
     [encoder setLabel:@"Circle Of Confusion Pass Encoder"];
     [encoder setRenderPipelineState:[self circleOfConfusionPipelineStateOnDevice:self.device]];
     [encoder setFragmentTexture:depthTexture atIndex:0];
+    [encoder setFragmentBuffer:self.uniforms offset:0 atIndex:0];
     [encoder drawPrimitives:MTLPrimitiveTypeTriangleStrip vertexStart:0 vertexCount:4];
     [encoder endEncoding];
 }
@@ -68,8 +69,8 @@ typedef struct {
     descriptor.label = @"Circle Of Confusion Pipeline State";
     descriptor.vertexFunction = [library newFunctionWithName:@"project_texture"];
     descriptor.fragmentFunction = [library newFunctionWithName:@"circle_of_confusion_pass"];
-    descriptor.colorAttachments[0].pixelFormat = MTLPixelFormatInvalid;
-    descriptor.depthAttachmentPixelFormat = MTLPixelFormatDepth32Float;
+    descriptor.colorAttachments[0].pixelFormat = MTLPixelFormatBGRA8Unorm;
+    descriptor.depthAttachmentPixelFormat = MTLPixelFormatInvalid;
     NSError *error = nil;
     id<MTLRenderPipelineState> pipelineState = [device newRenderPipelineStateWithDescriptor:descriptor error:&error];
     if (!pipelineState) {

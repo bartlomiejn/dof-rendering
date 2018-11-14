@@ -38,13 +38,13 @@
 -(SliderStackViewModel*)makeSliders
 {
     return [[SliderStackViewModel alloc] initWith:@[[[SliderViewModel alloc] initWithName:@"Focus Distance"
-                                                                                 maxValue:100.0f
-                                                                             currentValue:10.0f
-                                                                                 minValue:0.1f],
+                                                                                 maxValue:2.0f
+                                                                             currentValue:0.8f
+                                                                                 minValue:0.005f],
                                                     [[SliderViewModel alloc] initWithName:@"Focus Range"
-                                                                                 maxValue:20.0f
-                                                                             currentValue:5.0f
-                                                                                 minValue:0.1f]]];
+                                                                                 maxValue:2.0f
+                                                                             currentValue:0.22f
+                                                                                 minValue:0.005f]]];
 }
 
 -(ModelGroup*)makeTeapotGroupWith:(OBJMesh*)mesh
@@ -64,32 +64,36 @@
 
 - (void)viewDidLoad
 {
-    [_view presentSliders:_sliderViewModels];
-    [_view presentModelGroup:_teapotGroup];
+    [self.view presentSliders:_sliderViewModels];
+    [self.view drawModelGroup:_teapotGroup];
+    [self.view drawFocusDistance:self.sliderViewModels.sliders[0].currentValue
+                      focusRange:self.sliderViewModels.sliders[1].currentValue];
 }
 
 - (void)sliderValueChangedFor:(int)idx with:(float)value
 {
-    if (idx >= _sliderViewModels.sliders.count) {
+    if (idx >= self.sliderViewModels.sliders.count) {
         return;
     }
-    _sliderViewModels.sliders[idx].currentValue = value;
+    self.sliderViewModels.sliders[idx].currentValue = value;
+    [self.view drawFocusDistance:self.sliderViewModels.sliders[0].currentValue
+                      focusRange:self.sliderViewModels.sliders[1].currentValue];
 }
 
 -(void)willRenderNextFrameTo:(id<CAMetalDrawable>)drawable
                       ofSize:(CGSize)drawableSize
                frameDuration:(float)frameDuration
 {
-    [self updateTeapotModelGroupFor:frameDuration];
-    [_view presentModelGroup:_teapotGroup];
-    [_view drawNextFrameTo:drawable ofSize:drawableSize];
+    [self updateAndDrawTeapotModelGroupFor:frameDuration];
+    [self.view drawNextFrameTo:drawable ofSize:drawableSize];
 }
 
--(void)updateTeapotModelGroupFor:(float)frameDuration {
-    [_builder addLastFrameDuration:frameDuration];
-    for (int offset = 0; offset < _teapotGroup.count; offset++) {
-        _teapotGroup.transformations[offset] = [self.builder transformationMatrixForModelIndex:offset];
+-(void)updateAndDrawTeapotModelGroupFor:(float)frameDuration {
+    [self.builder addLastFrameDuration:frameDuration];
+    for (int offset = 0; offset < self.teapotGroup.count; offset++) {
+        self.teapotGroup.transformations[offset] = [self.builder transformationMatrixForModelIndex:offset];
     }
+    [self.view drawModelGroup:self.teapotGroup];
 }
 
 @end

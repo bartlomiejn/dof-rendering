@@ -24,6 +24,9 @@
                 </label>
                 <slider opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="0.5" minValue="0.0" maxValue="1" translatesAutoresizingMaskIntoConstraints="NO" id="lcA-zU-9wQ">
                     <rect key="frame" x="14" y="19" width="349" height="31"/>
+                    <connections>
+                        <action selector="sliderValueChanged:" destination="iN0-l3-epB" eventType="valueChanged" id="YWh-z7-k5G"/>
+                    </connections>
                 </slider>
             </subviews>
             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>

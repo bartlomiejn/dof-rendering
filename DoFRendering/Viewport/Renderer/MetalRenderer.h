@@ -22,6 +22,7 @@
          pipelineStateBuilder:(PipelineStateBuilder*)pipelineStateBuilder
            drawObjectsEncoder:(DrawObjectsRenderPassEncoder*)drawObjectsEncoder
                    cocEncoder:(CircleOfConfusionPassEncoder*)cocEncoder;
+-(void)setFocusDistance:(float)focusDistance focusRange:(float)focusRange;
 -(void)drawToDrawable:(id<CAMetalDrawable>)drawable ofSize:(CGSize)drawableSize;
 -(void)adjustedDrawableSize:(CGSize)drawableSize;
 @end

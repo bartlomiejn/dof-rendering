@@ -88,7 +88,9 @@ typedef struct {
     return uniforms;
 }
 
-#pragma mark - MetalViewDelegate
+-(void)setFocusDistance:(float)focusDistance focusRange:(float)focusRange {
+    [self.cocEncoder updateUniformsWithFocusDistance:focusDistance focusRange:focusRange];
+}
 
 -(void)drawToDrawable:(id<CAMetalDrawable>)drawable ofSize:(CGSize)drawableSize
 {
@@ -107,11 +109,16 @@ typedef struct {
                                 cameraTranslation:(vector_float3){ 0.0f, 0.0f, -5.0f }
                                        drawableSz:drawableSize
                                        clearColor:self.clearColor];
-    [self maskInFocusToTextureIn:commandBuffer with:drawableSize];
-    [self maskOutOfFocusToTextureIn:commandBuffer with:drawableSize];
-    [self horizontalBlurOnOutOfFocusTextureIn:commandBuffer with:drawableSize];
-    [self verticalBlurOnOutOfFocusTextureIn:commandBuffer with:drawableSize];
-    [self compositeTexturesIn:commandBuffer to:drawable.texture with:drawableSize];
+    [self.cocEncoder encodeCircleOfConfusionPassIn:commandBuffer
+                                 inputDepthTexture:self.depthTexture
+                                     outputTexture:drawable.texture
+                                      drawableSize:drawableSize
+                                        clearColor:self.clearColor];
+//    [self maskInFocusToTextureIn:commandBuffer with:drawableSize];
+//    [self maskOutOfFocusToTextureIn:commandBuffer with:drawableSize];
+//    [self horizontalBlurOnOutOfFocusTextureIn:commandBuffer with:drawableSize];
+//    [self verticalBlurOnOutOfFocusTextureIn:commandBuffer with:drawableSize];
+//    [self compositeTexturesIn:commandBuffer to:drawable.texture with:drawableSize];
     [commandBuffer presentDrawable:drawable];
     [scope endScope];
     [commandBuffer commit];

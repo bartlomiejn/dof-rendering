@@ -14,7 +14,8 @@
 
 @protocol ViewportViewProtocol <NSObject>
 - (void)presentSliders:(SliderStackViewModel*)viewModel;
-- (void)presentModelGroup:(ModelGroup*)modelGroup;
+- (void)drawModelGroup:(ModelGroup*)modelGroup;
+- (void)drawFocusDistance:(float)focusDistance focusRange:(float)focusRange;
 - (void)drawNextFrameTo:(id<CAMetalDrawable>)drawable ofSize:(CGSize)drawableSize;
 @end
 

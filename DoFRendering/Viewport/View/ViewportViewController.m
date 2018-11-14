@@ -91,9 +91,14 @@
                                                constraintEqualToAnchor:self.view.trailingAnchor]]];
 }
 
-- (void)presentModelGroup:(ModelGroup*)modelGroup
+- (void)drawModelGroup:(ModelGroup*)modelGroup
 {
     self.renderer.drawableModelGroup = modelGroup;
+}
+
+- (void)drawFocusDistance:(float)focusDistance focusRange:(float)focusRange
+{
+    [self.renderer setFocusDistance:focusDistance focusRange:focusRange];
 }
 
 - (void)drawNextFrameTo:(id<CAMetalDrawable>)drawable ofSize:(CGSize)drawableSize
