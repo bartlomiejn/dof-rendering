@@ -10,9 +10,14 @@
 #import "PassDescriptorBuilder.h"
 #import "PipelineStateBuilder.h"
 
+typedef struct {
+    simd_float1 focusDist, focusRange;
+} CoCUniforms;
+
 @interface CircleOfConfusionPassEncoder ()
 @property (nonatomic, strong) id<MTLDevice> device;
 @property (nonatomic, strong) PassDescriptorBuilder* passBuilder;
+@property (nonatomic, strong) id<MTLBuffer> uniforms;
 @end
 
 @implementation CircleOfConfusionPassEncoder
@@ -23,9 +28,12 @@
     if (self) {
         self.device = device;
         self.passBuilder = passBuilder;
+        self.uniforms = [self makeUniforms];
     }
     return self;
 }
+
+#pragma mark - CircleOfConfusionPassEncoder
 
 -(void)encodeCircleOfConfusionPassIn:(id<MTLCommandBuffer>)commandBuffer
                    inputDepthTexture:(id<MTLTexture>)depthTexture
@@ -44,6 +52,15 @@
     [encoder endEncoding];
 }
 
+-(void)updateUniformsWithFocusDistance:(float)focusDistance focusRange:(float)focusRange
+{
+    // TODO: Make this configurable from the sliders
+    CoCUniforms cocUniforms = (CoCUniforms) { .focusDist = focusDistance, .focusRange = focusRange };
+    memcpy(self.uniforms.contents, &cocUniforms, sizeof(CoCUniforms));
+}
+
+#pragma mark - Private
+
 -(id<MTLRenderPipelineState>)circleOfConfusionPipelineStateOnDevice:(id<MTLDevice>)device
 {
     id<MTLLibrary> library = [device newDefaultLibrary];
@@ -59,6 +76,15 @@
         NSLog(@"Error occurred when creating render pipeline state: %@", error);
     }
     return pipelineState;
+}
+
+-(id<MTLBuffer>)makeUniforms
+{
+    id<MTLBuffer> buffer = [self.device newBufferWithLength:sizeof(CoCUniforms)
+                                                    options:MTLResourceOptionCPUCacheModeDefault];
+    buffer.label = @"Circle Of Confusion Pass Uniforms";
+    
+    return buffer;
 }
 
 @end

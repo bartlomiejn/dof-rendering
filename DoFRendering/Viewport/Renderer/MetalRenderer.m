@@ -33,24 +33,14 @@ typedef struct {
     simd_float2 imageDimensions;
 } GaussianBlurUniforms;
 
-typedef struct {
-    simd_float1 focusDist, focusRange;
-} CoCUniforms;
-
 @interface MetalRenderer ()
-
 @property (nonatomic, strong) id<MTLDevice> device;
 @property (nonatomic, strong) id<MTLCommandQueue> commandQueue;
 @property (nonatomic, strong) PassDescriptorBuilder* passDescriptorBuilder;
 @property (nonatomic, strong) PipelineStateBuilder* pipelineStateBuilder;
 @property (nonatomic, strong) DrawObjectsRenderPassEncoder* drawObjectsEncoder;
 @property (nonatomic, strong) CircleOfConfusionPassEncoder* cocEncoder;
-
-// Uniforms
 @property (nonatomic, strong) NSArray<id<MTLBuffer>>* gaussianBlurUniforms;
-@property (nonatomic, strong) id<MTLBuffer> circleOfConfusionUniforms;
-
-// Textures / Stencil states
 @property (nonatomic, strong) id<MTLTexture> colorTexture;
 @property (nonatomic, strong) id<MTLTexture> depthTexture;
 @property (nonatomic, strong) id<MTLTexture> inFocusColorTexture;
@@ -58,12 +48,9 @@ typedef struct {
 @property (nonatomic, strong) id<MTLTexture> blurredOutOfFocusColorTexture;
 @property (nonatomic, strong) id<MTLTexture> blurredOutOfFocusColorTexture2;
 @property (nonatomic, strong) id<MTLDepthStencilState> depthStencilState;
-
-// Auxiliary
 @property (nonatomic, strong) dispatch_semaphore_t displaySemaphore;
 @property (nonatomic) MTLClearColor clearColor;
 @property (assign) NSInteger currentTripleBufferingIndex;
-
 @end
 
 @implementation MetalRenderer
@@ -83,7 +70,6 @@ typedef struct {
         self.drawObjectsEncoder = drawObjectsEncoder;
         self.cocEncoder = cocEncoder;
         self.gaussianBlurUniforms = [self makeGaussianBlurUniforms];
-        self.circleOfConfusionUniforms = [self makeCircleOfConfusionUniforms];
         self.displaySemaphore = dispatch_semaphore_create(inFlightBufferCount);
         self.clearColor = MTLClearColorMake(0.0, 0.0, 0.0, 1.0);
     }
@@ -100,14 +86,6 @@ typedef struct {
         [uniforms addObject:buffer];
     }
     return uniforms;
-}
-
--(id<MTLBuffer>)makeCircleOfConfusionUniforms
-{
-    id<MTLBuffer> buffer = [self.device newBufferWithLength:sizeof(CoCUniforms)
-                                                    options:MTLResourceOptionCPUCacheModeDefault];
-    buffer.label = @"Circle Of Confusion Pass Uniforms";
-    return buffer;
 }
 
 #pragma mark - MetalViewDelegate
@@ -201,23 +179,6 @@ typedef struct {
         .blurRadius = 3.0
     };
     memcpy(self.gaussianBlurUniforms[1].contents, &blurUniformsHorizontal, sizeof(blurUniformsHorizontal));
-    
-    CoCUniforms cocUniforms = (CoCUniforms) { .focusDist = 10, .focusRange = 5 };
-    memcpy(self.circleOfConfusionUniforms.contents, &cocUniforms, sizeof(blurUniformsHorizontal));
-}
-
--(void)circleOfConfusionIn:(id<MTLCommandBuffer>)commandBuffer with:(CGSize)drawableSize
-{
-    MTLRenderPassDescriptor *desc = [self.passDescriptorBuilder outputToDepthTextureDescriptorOfSize:drawableSize
-                                                                                           toTexture:self.depthTexture];
-    id<MTLRenderCommandEncoder> encoder = [commandBuffer renderCommandEncoderWithDescriptor:desc];
-    [encoder setLabel:@"Circle Of Confusion Pass Encoder"];
-    [encoder setRenderPipelineState:self.pipelineStateBuilder.circleOfConfusionPipelineState];
-    [encoder setFragmentBuffer:self.circleOfConfusionUniforms offset:0 atIndex:0];
-    [encoder setFragmentTexture:self.colorTexture atIndex:0];
-    [encoder setFragmentTexture:self.depthTexture atIndex:1];
-    [encoder drawPrimitives:MTLPrimitiveTypeTriangleStrip vertexStart:0 vertexCount:4];
-    [encoder endEncoding];
 }
 
 -(void)maskInFocusToTextureIn:(id<MTLCommandBuffer>)commandBuffer with:(CGSize)drawableSize
