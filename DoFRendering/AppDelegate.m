@@ -10,7 +10,6 @@
 #import "ViewportViewController.h"
 #import "MetalRenderer.h"
 #import "PassDescriptorBuilder.h"
-#import "PipelineStateBuilder.h"
 #import "DrawObjectsRenderPassEncoder.h"
 #import "CircleOfConfusionPassEncoder.h"
 #import "BokehPassEncoder.h"
@@ -42,11 +41,9 @@
 -(MetalRenderer*)metalRendererForDevice:(id<MTLDevice>)device
 {
     PassDescriptorBuilder* passBuilder = [[PassDescriptorBuilder alloc] init];
-    PipelineStateBuilder* pipelineStateBuilder = [[PipelineStateBuilder alloc] initWithDevice:device];
     DrawObjectsRenderPassEncoder* drawObjectsEncoder = [[DrawObjectsRenderPassEncoder alloc]
                                                         initWithDevice:device
-                                                        passBuilder:passBuilder
-                                                        pipelineStateBuilder:pipelineStateBuilder];
+                                                        passBuilder:passBuilder];
     CircleOfConfusionPassEncoder* cocEncoder = [[CircleOfConfusionPassEncoder alloc] initWithDevice:device
                                                                                         passBuilder:passBuilder];
     BokehPassEncoder* bokehEncoder = [[BokehPassEncoder alloc] initWithDevice:device passBuilder:passBuilder];

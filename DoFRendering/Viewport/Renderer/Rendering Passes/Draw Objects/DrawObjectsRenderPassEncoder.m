@@ -13,9 +13,10 @@
 #import "MathFunctions.h"
 
 @interface DrawObjectsRenderPassEncoder ()
-@property (nonatomic, strong) id<MTLDevice> device;
 @property (nonatomic, strong) PassDescriptorBuilder* passBuilder;
-@property (nonatomic, strong) PipelineStateBuilder* pipelineBuilder;
+@property (nonatomic, strong) id<MTLDevice> device;
+@property (nonatomic, strong) id<MTLRenderPipelineState> pipelineState;
+@property (nonatomic, strong) id<MTLDepthStencilState> depthStencilState;
 @property (nonatomic, strong) id<MTLBuffer> viewProjectionUniformsBuffer;
 @property (nonatomic, strong) id<MTLBuffer> modelGroupUniformsBuffer;
 @property (nonatomic) int modelGroupUniformsBufferCount;
@@ -23,19 +24,41 @@
 
 @implementation DrawObjectsRenderPassEncoder
 
--(instancetype)initWithDevice:(id<MTLDevice>)device
-                  passBuilder:(PassDescriptorBuilder*)passBuilder
-         pipelineStateBuilder:(PipelineStateBuilder*)pipelineBuilder
+-(instancetype)initWithDevice:(id<MTLDevice>)device passBuilder:(PassDescriptorBuilder*)passBuilder
 {
     self = [super init];
     if (self) {
-        self.device = device;
         self.passBuilder = passBuilder;
-        self.pipelineBuilder = pipelineBuilder;
+        self.device = device;
+        self.pipelineState = [self drawObjectsPipelineStateOnDevice:device];
+        self.depthStencilState = [self depthStencilStateOnDevice:device];
         self.viewProjectionUniformsBuffer = [self makeViewProjectionUniformsBufferOn:device];
         self.modelGroupUniformsBuffer = [self makeModelGroupUniformsBufferOn:device uniformCount:0];
     }
     return self;
+}
+
+-(id<MTLRenderPipelineState>)drawObjectsPipelineStateOnDevice:(id<MTLDevice>)device {
+    id<MTLLibrary> library = [device newDefaultLibrary];
+    MTLRenderPipelineDescriptor *descriptor = [MTLRenderPipelineDescriptor new];
+    descriptor.label = @"Draw Objects Pipeline State";
+    descriptor.vertexFunction = [library newFunctionWithName:@"map_vertices"];
+    descriptor.fragmentFunction = [library newFunctionWithName:@"color_passthrough"];
+    descriptor.colorAttachments[0].pixelFormat = MTLPixelFormatBGRA8Unorm;
+    descriptor.depthAttachmentPixelFormat = MTLPixelFormatDepth32Float;
+    NSError *error = nil;
+    id<MTLRenderPipelineState> pipelineState = [device newRenderPipelineStateWithDescriptor:descriptor error:&error];
+    if (!pipelineState) {
+        NSLog(@"Error occurred when creating render pipeline state: %@", error);
+    }
+    return pipelineState;
+}
+
+-(id<MTLDepthStencilState>)depthStencilStateOnDevice:(id<MTLDevice>)device {
+    MTLDepthStencilDescriptor *depthStencilDescriptor = [MTLDepthStencilDescriptor new];
+    depthStencilDescriptor.depthCompareFunction = MTLCompareFunctionLess;
+    depthStencilDescriptor.depthWriteEnabled = YES;
+    return [device newDepthStencilStateWithDescriptor:depthStencilDescriptor];
 }
 
 -(id<MTLBuffer>)makeViewProjectionUniformsBufferOn:(id<MTLDevice>)device
@@ -75,8 +98,8 @@
                                                                            outputDepthTexture:depthTexture];
     id<MTLRenderCommandEncoder> encoder = [commandBuffer renderCommandEncoderWithDescriptor:descriptor];
     [encoder setLabel:@"Draw Objects Encoder"];
-    [encoder setRenderPipelineState:[self drawObjectsPipelineStateOnDevice:self.device]];
-    [encoder setDepthStencilState:[self depthStencilStateOnDevice:self.device]];
+    [encoder setRenderPipelineState:self.pipelineState];
+    [encoder setDepthStencilState:self.depthStencilState];
     [encoder setFrontFacingWinding:MTLWindingCounterClockwise];
     [encoder setCullMode:MTLCullModeBack];
     [encoder setVertexBuffer:modelGroup.mesh.vertexBuffer offset:0 atIndex:0];
@@ -131,29 +154,6 @@
     const float near = 1.0;
     const float far = 100;
     return matrix_float4x4_perspective(aspectRatio, fov, near, far);
-}
-
--(id<MTLRenderPipelineState>)drawObjectsPipelineStateOnDevice:(id<MTLDevice>)device {
-    id<MTLLibrary> library = [device newDefaultLibrary];
-    MTLRenderPipelineDescriptor *descriptor = [MTLRenderPipelineDescriptor new];
-    descriptor.label = @"Draw Objects Pipeline State";
-    descriptor.vertexFunction = [library newFunctionWithName:@"map_vertices"];
-    descriptor.fragmentFunction = [library newFunctionWithName:@"color_passthrough"];
-    descriptor.colorAttachments[0].pixelFormat = MTLPixelFormatBGRA8Unorm;
-    descriptor.depthAttachmentPixelFormat = MTLPixelFormatDepth32Float;
-    NSError *error = nil;
-    id<MTLRenderPipelineState> pipelineState = [device newRenderPipelineStateWithDescriptor:descriptor error:&error];
-    if (!pipelineState) {
-        NSLog(@"Error occurred when creating render pipeline state: %@", error);
-    }
-    return pipelineState;
-}
-
--(id<MTLDepthStencilState>)depthStencilStateOnDevice:(id<MTLDevice>)device {
-    MTLDepthStencilDescriptor *depthStencilDescriptor = [MTLDepthStencilDescriptor new];
-    depthStencilDescriptor.depthCompareFunction = MTLCompareFunctionLess;
-    depthStencilDescriptor.depthWriteEnabled = YES;
-    return [device newDepthStencilStateWithDescriptor:depthStencilDescriptor];
 }
 
 @end

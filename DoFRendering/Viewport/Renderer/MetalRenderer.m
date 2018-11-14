@@ -11,7 +11,6 @@
 @import Metal;
 @import QuartzCore.CAMetalLayer;
 #import "MetalRenderer.h"
-#import "PipelineStateBuilder.h"
 #import "PassDescriptorBuilder.h"
 #import "DrawObjectsRenderPassEncoder.h"
 #import "CircleOfConfusionPassEncoder.h"
@@ -94,7 +93,7 @@ typedef struct {
                  drawableSize:drawableSize
                    clearColor:self.clearColor];
     [self.bokehEncoder encodeIn:commandBuffer
-                inputCoCTexture:self.cocTexture
+              inputColorTexture:self.colorTexture
                   outputTexture:drawable.texture
                    drawableSize:drawableSize
                      clearColor:self.clearColor];

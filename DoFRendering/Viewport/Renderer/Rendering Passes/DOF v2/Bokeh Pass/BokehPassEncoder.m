@@ -9,8 +9,10 @@
 #import "BokehPassEncoder.h"
 
 @interface BokehPassEncoder ()
-@property (nonatomic, strong) id<MTLDevice> device;
 @property (nonatomic, strong) PassDescriptorBuilder* passBuilder;
+@property (nonatomic, strong) id<MTLDevice> device;
+@property (nonatomic, strong) id<MTLRenderPipelineState> pipelineState;
+@property (nonatomic, strong) id<MTLBuffer> texelSizeUniformBuffer;
 @end
 
 @implementation BokehPassEncoder
@@ -19,27 +21,22 @@
 {
     self = [super init];
     if (self) {
-        self.device = device;
         self.passBuilder = passBuilder;
+        self.device = device;
+        self.pipelineState = [self bokehPipelineStateOnDevice:device];
+        self.texelSizeUniformBuffer = [self makeTexelSizeUniformBuffer];
     }
     return self;
 }
 
--(void)encodeIn:(id<MTLCommandBuffer>)commandBuffer
-inputCoCTexture:(id<MTLTexture>)cocTexture
-  outputTexture:(id<MTLTexture>)outputTexture
-   drawableSize:(CGSize)drawableSize
-     clearColor:(MTLClearColor)clearColor
+-(id<MTLBuffer>)makeTexelSizeUniformBuffer
 {
-    MTLRenderPassDescriptor* descriptor = [self.passBuilder outputToColorTextureDescriptorOfSize:drawableSize
-                                                                                      clearColor:clearColor
-                                                                                       toTexture:outputTexture];
-    id<MTLRenderCommandEncoder> encoder = [commandBuffer renderCommandEncoderWithDescriptor:descriptor];
-    [encoder setLabel:@"Circle Of Confusion Pass Encoder"];
-    [encoder setRenderPipelineState:[self bokehPipelineStateOnDevice:self.device]];
-    [encoder setFragmentTexture:cocTexture atIndex:0];
-    [encoder drawPrimitives:MTLPrimitiveTypeTriangleStrip vertexStart:0 vertexCount:4];
-    [encoder endEncoding];
+    simd_float2 texelSize = { 0.005f, 0.005f };
+    id<MTLBuffer> buffer = [self.device newBufferWithLength:sizeof(simd_float2)
+                                                    options:MTLResourceOptionCPUCacheModeDefault];
+    buffer.label = @"Texel Size Uniform";
+    memcpy(buffer.contents, &texelSize, sizeof(simd_float2));
+    return buffer;
 }
 
 -(id<MTLRenderPipelineState>)bokehPipelineStateOnDevice:(id<MTLDevice>)device
@@ -58,4 +55,23 @@ inputCoCTexture:(id<MTLTexture>)cocTexture
     }
     return pipelineState;
 }
+
+-(void)  encodeIn:(id<MTLCommandBuffer>)commandBuffer
+inputColorTexture:(id<MTLTexture>)colorTexture
+    outputTexture:(id<MTLTexture>)outputTexture
+     drawableSize:(CGSize)drawableSize
+       clearColor:(MTLClearColor)clearColor
+{
+    MTLRenderPassDescriptor* descriptor = [self.passBuilder outputToColorTextureDescriptorOfSize:drawableSize
+                                                                                      clearColor:clearColor
+                                                                                       toTexture:outputTexture];
+    id<MTLRenderCommandEncoder> encoder = [commandBuffer renderCommandEncoderWithDescriptor:descriptor];
+    [encoder setLabel:@"Bokeh Pass Encoder"];
+    [encoder setRenderPipelineState:self.pipelineState];
+    [encoder setFragmentTexture:colorTexture atIndex:0];
+    [encoder setFragmentBuffer:self.texelSizeUniformBuffer offset:0 atIndex:0];
+    [encoder drawPrimitives:MTLPrimitiveTypeTriangleStrip vertexStart:0 vertexCount:4];
+    [encoder endEncoding];
+}
+
 @end
