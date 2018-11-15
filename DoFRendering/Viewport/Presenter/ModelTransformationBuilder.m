@@ -39,7 +39,7 @@
 {
     matrix_float4x4 translationMatrix = [self teapotTranslationForIndex:index];
     matrix_float4x4 rotationMatrix = [self teapotRotationForIndex:index];
-    matrix_float4x4 scaleMatrix = [self teapotScaleForIndex:index];
+    matrix_float4x4 scaleMatrix = matrix_float4x4_uniform_scale(3.0);
     return matrix_multiply(matrix_multiply(translationMatrix, rotationMatrix), scaleMatrix);
 }
 
@@ -47,11 +47,11 @@
 {
     vector_float3 translation;
     if (index == 1) {
-        translation = (vector_float3) { 0, 0, sinf(5 * _elapsedTime) * 0.5 + 1.5 };
+        translation = (vector_float3) { 0.0, 1.0, 0.0 };
     } else if (index == 2) {
-        translation = (vector_float3) { 0.8, 12, -20.0 };
+        translation = (vector_float3) { 0.8, 12.0, -20.0 };
     } else {
-        translation = (vector_float3) { -0.7, -4.1, -3.0 };
+        translation = (vector_float3) { -0.7, -1.1, -3.0 };
     }
     return matrix_float4x4_translation(translation);
 }
@@ -65,19 +65,6 @@
     matrix_float4x4 yRotation = matrix_float4x4_rotation(yAxis, _yRotation);
     matrix_float4x4 zRotation = matrix_float4x4_rotation(zAxis, _zRotation);
     return matrix_multiply(matrix_multiply(xRotation, yRotation), zRotation);
-}
-
--(matrix_float4x4)teapotScaleForIndex:(int)index
-{
-    float scaleFactor;
-    if (index == 1) {
-        scaleFactor = 2.8;
-    } else if (index == 2) {
-        scaleFactor = sinf(5 * _elapsedTime) * 0.5 + 6;
-    } else {
-        scaleFactor = sinf(5 * _elapsedTime) * 0.5 + 3;
-    }
-    return matrix_float4x4_uniform_scale(scaleFactor);
 }
 
 @end
