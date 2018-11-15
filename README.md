@@ -1,13 +1,14 @@
 ![Example image](https://raw.githubusercontent.com/bartlomiejn/dof-rendering-metal/master/dof_rendering.gif)
 
 # DoF rendering
-- Loading and rendering OBJ model files
-- Transformation animation of models
-- Depth of field rendering:
-  - Masking of out of / in focus parts of image
-  - Gaussian blur with approximated constant coefficients of out of focus parts of image
-  - Composition of both elements into end image
+- Loading and rendering of OBJ model files
+- Depth of field rendering composed of 5 passes:
+  - Drawing objects
+  - Circle of confusion calculation
+  - Downsample with extreme CoC values selection
+  - Disk kernel based bokeh calculation
+  - Box filter
+- Adjustable focus distance, range and bokeh radius
 
 # In progress
-- Configurable focus range / distance
-- Bokeh effect
+- Correcting artifacts on small bokeh values
