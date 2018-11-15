@@ -38,17 +38,17 @@
 -(SliderStackViewModel*)makeSliders
 {
     return [[SliderStackViewModel alloc] initWith:@[[[SliderViewModel alloc] initWithName:@"Focus Distance"
-                                                                                 maxValue:2.0f
-                                                                             currentValue:0.8f
+                                                                                 maxValue:1.2f
+                                                                             currentValue:0.97f
                                                                                  minValue:0.005f],
                                                     [[SliderViewModel alloc] initWithName:@"Focus Range"
-                                                                                 maxValue:2.0f
-                                                                             currentValue:0.22f
+                                                                                 maxValue:5.0f
+                                                                             currentValue:2.1f
                                                                                  minValue:0.005f],
                                                     [[SliderViewModel alloc] initWithName:@"Bokeh Radius"
-                                                                                 maxValue:20.0f
-                                                                             currentValue:3.0f
-                                                                                 minValue:1.0f]]];
+                                                                                 maxValue:18.0f
+                                                                             currentValue:18.0f
+                                                                                 minValue:0.01f]]];
 }
 
 -(ModelGroup*)makeTeapotGroupWith:(OBJMesh*)mesh
@@ -77,6 +77,10 @@
 
 - (void)sliderValueChangedFor:(int)idx with:(float)value
 {
+    NSLog(@"%f %f %f",
+          self.sliderViewModels.sliders[0].currentValue,
+          self.sliderViewModels.sliders[1].currentValue,
+          self.sliderViewModels.sliders[2].currentValue);
     if (idx >= self.sliderViewModels.sliders.count) {
         return;
     }

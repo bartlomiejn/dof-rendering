@@ -43,6 +43,7 @@
     descriptor.vertexFunction = [library newFunctionWithName:@"project_texture"];
     descriptor.fragmentFunction = [library newFunctionWithName:@"downsample_coc"];
     descriptor.colorAttachments[0].pixelFormat = MTLPixelFormatBGRA8Unorm;
+    descriptor.colorAttachments[1].pixelFormat = MTLPixelFormatR32Float;
     descriptor.depthAttachmentPixelFormat = MTLPixelFormatInvalid;
     NSError *error = nil;
     id<MTLRenderPipelineState> pipelineState = [device newRenderPipelineStateWithDescriptor:descriptor error:&error];
@@ -52,20 +53,24 @@
     return pipelineState;
 }
 
--(void)  encodeIn:(id<MTLCommandBuffer>)commandBuffer
-inputColorTexture:(id<MTLTexture>)colorTexture
-    outputTexture:(id<MTLTexture>)outputTexture
-     drawableSize:(CGSize)drawableSize
-       clearColor:(MTLClearColor)clearColor
+-(void)   encodeIn:(id<MTLCommandBuffer>)commandBuffer
+ inputColorTexture:(id<MTLTexture>)colorTexture
+   inputCoCTexture:(id<MTLTexture>)cocTexture
+outputColorTexture:(id<MTLTexture>)outputColorTexture
+  outputCoCTexture:(id<MTLTexture>)outputCoCTexture
+      drawableSize:(CGSize)drawableSize
+        clearColor:(MTLClearColor)clearColor
 {
     [self updateTexelSizeUniformWith:drawableSize];
-    MTLRenderPassDescriptor* descriptor = [self outputToColorTextureDescriptorOfSize:drawableSize
-                                                                          clearColor:clearColor
-                                                                           toTexture:outputTexture];
+    MTLRenderPassDescriptor* descriptor = [self outputToColorAndCocTextureDescriptorOfSize:drawableSize
+                                                                                clearColor:clearColor
+                                                                            toColorTexture:outputColorTexture
+                                                                              toCoCTexture:outputCoCTexture];
     id<MTLRenderCommandEncoder> encoder = [commandBuffer renderCommandEncoderWithDescriptor:descriptor];
     [encoder setLabel:@"Pre-filter Pass Encoder"];
     [encoder setRenderPipelineState:self.pipelineState];
     [encoder setFragmentTexture:colorTexture atIndex:0];
+    [encoder setFragmentTexture:cocTexture atIndex:1];
     [encoder setFragmentBuffer:self.texelSizeUniformBuffer offset:0 atIndex:0];
     [encoder drawPrimitives:MTLPrimitiveTypeTriangleStrip vertexStart:0 vertexCount:4];
     [encoder endEncoding];
@@ -77,15 +82,20 @@ inputColorTexture:(id<MTLTexture>)colorTexture
     memcpy(self.texelSizeUniformBuffer.contents, &texelSize, sizeof(simd_float2));
 }
 
--(MTLRenderPassDescriptor *)outputToColorTextureDescriptorOfSize:(CGSize)size
-                                                      clearColor:(MTLClearColor)clearColor
-                                                       toTexture:(id<MTLTexture>)colorTexture
+-(MTLRenderPassDescriptor *)outputToColorAndCocTextureDescriptorOfSize:(CGSize)size
+                                                            clearColor:(MTLClearColor)clearColor
+                                                        toColorTexture:(id<MTLTexture>)colorTexture
+                                                          toCoCTexture:(id<MTLTexture>)cocTexture
 {
     MTLRenderPassDescriptor *descriptor = [MTLRenderPassDescriptor renderPassDescriptor];
     descriptor.colorAttachments[0].texture = colorTexture;
     descriptor.colorAttachments[0].clearColor = clearColor;
     descriptor.colorAttachments[0].loadAction = MTLLoadActionLoad;
     descriptor.colorAttachments[0].storeAction = MTLStoreActionStore;
+    descriptor.colorAttachments[1].texture = cocTexture;
+    descriptor.colorAttachments[1].clearColor = clearColor;
+    descriptor.colorAttachments[1].loadAction = MTLLoadActionLoad;
+    descriptor.colorAttachments[1].storeAction = MTLStoreActionStore;
     descriptor.renderTargetWidth = size.width;
     descriptor.renderTargetHeight = size.height;
     return descriptor;

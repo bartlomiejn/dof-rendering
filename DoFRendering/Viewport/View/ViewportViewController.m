@@ -79,7 +79,7 @@
 {
     SliderStackView *stackView = [[SliderStackView alloc] init];
     [stackView setupWith:viewModel];
-    WEAK_SELF weakSelf = self;
+    weak_self weakSelf = self;
     stackView.onValueChange = ^(int idx, float value) {
         [weakSelf.presenter sliderValueChangedFor:idx with:value];
     };

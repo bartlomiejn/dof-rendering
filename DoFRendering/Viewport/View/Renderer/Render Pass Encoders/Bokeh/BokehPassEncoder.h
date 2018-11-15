@@ -15,6 +15,7 @@ NS_ASSUME_NONNULL_BEGIN
 -(instancetype)initWithDevice:(id<MTLDevice>)device;
 -(void)  encodeIn:(id<MTLCommandBuffer>)commandBuffer
 inputColorTexture:(id<MTLTexture>)colorTexture
+  inputCoCTexture:(id<MTLTexture>)cocTexture
     outputTexture:(id<MTLTexture>)outputTexture
      drawableSize:(CGSize)drawableSize
        clearColor:(MTLClearColor)clearColor;

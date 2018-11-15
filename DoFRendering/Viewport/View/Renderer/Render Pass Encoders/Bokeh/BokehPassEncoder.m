@@ -11,7 +11,7 @@
 
 typedef struct {
     simd_float2 texelSize;
-    simd_float1 bokehSize;
+    simd_float1 bokehRadius;
 } BokehUniforms;
 
 @interface BokehPassEncoder ()
@@ -62,6 +62,7 @@ typedef struct {
 
 -(void)  encodeIn:(id<MTLCommandBuffer>)commandBuffer
 inputColorTexture:(id<MTLTexture>)colorTexture
+  inputCoCTexture:(id<MTLTexture>)cocTexture
     outputTexture:(id<MTLTexture>)outputTexture
      drawableSize:(CGSize)drawableSize
        clearColor:(MTLClearColor)clearColor
@@ -74,6 +75,7 @@ inputColorTexture:(id<MTLTexture>)colorTexture
     [encoder setLabel:@"Bokeh Pass Encoder"];
     [encoder setRenderPipelineState:self.pipelineState];
     [encoder setFragmentTexture:colorTexture atIndex:0];
+    [encoder setFragmentTexture:cocTexture atIndex:1];
     [encoder setFragmentBuffer:self.bokehUniformsBuffer offset:0 atIndex:0];
     [encoder drawPrimitives:MTLPrimitiveTypeTriangleStrip vertexStart:0 vertexCount:4];
     [encoder endEncoding];
@@ -88,7 +90,7 @@ inputColorTexture:(id<MTLTexture>)colorTexture
 {
     BokehUniforms uniforms = (BokehUniforms) {
         .texelSize = { 1.0f / drawableSize.width, 1.0f / drawableSize.height },
-        .bokehSize = self.bokehSize
+        .bokehRadius = self.bokehSize
     };
     memcpy(self.bokehUniformsBuffer.contents, &uniforms, sizeof(BokehUniforms));
 }

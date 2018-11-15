@@ -180,8 +180,8 @@
 			children = (
 				60792253219C22A7004F3B7F /* CircleOfConfusionPassEncoder.h */,
 				60792254219C22A7004F3B7F /* CircleOfConfusionPassEncoder.m */,
-				60792247219C1C70004F3B7F /* CircleOfConfusion.metal */,
 				60792256219C3ACE004F3B7F /* CoCUniforms.h */,
+				60792247219C1C70004F3B7F /* CircleOfConfusion.metal */,
 			);
 			path = "Circle Of Confusion";
 			sourceTree = "<group>";

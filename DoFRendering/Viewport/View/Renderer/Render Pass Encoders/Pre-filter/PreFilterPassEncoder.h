@@ -13,11 +13,13 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface PreFilterPassEncoder : NSObject
 -(instancetype)initWithDevice:(id<MTLDevice>)device;
--(void)  encodeIn:(id<MTLCommandBuffer>)commandBuffer
-inputColorTexture:(id<MTLTexture>)colorTexture
-    outputTexture:(id<MTLTexture>)outputTexture
-     drawableSize:(CGSize)drawableSize
-       clearColor:(MTLClearColor)clearColor;
+-(void)   encodeIn:(id<MTLCommandBuffer>)commandBuffer
+ inputColorTexture:(id<MTLTexture>)colorTexture
+   inputCoCTexture:(id<MTLTexture>)cocTexture
+outputColorTexture:(id<MTLTexture>)outputColorTexture
+  outputCoCTexture:(id<MTLTexture>)outputCoCTexture
+      drawableSize:(CGSize)drawableSize
+        clearColor:(MTLClearColor)clearColor;
 @end
 
 NS_ASSUME_NONNULL_END

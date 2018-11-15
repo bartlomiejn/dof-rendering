@@ -9,6 +9,6 @@
 #ifndef WeakSelf_h
 #define WeakSelf_h
 
-#define WEAK_SELF __weak __typeof__(self)
+#define weak_self __weak __typeof__(self)
 
 #endif /* WeakSelf_h */

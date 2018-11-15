@@ -35,7 +35,7 @@
     [viewModel.sliders enumerateObjectsUsingBlock:^(SliderViewModel *sliderViewModel, NSUInteger idx, BOOL *stop) {
         SliderView *view = [[UINib nibWithNibName:@"SliderView" bundle:nil] instantiateWithOwner:nil options:nil][0];
         [view setupWith:sliderViewModel];
-        WEAK_SELF weakSelf = self;
+        weak_self weakSelf = self;
         view.onValueChange = ^(float value) {
             if (weakSelf && weakSelf.onValueChange) {
                 weakSelf.onValueChange((int)idx, value);

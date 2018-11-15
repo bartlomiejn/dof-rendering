@@ -17,9 +17,9 @@ fragment half4 post_filter(TextureMappingVertex vert [[stage_in]],
                            texture2d<float, access::sample> colorTex [[texture(0)]])
 {
     float4 o = texelSize.xyxy * float2(-0.5, 0.5).xxyy;
-    half4 s = (half4)colorTex.sample(texSampler, vert.textureCoordinate + o.xy)
-            + (half4)colorTex.sample(texSampler, vert.textureCoordinate + o.zy)
-            + (half4)colorTex.sample(texSampler, vert.textureCoordinate + o.xw)
-            + (half4)colorTex.sample(texSampler, vert.textureCoordinate + o.zw);
+    half4 s = (half4)colorTex.sample(texSampler, vert.uv + o.xy)
+            + (half4)colorTex.sample(texSampler, vert.uv + o.zy)
+            + (half4)colorTex.sample(texSampler, vert.uv + o.xw)
+            + (half4)colorTex.sample(texSampler, vert.uv + o.zw);
     return s * 0.25;
 }

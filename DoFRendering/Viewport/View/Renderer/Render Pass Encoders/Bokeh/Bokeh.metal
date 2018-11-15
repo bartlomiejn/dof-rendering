@@ -12,7 +12,7 @@ using namespace metal;
 
 typedef struct {
     float2 texelSize;
-    float bokehSize;
+    float bokehRadius;
 } BokehUniforms;
 
 // From https://github.com/Unity-Technologies/PostProcessing/blob/v2/PostProcessing/Shaders/Builtins/DiskKernels.hlsl
@@ -38,16 +38,28 @@ static constant float2 diskKernel[diskKernelSampleCount] = {
 
 constexpr sampler texSampler(address::clamp_to_zero, filter::linear, coord::normalized);
 
+half weigh(half coc, half radius)
+{
+    return clamp((coc - radius) / 2, (half)0.0, (half)1.0);
+}
+
 fragment half4 bokeh(TextureMappingVertex vert [[stage_in]],
                      constant BokehUniforms *uniforms [[buffer(0)]],
-                     texture2d<float, access::sample> colorTex [[texture(0)]])
+                     texture2d<float, access::sample> colorTex [[texture(0)]],
+                     texture2d<float, access::sample> cocTex [[texture(1)]])
 {
     half3 color = 0;
-    for (int k=0; k<diskKernelSampleCount; k++) {
-        float2 o = diskKernel[k];
-        o *= uniforms->texelSize.xy * uniforms->bokehSize;
-        color += (half3)colorTex.sample(texSampler, vert.textureCoordinate + o).rgb;
+    half weight = 0;
+    for (int k = 0; k < diskKernelSampleCount; k++) {
+        float2 o = diskKernel[k] * uniforms->bokehRadius;
+        half radius = length(o) * 0.1;
+        o *= uniforms->texelSize.xy;
+        half3 s = (half3)colorTex.sample(texSampler, vert.uv + o).rgb;
+        half coc = (half)cocTex.sample(texSampler, vert.uv + o).r;
+        half sw = weigh(abs(coc), radius);
+        color += s * sw;
+        weight += sw;
     }
-    color *= 1.0 / diskKernelSampleCount;
+    color *= 1.0 / weight;
     return half4(color, 1);
 }

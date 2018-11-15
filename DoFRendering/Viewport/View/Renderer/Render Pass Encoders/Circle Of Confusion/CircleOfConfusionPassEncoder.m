@@ -13,6 +13,7 @@
 @property (nonatomic, strong) id<MTLDevice> device;
 @property (nonatomic, strong) id<MTLRenderPipelineState> pipelineState;
 @property (nonatomic, strong) id<MTLBuffer> uniforms;
+@property (nonatomic) float bokehRadius, focusDistance, focusRange;
 @end
 
 @implementation CircleOfConfusionPassEncoder
@@ -35,7 +36,8 @@
     descriptor.label = @"Circle Of Confusion Pipeline State";
     descriptor.vertexFunction = [library newFunctionWithName:@"project_texture"];
     descriptor.fragmentFunction = [library newFunctionWithName:@"circle_of_confusion_pass"];
-    descriptor.colorAttachments[0].pixelFormat = MTLPixelFormatR8Snorm;
+//    descriptor.colorAttachments[0].pixelFormat = MTLPixelFormatBGRA8Unorm;
+    descriptor.colorAttachments[0].pixelFormat = MTLPixelFormatR32Float;
     descriptor.depthAttachmentPixelFormat = MTLPixelFormatInvalid;
     NSError *error = nil;
     id<MTLRenderPipelineState> pipelineState = [device newRenderPipelineStateWithDescriptor:descriptor error:&error];
@@ -73,10 +75,27 @@
     [encoder endEncoding];
 }
 
+-(void)updateUniformsWithBokehRadius:(float)bokehRadius
+{
+    self.bokehRadius = bokehRadius;
+    [self updateUniformBuffer];
+}
+
 -(void)updateUniformsWithFocusDistance:(float)focusDistance focusRange:(float)focusRange
 {
-    CoCUniforms cocUniforms = (CoCUniforms) { .focusDist = focusDistance, .focusRange = focusRange };
-    memcpy(self.uniforms.contents, &cocUniforms, sizeof(CoCUniforms));
+    self.focusDistance = focusDistance;
+    self.focusRange = focusRange;
+    [self updateUniformBuffer];
+}
+
+-(void)updateUniformBuffer
+{
+    CoCUniforms uniforms = (CoCUniforms) {
+        .focusDist = self.focusDistance,
+        .focusRange = self.focusRange,
+        .bokehRadius = self.bokehRadius
+    };
+    memcpy(self.uniforms.contents, &uniforms, sizeof(CoCUniforms));
 }
 
 - (MTLRenderPassDescriptor *)outputToColorTextureDescriptorOfSize:(CGSize)size

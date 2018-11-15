@@ -18,6 +18,7 @@ NS_ASSUME_NONNULL_BEGIN
                        outputTexture:(id<MTLTexture>)outputTexture
                         drawableSize:(CGSize)drawableSize
                           clearColor:(MTLClearColor)clearColor;
+-(void)updateUniformsWithBokehRadius:(float)bokehRadius;
 -(void)updateUniformsWithFocusDistance:(float)focusDistance focusRange:(float)focusRange;
 @end
 

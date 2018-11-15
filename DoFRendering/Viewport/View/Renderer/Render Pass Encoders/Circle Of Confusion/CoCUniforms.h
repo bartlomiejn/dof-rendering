@@ -12,7 +12,7 @@
 #include <simd/simd.h>
 
 typedef struct {
-    simd_float1 focusDist, focusRange;
+    simd_float1 focusDist, focusRange, bokehRadius;
 } CoCUniforms;
 
 #endif /* CoCUniforms_h */

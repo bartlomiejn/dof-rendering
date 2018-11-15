@@ -11,17 +11,32 @@ using namespace metal;
 #include "../TextureMappingVertex.h"
 
 typedef struct {
-    float focusDist, focusRange;
+    float focusDist, focusRange, bokehRadius;
 } CoCUniforms;
 
 constexpr sampler texSampler(address::clamp_to_zero, filter::linear, coord::normalized);
+
+//fragment half4
+//circle_of_confusion_pass(TextureMappingVertex vert [[stage_in]],
+//                         constant CoCUniforms *uni [[buffer(0)]],
+//                         depth2d<float, access::sample> depthTex [[texture(0)]])
+//{
+//    half depth = depthTex.sample(texSampler, vert.uv);
+//    float coc = (depth - uni->focusDist) / uni->focusRange;
+//    half3 debug = half3((clamp(coc, -1, 1) * uni->bokehRadius));
+//    if (coc < 0) {
+//        return half4(debug, 1) * -half4(1, 0, 0, 1);
+//    } else {
+//        return half4(debug, 1);
+//    }
+//}
 
 fragment half
 circle_of_confusion_pass(TextureMappingVertex vert [[stage_in]],
                          constant CoCUniforms *uni [[buffer(0)]],
                          depth2d<float, access::sample> depthTex [[texture(0)]])
 {
-    half depth = depthTex.sample(texSampler, vert.textureCoordinate);
+    half depth = depthTex.sample(texSampler, vert.uv);
     float coc = (depth - uni->focusDist) / uni->focusRange;
-    return clamp(coc, -1, 1);
+    return clamp(coc, -1, 1) * uni->bokehRadius;
 }
