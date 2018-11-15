@@ -90,7 +90,6 @@
                                        clearColor:self.clearColor];
     [self.cocEncoder encodeIn:commandBuffer
             inputDepthTexture:self.depthTexture
-//                outputTexture:drawable.texture
                 outputTexture:self.cocTexture
                  drawableSize:drawableSize
                    clearColor:self.clearColor];

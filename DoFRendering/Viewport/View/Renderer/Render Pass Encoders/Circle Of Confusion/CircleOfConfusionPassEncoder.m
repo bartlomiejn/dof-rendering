@@ -36,7 +36,6 @@
     descriptor.label = @"Circle Of Confusion Pipeline State";
     descriptor.vertexFunction = [library newFunctionWithName:@"project_texture"];
     descriptor.fragmentFunction = [library newFunctionWithName:@"circle_of_confusion_pass"];
-//    descriptor.colorAttachments[0].pixelFormat = MTLPixelFormatBGRA8Unorm;
     descriptor.colorAttachments[0].pixelFormat = MTLPixelFormatR32Float;
     descriptor.depthAttachmentPixelFormat = MTLPixelFormatInvalid;
     NSError *error = nil;
