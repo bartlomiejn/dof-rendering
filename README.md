@@ -6,7 +6,7 @@
   - Drawing objects
   - Circle of confusion calculation
   - Downsample with extreme CoC values selection
-  - Disk kernel based bokeh calculation
-  - Box filter
+  - Bokeh calculation
+  - Box filtering
   - Compose pass that unblurs in-focus parts
 - Adjustable focus distance, range and bokeh radius
