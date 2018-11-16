@@ -8,7 +8,5 @@
   - Downsample with extreme CoC values selection
   - Disk kernel based bokeh calculation
   - Box filter
+  - Compose pass that unblurs in-focus texels
 - Adjustable focus distance, range and bokeh radius
-
-# In progress
-- Correcting artifacts on high CoC value changes
