@@ -2,7 +2,7 @@
 
 # DoF rendering
 - Loading and rendering of OBJ model files
-- Depth of field rendering composed of 5 passes:
+- Depth of field rendering composed of 6 passes:
   - Drawing objects
   - Circle of confusion calculation
   - Downsample with extreme CoC values selection
