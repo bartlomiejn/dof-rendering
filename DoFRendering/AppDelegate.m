@@ -14,6 +14,7 @@
 #import "PreFilterPassEncoder.h"
 #import "BokehPassEncoder.h"
 #import "PostFilterPassEncoder.h"
+#import "ComposePassEncoder.h"
 
 @interface AppDelegate ()
 @end
@@ -46,12 +47,14 @@
     PreFilterPassEncoder* preFilterEncoder = [[PreFilterPassEncoder alloc] initWithDevice:device];
     BokehPassEncoder* bokehEncoder = [[BokehPassEncoder alloc] initWithDevice:device];
     PostFilterPassEncoder* postFilterEncoder = [[PostFilterPassEncoder alloc] initWithDevice:device];
+    ComposePassEncoder* composeEncoder = [[ComposePassEncoder alloc] initWithDevice:device];
     MetalRenderer* renderer = [[MetalRenderer alloc] initWithDevice:device
                                                  drawObjectsEncoder:drawObjectsEncoder
                                                          cocEncoder:cocEncoder
                                                    preFilterEncoder:preFilterEncoder
                                                        bokehEncoder:bokehEncoder
-                                                  postFilterEncoder:postFilterEncoder];
+                                                  postFilterEncoder:postFilterEncoder
+                                                     composeEncoder:composeEncoder];
     renderer.colorPixelFormat = MTLPixelFormatBGRA8Unorm;
     return renderer;
 }

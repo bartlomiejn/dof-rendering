@@ -13,6 +13,7 @@
 #import "PreFilterPassEncoder.h"
 #import "BokehPassEncoder.h"
 #import "PostFilterPassEncoder.h"
+#import "ComposePassEncoder.h"
 #import "ModelGroup.h"
 
 @interface MetalRenderer : NSObject
@@ -23,7 +24,8 @@
                    cocEncoder:(CircleOfConfusionPassEncoder*)cocEncoder
              preFilterEncoder:(PreFilterPassEncoder*)preFilterEncoder
                  bokehEncoder:(BokehPassEncoder*)bokehEncoder
-            postFilterEncoder:(PostFilterPassEncoder*)postFilterEncoder;
+            postFilterEncoder:(PostFilterPassEncoder*)postFilterEncoder
+               composeEncoder:(ComposePassEncoder*)composeEncoder;
 -(void)setBokehRadius:(float)bokehRadius;
 -(void)setFocusDistance:(float)focusDistance focusRange:(float)focusRange;
 -(void)drawToDrawable:(id<CAMetalDrawable>)drawable ofSize:(CGSize)drawableSize;

@@ -1,56 +1,42 @@
 //
-//  BokehPassEncoder.m
+//  CircleOfConfusionPassEncoder.m
 //  DoFRendering
 //
 //  Created by Bartłomiej Nowak on 14/11/2018.
 //  Copyright © 2018 Bartłomiej Nowak. All rights reserved.
 //
 
-#import "BokehPassEncoder.h"
-#import <simd/simd.h>
+#import "CircleOfConfusionPassEncoder.h"
+#import "CoCUniforms.h"
 
-typedef struct {
-    simd_float2 texelSize;
-    simd_float1 bokehRadius;
-} BokehUniforms;
-
-@interface BokehPassEncoder ()
+@interface CircleOfConfusionPassEncoder ()
 @property (nonatomic, strong) id<MTLDevice> device;
 @property (nonatomic, strong) id<MTLRenderPipelineState> pipelineState;
-@property (nonatomic, strong) id<MTLBuffer> bokehUniformsBuffer;
-@property (nonatomic) float bokehSize;
+@property (nonatomic, strong) id<MTLBuffer> uniforms;
+@property (nonatomic) float bokehRadius, focusDistance, focusRange;
 @end
 
-@implementation BokehPassEncoder
+@implementation CircleOfConfusionPassEncoder
 
 -(instancetype)initWithDevice:(id<MTLDevice>)device
 {
     self = [super init];
     if (self) {
         self.device = device;
-        self.pipelineState = [self bokehPipelineStateOnDevice:device];
-        self.bokehUniformsBuffer = [self makeBokehUniformsBuffer];
-        self.bokehSize = 0.0f;
+        self.pipelineState = [self circleOfConfusionPipelineStateOnDevice:device];
+        self.uniforms = [self makeUniforms];
     }
     return self;
 }
 
--(id<MTLBuffer>)makeBokehUniformsBuffer
-{
-    id<MTLBuffer> buffer = [self.device newBufferWithLength:sizeof(BokehUniforms)
-                                                    options:MTLResourceOptionCPUCacheModeDefault];
-    buffer.label = @"Bokeh Uniforms";
-    return buffer;
-}
-
--(id<MTLRenderPipelineState>)bokehPipelineStateOnDevice:(id<MTLDevice>)device
+-(id<MTLRenderPipelineState>)circleOfConfusionPipelineStateOnDevice:(id<MTLDevice>)device
 {
     id<MTLLibrary> library = [device newDefaultLibrary];
     MTLRenderPipelineDescriptor *descriptor = [MTLRenderPipelineDescriptor new];
-    descriptor.label = @"Bokeh Pipeline State";
+    descriptor.label = @"Circle Of Confusion Pipeline State";
     descriptor.vertexFunction = [library newFunctionWithName:@"project_texture"];
-    descriptor.fragmentFunction = [library newFunctionWithName:@"bokeh"];
-    descriptor.colorAttachments[0].pixelFormat = MTLPixelFormatBGRA8Unorm;
+    descriptor.fragmentFunction = [library newFunctionWithName:@"circle_of_confusion_pass"];
+    descriptor.colorAttachments[0].pixelFormat = MTLPixelFormatR32Float;
     descriptor.depthAttachmentPixelFormat = MTLPixelFormatInvalid;
     NSError *error = nil;
     id<MTLRenderPipelineState> pipelineState = [device newRenderPipelineStateWithDescriptor:descriptor error:&error];
@@ -60,42 +46,58 @@ typedef struct {
     return pipelineState;
 }
 
--(void)  encodeIn:(id<MTLCommandBuffer>)commandBuffer
-inputColorTexture:(id<MTLTexture>)colorTexture
-  inputCoCTexture:(id<MTLTexture>)cocTexture
-    outputTexture:(id<MTLTexture>)outputTexture
-     drawableSize:(CGSize)drawableSize
-       clearColor:(MTLClearColor)clearColor
+-(id<MTLBuffer>)makeUniforms
 {
-    [self updateBokehUniformsWith:drawableSize];
+    id<MTLBuffer> buffer = [self.device newBufferWithLength:sizeof(CoCUniforms)
+                                                    options:MTLResourceOptionCPUCacheModeDefault];
+    buffer.label = @"Circle Of Confusion Pass Uniforms";
+    return buffer;
+}
+
+#pragma mark - CircleOfConfusionPassEncoder
+
+-(void)encodeIn:(id<MTLCommandBuffer>)commandBuffer
+                   inputDepthTexture:(id<MTLTexture>)depthTexture
+                       outputTexture:(id<MTLTexture>)outputTexture
+                        drawableSize:(CGSize)drawableSize
+                          clearColor:(MTLClearColor)clearColor
+{
     MTLRenderPassDescriptor* descriptor = [self outputToColorTextureDescriptorOfSize:drawableSize
                                                                           clearColor:clearColor
                                                                            toTexture:outputTexture];
     id<MTLRenderCommandEncoder> encoder = [commandBuffer renderCommandEncoderWithDescriptor:descriptor];
-    [encoder setLabel:@"Bokeh Pass Encoder"];
+    [encoder setLabel:@"Circle Of Confusion"];
     [encoder setRenderPipelineState:self.pipelineState];
-    [encoder setFragmentTexture:colorTexture atIndex:0];
-    [encoder setFragmentTexture:cocTexture atIndex:1];
-    [encoder setFragmentBuffer:self.bokehUniformsBuffer offset:0 atIndex:0];
+    [encoder setFragmentTexture:depthTexture atIndex:0];
+    [encoder setFragmentBuffer:self.uniforms offset:0 atIndex:0];
     [encoder drawPrimitives:MTLPrimitiveTypeTriangleStrip vertexStart:0 vertexCount:4];
     [encoder endEncoding];
 }
 
--(void)updateBokehRadius:(float)bokehSize
+-(void)updateUniformsWithBokehRadius:(float)bokehRadius
 {
-    self.bokehSize = bokehSize;
+    self.bokehRadius = bokehRadius;
+    [self updateUniformBuffer];
 }
 
--(void)updateBokehUniformsWith:(CGSize)drawableSize
+-(void)updateUniformsWithFocusDistance:(float)focusDistance focusRange:(float)focusRange
 {
-    BokehUniforms uniforms = (BokehUniforms) {
-        .texelSize = { 1.0f / drawableSize.width, 1.0f / drawableSize.height },
-        .bokehRadius = self.bokehSize
+    self.focusDistance = focusDistance;
+    self.focusRange = focusRange;
+    [self updateUniformBuffer];
+}
+
+-(void)updateUniformBuffer
+{
+    CoCUniforms uniforms = (CoCUniforms) {
+        .focusDist = self.focusDistance,
+        .focusRange = self.focusRange,
+        .bokehRadius = self.bokehRadius
     };
-    memcpy(self.bokehUniformsBuffer.contents, &uniforms, sizeof(BokehUniforms));
+    memcpy(self.uniforms.contents, &uniforms, sizeof(CoCUniforms));
 }
 
--(MTLRenderPassDescriptor *)outputToColorTextureDescriptorOfSize:(CGSize)size
+- (MTLRenderPassDescriptor *)outputToColorTextureDescriptorOfSize:(CGSize)size
                                                       clearColor:(MTLClearColor)clearColor
                                                        toTexture:(id<MTLTexture>)colorTexture
 {

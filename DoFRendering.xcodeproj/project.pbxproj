@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		6000D51C219F0EDC002C920D /* ComposePassEncoder.m in Sources */ = {isa = PBXBuildFile; fileRef = 6000D51B219F0EDC002C920D /* ComposePassEncoder.m */; };
+		6000D51E219F0FD0002C920D /* Compose.metal in Sources */ = {isa = PBXBuildFile; fileRef = 6000D51D219F0FD0002C920D /* Compose.metal */; };
 		60068326219C41CA00AA729F /* BokehPassEncoder.m in Sources */ = {isa = PBXBuildFile; fileRef = 60068325219C41CA00AA729F /* BokehPassEncoder.m */; };
 		60068329219C435B00AA729F /* Bokeh.metal in Sources */ = {isa = PBXBuildFile; fileRef = 60068328219C435B00AA729F /* Bokeh.metal */; };
 		604E6BBF2194AFA0005FAF4A /* SliderStackView.m in Sources */ = {isa = PBXBuildFile; fileRef = 604E6BBE2194AFA0005FAF4A /* SliderStackView.m */; };
@@ -45,6 +47,9 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		6000D51A219F0EDC002C920D /* ComposePassEncoder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ComposePassEncoder.h; sourceTree = "<group>"; };
+		6000D51B219F0EDC002C920D /* ComposePassEncoder.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ComposePassEncoder.m; sourceTree = "<group>"; };
+		6000D51D219F0FD0002C920D /* Compose.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Compose.metal; sourceTree = "<group>"; };
 		60068324219C41CA00AA729F /* BokehPassEncoder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BokehPassEncoder.h; sourceTree = "<group>"; };
 		60068325219C41CA00AA729F /* BokehPassEncoder.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = BokehPassEncoder.m; sourceTree = "<group>"; };
 		60068328219C435B00AA729F /* Bokeh.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Bokeh.metal; sourceTree = "<group>"; };
@@ -127,6 +132,16 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		6000D519219F0EC3002C920D /* Compose */ = {
+			isa = PBXGroup;
+			children = (
+				6000D51A219F0EDC002C920D /* ComposePassEncoder.h */,
+				6000D51B219F0EDC002C920D /* ComposePassEncoder.m */,
+				6000D51D219F0FD0002C920D /* Compose.metal */,
+			);
+			path = Compose;
+			sourceTree = "<group>";
+		};
 		60068323219C41B400AA729F /* Bokeh */ = {
 			isa = PBXGroup;
 			children = (
@@ -206,7 +221,7 @@
 			path = "Pre-filter";
 			sourceTree = "<group>";
 		};
-		60DD2CEF21971D13007B2CBD /* Render Pass Encoders */ = {
+		60DD2CEF21971D13007B2CBD /* Encoders */ = {
 			isa = PBXGroup;
 			children = (
 				6079222F2199E8F1004F3B7F /* Draw Objects */,
@@ -214,10 +229,11 @@
 				609ED946219C797B003ADC49 /* Pre-filter */,
 				60068323219C41B400AA729F /* Bokeh */,
 				609ED940219C6D32003ADC49 /* Post-filter */,
+				6000D519219F0EC3002C920D /* Compose */,
 				60792245219C1C3B004F3B7F /* TextureMappingVertex.h */,
 				60792249219C1CE3004F3B7F /* ProjectTexture.metal */,
 			);
-			path = "Render Pass Encoders";
+			path = Encoders;
 			sourceTree = "<group>";
 		};
 		60DD2CF721989583007B2CBD /* Presenter */ = {
@@ -321,7 +337,7 @@
 		9F2D391D1FBC8E7F00F7578F /* Renderer */ = {
 			isa = PBXGroup;
 			children = (
-				60DD2CEF21971D13007B2CBD /* Render Pass Encoders */,
+				60DD2CEF21971D13007B2CBD /* Encoders */,
 				6079222E2199E803004F3B7F /* MetalRendererProperties.h */,
 				9F2D391E1FBC8E9D00F7578F /* MetalRenderer.h */,
 				9F2D391F1FBC8E9D00F7578F /* MetalRenderer.m */,
@@ -434,6 +450,8 @@
 				60DD2D0221989CCA007B2CBD /* ModelGroup.m in Sources */,
 				60068326219C41CA00AA729F /* BokehPassEncoder.m in Sources */,
 				9F843C101FC74D9E00A15944 /* OBJMesh.m in Sources */,
+				6000D51E219F0FD0002C920D /* Compose.metal in Sources */,
+				6000D51C219F0EDC002C920D /* ComposePassEncoder.m in Sources */,
 				9F2D391C1FBC8C2400F7578F /* MathFunctions.m in Sources */,
 				60DD2CF221971D41007B2CBD /* DrawObjects.metal in Sources */,
 				60DD2CE721971A5F007B2CBD /* DrawObjectsPassEncoder.m in Sources */,

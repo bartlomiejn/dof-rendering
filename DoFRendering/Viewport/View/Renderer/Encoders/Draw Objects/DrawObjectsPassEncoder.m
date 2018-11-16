@@ -95,7 +95,7 @@
                                                                outputColorTexture:colorTexture
                                                                outputDepthTexture:depthTexture];
     id<MTLRenderCommandEncoder> encoder = [commandBuffer renderCommandEncoderWithDescriptor:descriptor];
-    [encoder setLabel:@"Draw Objects Encoder"];
+    [encoder setLabel:@"Draw Objects"];
     [encoder setRenderPipelineState:self.pipelineState];
     [encoder setDepthStencilState:self.depthStencilState];
     [encoder setFrontFacingWinding:MTLWindingCounterClockwise];
