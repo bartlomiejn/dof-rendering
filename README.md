@@ -11,4 +11,4 @@
 - Adjustable focus distance, range and bokeh radius
 
 # In progress
-- Correcting artifacts on overlapping objects
+- Correcting artifacts on high CoC value changes
