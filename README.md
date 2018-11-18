@@ -11,4 +11,4 @@
   - Compose pass that unblurs in-focus parts
 - Adjustable focus distance, range and bokeh radius
 # Work in progress
-- Improper behaviour of bokeh at intersection of background and foreground objects 
+- Improper behaviour of bokeh at intersection of background and foreground
